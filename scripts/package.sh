@@ -9,5 +9,5 @@ windows_archive="$ARTIFACTS_DIRECTORY/$WINDOWS_BUNDLE_NAME.zip"
 "$SCRIPT_DIRECTORY/archive.sh"
 "$SCRIPT_DIRECTORY/checksums.sh"
 
-tar --list --file "$linux_archive" | grep -q "$LINUX_BUNDLE_NAME/LICENSES/Avalonia-MIT.txt"
-unzip -l "$windows_archive" | grep -q "$WINDOWS_BUNDLE_NAME/LICENSES/Avalonia-MIT.txt"
+tar --list --file "$linux_archive" "$LINUX_BUNDLE_NAME/LICENSES/Avalonia-MIT.txt" >/dev/null
+unzip -t "$windows_archive" "$WINDOWS_BUNDLE_NAME/LICENSES/Avalonia-MIT.txt" >/dev/null
