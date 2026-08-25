@@ -1,0 +1,17 @@
+{
+  "version": 8,
+  "party_data": {
+    "chara_code": [8, 1, 2, 3, 4, 5],
+    "mochi_kin": 100,
+    "party_item_kazu": 0,
+    "party_item": [0, 0, 0, 0, 0, 0, 0, 0]
+  },
+  "shiro_data": {
+    "level": 1
+  },
+  "player_base": [],
+  "member_flag": [0, 0, 0, 0, 0, 0, 0, 0, 9],
+  "playerName": "Synthetic Hero",
+  "playerCName": "Synthetic HQ"
+}
+
