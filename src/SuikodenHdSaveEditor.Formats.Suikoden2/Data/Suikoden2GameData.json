@@ -1,0 +1,4239 @@
+{
+  "CHARACTERS": {
+    "1": {
+      "name": "Riou",
+      "attrs": [
+        "C",
+        "L",
+        "M",
+        "Y"
+      ]
+    },
+    "2": {
+      "name": "Flik",
+      "attrs": [
+        "C",
+        "L",
+        "S",
+        "M"
+      ]
+    },
+    "3": {
+      "name": "Viktor",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "4": {
+      "name": "Viki",
+      "attrs": [
+        "C",
+        "R",
+        "F"
+      ]
+    },
+    "5": {
+      "name": "Sheena",
+      "attrs": [
+        "C",
+        "L",
+        "S",
+        "M"
+      ]
+    },
+    "6": {
+      "name": "Clive",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "7": {
+      "name": "Hix",
+      "attrs": [
+        "C",
+        "L",
+        "S",
+        "M"
+      ]
+    },
+    "8": {
+      "name": "Tengaar",
+      "attrs": [
+        "C",
+        "R",
+        "F"
+      ]
+    },
+    "9": {
+      "name": "Futch",
+      "attrs": [
+        "E",
+        "L",
+        "S",
+        "M",
+        "Y"
+      ]
+    },
+    "10": {
+      "name": "Humphrey",
+      "attrs": [
+        "E",
+        "H",
+        "M"
+      ]
+    },
+    "11": {
+      "name": "Georg",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "12": {
+      "name": "Valeria",
+      "attrs": [
+        "C",
+        "L",
+        "S",
+        "F"
+      ]
+    },
+    "13": {
+      "name": "Pesmerga",
+      "attrs": [
+        "E",
+        "H",
+        "S",
+        "M"
+      ]
+    },
+    "14": {
+      "name": "Lorelai",
+      "attrs": [
+        "E",
+        "L",
+        "F"
+      ]
+    },
+    "15": {
+      "name": "Shin",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "16": {
+      "name": "Rikimaru",
+      "attrs": [
+        "E",
+        "L",
+        "M"
+      ]
+    },
+    "17": {
+      "name": "Tomo",
+      "attrs": [
+        "C",
+        "V",
+        "F",
+        "Y"
+      ]
+    },
+    "18": {
+      "name": "Nanami",
+      "attrs": [
+        "C",
+        "V",
+        "F"
+      ]
+    },
+    "19": {
+      "name": "Eilie",
+      "attrs": [
+        "C",
+        "V",
+        "F",
+        "Y"
+      ]
+    },
+    "20": {
+      "name": "Rina",
+      "attrs": [
+        "C",
+        "V",
+        "F"
+      ]
+    },
+    "21": {
+      "name": "Bolgan",
+      "attrs": [
+        "E",
+        "L",
+        "M",
+        "Y"
+      ]
+    },
+    "22": {
+      "name": "Tuta",
+      "attrs": [
+        "C",
+        "R",
+        "M",
+        "Y"
+      ]
+    },
+    "23": {
+      "name": "Hanna",
+      "attrs": [
+        "E",
+        "L",
+        "S",
+        "F"
+      ]
+    },
+    "24": {
+      "name": "Milie",
+      "attrs": [
+        "C",
+        "V",
+        "F",
+        "Y"
+      ]
+    },
+    "25": {
+      "name": "Karen",
+      "attrs": [
+        "C",
+        "V",
+        "F"
+      ]
+    },
+    "26": {
+      "name": "Shiro",
+      "attrs": [
+        "Z"
+      ]
+    },
+    "27": {
+      "name": "Zamza",
+      "attrs": [
+        "C",
+        "R",
+        "M"
+      ]
+    },
+    "28": {
+      "name": "Gengen",
+      "attrs": [
+        "E",
+        "L",
+        "S",
+        "K",
+        "Y"
+      ]
+    },
+    "29": {
+      "name": "Gabotcha",
+      "attrs": [
+        "C",
+        "L",
+        "K",
+        "Y"
+      ]
+    },
+    "30": {
+      "name": "Kinnison",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "31": {
+      "name": "Shilo",
+      "attrs": [
+        "C",
+        "V",
+        "M"
+      ]
+    },
+    "32": {
+      "name": "Miklotov",
+      "attrs": [
+        "E",
+        "H",
+        "M"
+      ]
+    },
+    "33": {
+      "name": "Camus",
+      "attrs": [
+        "E",
+        "L",
+        "S",
+        "M"
+      ]
+    },
+    "34": {
+      "name": "Hauser",
+      "attrs": [
+        "E",
+        "L",
+        "M"
+      ]
+    },
+    "35": {
+      "name": "Freed Y",
+      "attrs": [
+        "E",
+        "L",
+        "S",
+        "M"
+      ]
+    },
+    "36": {
+      "name": "Kahn",
+      "attrs": [
+        "E",
+        "L",
+        "M"
+      ]
+    },
+    "37": {
+      "name": "Amada",
+      "attrs": [
+        "C",
+        "V",
+        "M"
+      ]
+    },
+    "38": {
+      "name": "Tai Ho",
+      "attrs": [
+        "C",
+        "V",
+        "M"
+      ]
+    },
+    "39": {
+      "name": "Anita",
+      "attrs": [
+        "C",
+        "L",
+        "S",
+        "F"
+      ]
+    },
+    "40": {
+      "name": "Bob",
+      "attrs": [
+        "C",
+        "V",
+        "M"
+      ]
+    },
+    "41": {
+      "name": "Meg",
+      "attrs": [
+        "C",
+        "V",
+        "F",
+        "Y"
+      ]
+    },
+    "42": {
+      "name": "Gadget",
+      "attrs": [
+        "Z"
+      ]
+    },
+    "43": {
+      "name": "Ayda",
+      "attrs": [
+        "C",
+        "V",
+        "F",
+        "Y"
+      ]
+    },
+    "44": {
+      "name": "Killey",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "45": {
+      "name": "Sierra",
+      "attrs": [
+        "C",
+        "V",
+        "F"
+      ]
+    },
+    "46": {
+      "name": "Oulan",
+      "attrs": [
+        "E",
+        "L",
+        "F"
+      ]
+    },
+    "47": {
+      "name": "Genshu",
+      "attrs": [
+        "C",
+        "V",
+        "M"
+      ]
+    },
+    "48": {
+      "name": "Mukumuku",
+      "attrs": [
+        "Z",
+        "M"
+      ]
+    },
+    "49": {
+      "name": "Abizboah",
+      "attrs": [
+        "Z",
+        "M"
+      ]
+    },
+    "50": {
+      "name": "Feather",
+      "attrs": [
+        "Z",
+        "M"
+      ]
+    },
+    "51": {
+      "name": "Badeaux",
+      "attrs": [
+        "E",
+        "H",
+        "M"
+      ]
+    },
+    "52": {
+      "name": "Tsai",
+      "attrs": [
+        "C",
+        "V",
+        "M"
+      ]
+    },
+    "53": {
+      "name": "Luc",
+      "attrs": [
+        "C",
+        "R",
+        "M",
+        "Y"
+      ]
+    },
+    "54": {
+      "name": "Chaco",
+      "attrs": [
+        "C",
+        "V",
+        "W"
+      ]
+    },
+    "55": {
+      "name": "Nina",
+      "attrs": [
+        "C",
+        "V",
+        "F",
+        "Y"
+      ]
+    },
+    "56": {
+      "name": "Sid",
+      "attrs": [
+        "C",
+        "V",
+        "W"
+      ]
+    },
+    "57": {
+      "name": "Yoshino",
+      "attrs": [
+        "C",
+        "V",
+        "F"
+      ]
+    },
+    "58": {
+      "name": "Gijimu",
+      "attrs": [
+        "E",
+        "H",
+        "M"
+      ]
+    },
+    "59": {
+      "name": "Koyu",
+      "attrs": [
+        "C",
+        "L",
+        "M",
+        "Y"
+      ]
+    },
+    "60": {
+      "name": "Lo Wen",
+      "attrs": [
+        "E",
+        "L",
+        "F"
+      ]
+    },
+    "61": {
+      "name": "Mazus",
+      "attrs": [
+        "C",
+        "R",
+        "M"
+      ]
+    },
+    "62": {
+      "name": "Sasuke",
+      "attrs": [
+        "C",
+        "V",
+        "M",
+        "Y"
+      ]
+    },
+    "63": {
+      "name": "Mondo",
+      "attrs": [
+        "C",
+        "V",
+        "M"
+      ]
+    },
+    "64": {
+      "name": "Vincent",
+      "attrs": [
+        "C",
+        "L",
+        "S",
+        "N"
+      ]
+    },
+    "65": {
+      "name": "Simone",
+      "attrs": [
+        "C",
+        "L",
+        "N"
+      ]
+    },
+    "66": {
+      "name": "Hai Yo",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "67": {
+      "name": "Stallion",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "68": {
+      "name": "Wakaba",
+      "attrs": [
+        "C",
+        "V",
+        "F"
+      ]
+    },
+    "69": {
+      "name": "Long Chan-Chan",
+      "attrs": [
+        "C",
+        "V",
+        "M"
+      ]
+    },
+    "70": {
+      "name": "Gantetsu",
+      "attrs": [
+        "C",
+        "V",
+        "M"
+      ]
+    },
+    "71": {
+      "name": "Hoi",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "72": {
+      "name": "Siegfried",
+      "attrs": [
+        "Z",
+        "N"
+      ]
+    },
+    "73": {
+      "name": "Kasumi",
+      "attrs": [
+        "C",
+        "V",
+        "F"
+      ]
+    },
+    "74": {
+      "name": "Rulodia",
+      "attrs": [
+        "Z",
+        "F"
+      ]
+    },
+    "75": {
+      "name": "Makumaku",
+      "attrs": [
+        "Z",
+        "M"
+      ]
+    },
+    "76": {
+      "name": "Mikumiku",
+      "attrs": [
+        "Z",
+        "F"
+      ]
+    },
+    "77": {
+      "name": "Mekumeku",
+      "attrs": [
+        "Z",
+        "M"
+      ]
+    },
+    "78": {
+      "name": "MokuMoku",
+      "attrs": [
+        "Z",
+        "M"
+      ]
+    },
+    "79": {
+      "name": "Chuchara",
+      "attrs": [
+        "Z",
+        "M"
+      ]
+    },
+    "80": {
+      "name": "Jowy 1",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "81": {
+      "name": "Jowy 2",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "82": {
+      "name": "McDohl",
+      "attrs": [
+        "C",
+        "L",
+        "M"
+      ]
+    },
+    "83": {
+      "name": "Milie Sans Bonapart",
+      "attrs": [
+        "C",
+        "V",
+        "F",
+        "Y"
+      ]
+    },
+    "85": {
+      "name": "Apple",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "86": {
+      "name": "Templton",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "87": {
+      "name": "Kiba",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "88": {
+      "name": "Fitcher",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "89": {
+      "name": "Shu",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "90": {
+      "name": "Tetsu",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "91": {
+      "name": "Leona",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "92": {
+      "name": "Huan",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "93": {
+      "name": "Jess",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "94": {
+      "name": "Hilda",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "95": {
+      "name": "Alex",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "96": {
+      "name": "Emilia",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "97": {
+      "name": "Tenkou",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "98": {
+      "name": "Barbara",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "99": {
+      "name": "Richmond",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "100": {
+      "name": "Yam Koo",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "101": {
+      "name": "Teresa",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "102": {
+      "name": "Yuzu",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "104": {
+      "name": "Tony",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "105": {
+      "name": "Adlai",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "106": {
+      "name": "Gordon",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "107": {
+      "name": "Hans",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "108": {
+      "name": "Connell",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "109": {
+      "name": "Lebrante",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "110": {
+      "name": "Tessai",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "111": {
+      "name": "Raura",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "112": {
+      "name": "Annallee",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "113": {
+      "name": "Pico",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "114": {
+      "name": "Alberto",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "115": {
+      "name": "Jude",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "116": {
+      "name": "Jeane",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "117": {
+      "name": "Ridley",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "118": {
+      "name": "Klaus",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "119": {
+      "name": "Max",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "120": {
+      "name": "Marlowe",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "121": {
+      "name": "Gilbert",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "122": {
+      "name": "Boris",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "123": {
+      "name": "Pilika 1",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "124": {
+      "name": "Pilika 2",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "125": {
+      "name": "Gremio",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "127": {
+      "name": "NA-",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "128": {
+      "name": "Marx",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "129": {
+      "name": "Joanna",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "130": {
+      "name": "Leknaat",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "131": {
+      "name": "Lepant",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "132": {
+      "name": "Varkas",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "133": {
+      "name": "Alen",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "134": {
+      "name": "Glenshiel",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "135": {
+      "name": "Anabelle",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "136": {
+      "name": "Granmeyer",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "137": {
+      "name": "Makai",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "138": {
+      "name": "Gustav",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "139": {
+      "name": "Gordeau",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "140": {
+      "name": "Luca",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "141": {
+      "name": "Jillia",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "142": {
+      "name": "Solon Jhee",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "143": {
+      "name": "Culgan",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "144": {
+      "name": "Seed",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "145": {
+      "name": "Rowd",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "146": {
+      "name": "Agares",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "147": {
+      "name": "Leon",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "148": {
+      "name": "Han",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "149": {
+      "name": "Genkaku",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "150": {
+      "name": "Sasarai",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "151": {
+      "name": "Neclord",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "152": {
+      "name": "Suikoden",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "153": {
+      "name": "Celestial Sword",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "154": {
+      "name": "Lilly",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "155": {
+      "name": "Lucia",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "156": {
+      "name": "Yuber",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "157": {
+      "name": "Kage",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "158": {
+      "name": "Antonio",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "159": {
+      "name": "Lester",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "160": {
+      "name": "Cleo",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "161": {
+      "name": "Pahn",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "162": {
+      "name": "Marie",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "163": {
+      "name": "Sarah",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "164": {
+      "name": "Tesla",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "165": {
+      "name": "Liukan",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "166": {
+      "name": "Eileen",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "167": {
+      "name": "Elza",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "168": {
+      "name": "Ellie",
+      "attrs": [
+        "NP"
+      ]
+    },
+    "169": {
+      "name": "Pohl",
+      "attrs": [
+        "NP"
+      ]
+    }
+  },
+  "ITEMS": {
+    "0": {
+      "name": "None",
+      "attrs": [
+        0
+      ]
+    },
+    "1": {
+      "name": "Medicine",
+      "attrs": [
+        9
+      ]
+    },
+    "2": {
+      "name": "Mega Medicine",
+      "attrs": [
+        9
+      ]
+    },
+    "3": {
+      "name": "Antitoxin",
+      "attrs": [
+        9
+      ]
+    },
+    "4": {
+      "name": "Throat Drops",
+      "attrs": [
+        9
+      ]
+    },
+    "5": {
+      "name": "Needle",
+      "attrs": [
+        9
+      ]
+    },
+    "6": {
+      "name": "Flaming Arrows",
+      "attrs": [
+        9
+      ]
+    },
+    "7": {
+      "name": "Dancing Flames",
+      "attrs": [
+        9
+      ]
+    },
+    "8": {
+      "name": "Fire Wall",
+      "attrs": [
+        9
+      ]
+    },
+    "9": {
+      "name": "Kindness Drops",
+      "attrs": [
+        9
+      ]
+    },
+    "10": {
+      "name": "Protect Mist",
+      "attrs": [
+        9
+      ]
+    },
+    "11": {
+      "name": "Kindness Rain",
+      "attrs": [
+        9
+      ]
+    },
+    "12": {
+      "name": "Wind of Sleep",
+      "attrs": [
+        9
+      ]
+    },
+    "13": {
+      "name": "Healing Wind",
+      "attrs": [
+        9
+      ]
+    },
+    "14": {
+      "name": "The Shredding",
+      "attrs": [
+        9
+      ]
+    },
+    "15": {
+      "name": "Clay Guardian",
+      "attrs": [
+        9
+      ]
+    },
+    "16": {
+      "name": "Revenge Earth",
+      "attrs": [
+        9
+      ]
+    },
+    "17": {
+      "name": "Canopy Defense",
+      "attrs": [
+        9
+      ]
+    },
+    "18": {
+      "name": "Angry Blow",
+      "attrs": [
+        9
+      ]
+    },
+    "19": {
+      "name": "Thunder Runner",
+      "attrs": [
+        9
+      ]
+    },
+    "20": {
+      "name": "Bolt of Wrath",
+      "attrs": [
+        9
+      ]
+    },
+    "21": {
+      "name": "Stone of Power",
+      "attrs": [
+        1
+      ]
+    },
+    "22": {
+      "name": "Stone of Magic",
+      "attrs": [
+        1
+      ]
+    },
+    "23": {
+      "name": "Stone of Defense",
+      "attrs": [
+        1
+      ]
+    },
+    "24": {
+      "name": "Stone of Magic-Defense",
+      "attrs": [
+        1
+      ]
+    },
+    "25": {
+      "name": "Stone of Dexterity",
+      "attrs": [
+        1
+      ]
+    },
+    "26": {
+      "name": "Stone of Speed",
+      "attrs": [
+        1
+      ]
+    },
+    "27": {
+      "name": "Stone of Luck",
+      "attrs": [
+        1
+      ]
+    },
+    "28": {
+      "name": "Dragon Censer",
+      "attrs": [
+        0
+      ]
+    },
+    "29": {
+      "name": "Blinking Mirror",
+      "attrs": [
+        0
+      ]
+    },
+    "30": {
+      "name": "Sacrifical Jizo",
+      "attrs": [
+        1
+      ]
+    },
+    "31": {
+      "name": "Chick (Bath Set)",
+      "attrs": [
+        1
+      ]
+    },
+    "32": {
+      "name": "Drinking Set",
+      "attrs": [
+        1
+      ]
+    },
+    "33": {
+      "name": "Toy Boat",
+      "attrs": [
+        1
+      ]
+    },
+    "34": {
+      "name": "Escape Talisman",
+      "attrs": [
+        0
+      ]
+    },
+    "35": {
+      "name": "Suiko Map",
+      "attrs": [
+        0
+      ]
+    },
+    "36": {
+      "name": "Rag",
+      "attrs": [
+        0
+      ]
+    },
+    "37": {
+      "name": "Oily Rag",
+      "attrs": [
+        0
+      ]
+    },
+    "38": {
+      "name": "Rope",
+      "attrs": [
+        0
+      ]
+    },
+    "39": {
+      "name": "Flint Stone",
+      "attrs": [
+        0
+      ]
+    },
+    "40": {
+      "name": "Flint Stone",
+      "attrs": [
+        0
+      ]
+    },
+    "41": {
+      "name": "Flour",
+      "attrs": [
+        0
+      ]
+    },
+    "42": {
+      "name": "Wooden Amulet",
+      "attrs": [
+        0
+      ]
+    },
+    "43": {
+      "name": "Healing Herb",
+      "attrs": [
+        0
+      ]
+    },
+    "44": {
+      "name": "Reference Letter",
+      "attrs": [
+        0
+      ]
+    },
+    "45": {
+      "name": "Highland Uniform",
+      "attrs": [
+        0
+      ]
+    },
+    "46": {
+      "name": "Listening Hood?",
+      "attrs": [
+        0
+      ]
+    },
+    "47": {
+      "name": "Iron Hammer",
+      "attrs": [
+        0
+      ]
+    },
+    "48": {
+      "name": "Copper Hammer",
+      "attrs": [
+        0
+      ]
+    },
+    "49": {
+      "name": "Silver Hammer",
+      "attrs": [
+        0
+      ]
+    },
+    "50": {
+      "name": "Gold Hammer",
+      "attrs": [
+        0
+      ]
+    },
+    "51": {
+      "name": "Round Plate",
+      "attrs": [
+        0
+      ]
+    },
+    "52": {
+      "name": "Triangle Plate",
+      "attrs": [
+        0
+      ]
+    },
+    "53": {
+      "name": "Square Plate",
+      "attrs": [
+        0
+      ]
+    },
+    "54": {
+      "name": "Clay",
+      "attrs": [
+        0
+      ]
+    },
+    "55": {
+      "name": "Listening Crystal",
+      "attrs": [
+        0
+      ]
+    },
+    "56": {
+      "name": "Recipe #25",
+      "attrs": [
+        0
+      ]
+    },
+    "57": {
+      "name": "Recipe #26",
+      "attrs": [
+        0
+      ]
+    },
+    "58": {
+      "name": "Recipe #27",
+      "attrs": [
+        0
+      ]
+    },
+    "59": {
+      "name": "Recipe #28",
+      "attrs": [
+        0
+      ]
+    },
+    "60": {
+      "name": "Recipe #29",
+      "attrs": [
+        0
+      ]
+    },
+    "61": {
+      "name": "Recipe #30",
+      "attrs": [
+        0
+      ]
+    },
+    "62": {
+      "name": "Recipe #31",
+      "attrs": [
+        0
+      ]
+    },
+    "63": {
+      "name": "Recipe #32",
+      "attrs": [
+        0
+      ]
+    },
+    "64": {
+      "name": "Recipe #33",
+      "attrs": [
+        0
+      ]
+    },
+    "65": {
+      "name": "Recipe #34",
+      "attrs": [
+        0
+      ]
+    },
+    "66": {
+      "name": "Recipe #35",
+      "attrs": [
+        0
+      ]
+    },
+    "67": {
+      "name": "Recipe #36",
+      "attrs": [
+        0
+      ]
+    },
+    "68": {
+      "name": "Recipe #37",
+      "attrs": [
+        0
+      ]
+    },
+    "69": {
+      "name": "Recipe #38",
+      "attrs": [
+        0
+      ]
+    },
+    "70": {
+      "name": "Recipe #39",
+      "attrs": [
+        0
+      ]
+    },
+    "71": {
+      "name": "Recipe #40",
+      "attrs": [
+        0
+      ]
+    },
+    "72": {
+      "name": "Two Packages",
+      "attrs": [
+        0
+      ]
+    },
+    "73": {
+      "name": "Leon's Letter",
+      "attrs": [
+        0
+      ]
+    },
+    "74": {
+      "name": "Entry Permit",
+      "attrs": [
+        0
+      ]
+    },
+    "75": {
+      "name": "Bath Set",
+      "attrs": [
+        0
+      ]
+    },
+    "76": {
+      "name": "Sunglasses",
+      "attrs": [
+        0
+      ]
+    },
+    "77": {
+      "name": "Dog Whistle",
+      "attrs": [
+        0
+      ]
+    },
+    "78": {
+      "name": "Lubricating Oil",
+      "attrs": [
+        0
+      ]
+    },
+    "79": {
+      "name": "Rose Bouquet",
+      "attrs": [
+        0
+      ]
+    },
+    "80": {
+      "name": "Secret Writings",
+      "attrs": [
+        0
+      ]
+    },
+    "81": {
+      "name": "Millet Dumplings",
+      "attrs": [
+        0
+      ]
+    },
+    "82": {
+      "name": "Leisure Set",
+      "attrs": [
+        0
+      ]
+    },
+    "83": {
+      "name": "Invincible Smile",
+      "attrs": [
+        0
+      ]
+    },
+    "84": {
+      "name": "Sexy Wink",
+      "attrs": [
+        0
+      ]
+    },
+    "85": {
+      "name": "Cup of the Oath",
+      "attrs": [
+        0
+      ]
+    }
+  },
+  "FARMING": {
+    "0": "None",
+    "1": "Cabbage Seed",
+    "2": "Potato Seed",
+    "3": "Spinach Seed",
+    "4": "Tomato Seed",
+    "5": "Chick",
+    "6": "Piglet",
+    "7": "Lamb",
+    "8": "Calf"
+  },
+  "TRADE": {
+    "0": "None",
+    "1": "Defective Urn",
+    "2": "Octopus Pot",
+    "3": "Flower Vase",
+    "4": "Wide Urn",
+    "5": "Blue Dragon Urn",
+    "6": "Celadon Urn",
+    "7": "Black Urn",
+    "8": "Fine China",
+    "9": "Persian Lamp",
+    "10": "Hex Doll",
+    "11": "Japanese Dish",
+    "12": "Chinese Dish",
+    "13": "Peeing Boy",
+    "14": "Bonsai Tree",
+    "15": "Knight Statue",
+    "16": "Goddess Statue",
+    "17": "Coral",
+    "18": "Graffiti",
+    "19": "Flower Painting",
+    "20": "Lover's Garden",
+    "21": "Landscape Scroll",
+    "22": "Beauties of Nature",
+    "23": "Sugar",
+    "24": "Salt",
+    "25": "Soy Sauce",
+    "26": "Mayonnaise",
+    "27": "Red Pepper",
+    "28": "Candle",
+    "29": "Fur",
+    "30": "Flute",
+    "31": "Wooden Amulet",
+    "32": "Native Costume",
+    "33": "Holly Berry",
+    "34": "Wine",
+    "35": "Deer Antler",
+    "36": "Book",
+    "37": "Musk",
+    "38": "Crystal Ball",
+    "39": "Pearl",
+    "40": "Ancient Text",
+    "41": "Gold Bar",
+    "42": "Karen Painting A",
+    "43": "Karen Painting B",
+    "44": "Trio Painting",
+    "45": "Karen Statue A",
+    "46": "Karen Statue B",
+    "47": "Karen Statue C",
+    "48": "Nanami's Vase",
+    "49": "Large Vase",
+    "50": "Genkaku's Vase"
+  },
+  "BASE_ITEM": {
+    "0": "None",
+    "1": "Old book vol 1",
+    "2": "Old book vol 2",
+    "3": "Old book vol 3",
+    "4": "Old book vol 4",
+    "5": "Old book vol 5",
+    "6": "Old book vol 6",
+    "7": "Old book vol 7",
+    "8": "Old book vol 8",
+    "9": "Old book vol 9",
+    "10": "Old book vol 10",
+    "11": "Old book vol 11",
+    "12": "Old book vol 12",
+    "13": "Window Set 1",
+    "14": "Window Set 2",
+    "15": "Window Set 3",
+    "16": "Window Set 4",
+    "17": "Window Set 5",
+    "18": "Window Set 6",
+    "19": "Window Set 7",
+    "20": "Sound Set 1",
+    "21": "Sound Set 2",
+    "22": "Sound Set 3",
+    "23": "Sound Set 4",
+    "24": "Sound Set 5",
+    "25": "Sound Set 6",
+    "26": "Sound Set 7",
+    "27": "Dragon Plans 1",
+    "28": "Dragon Plans 2",
+    "29": "Dragon Plans 3",
+    "30": "Dragon Plans 4",
+    "31": "Unicorn Plans 1",
+    "32": "Unicorn Plans 2",
+    "33": "Unicorn Plans 3",
+    "34": "Unicorn Plans 4",
+    "35": "Rabbit Plans 1",
+    "36": "Rabbit Plans 2",
+    "37": "Rabbit Plans 3",
+    "38": "Rabbit Plans 4",
+    "39": "Turtle Plans 1",
+    "40": "Turtle Plans 2",
+    "41": "Turtle Plans 3",
+    "42": "Turtle Plans 4",
+    "43": "Recipe#1",
+    "44": "Recipe#2",
+    "45": "Recipe#3",
+    "46": "Recipe#4",
+    "47": "Recipe#5",
+    "48": "Recipe#6",
+    "49": "Recipe#7",
+    "50": "Recipe#8",
+    "51": "Recipe#9",
+    "52": "Recipe#10",
+    "53": "Recipe#11",
+    "54": "Recipe#12",
+    "55": "Recipe#13",
+    "56": "Recipe#14",
+    "57": "Recipe#15",
+    "58": "Recipe#16",
+    "59": "Recipe#17",
+    "60": "Recipe#18",
+    "61": "Recipe#19",
+    "62": "Recipe#20",
+    "63": "Recipe#21",
+    "64": "Recipe#22",
+    "65": "Recipe#23",
+    "66": "Recipe#24"
+  },
+  "FOOD": {
+    "0": {
+      "name": "None",
+      "attrs": [
+        105
+      ]
+    },
+    "1": {
+      "name": "Tamago-Yaki",
+      "attrs": [
+        101
+      ]
+    },
+    "2": {
+      "name": "Sweet Omelet",
+      "attrs": [
+        101
+      ]
+    },
+    "3": {
+      "name": "Adult Fried Egg",
+      "attrs": [
+        101
+      ]
+    },
+    "4": {
+      "name": "Fried Egg",
+      "attrs": [
+        101
+      ]
+    },
+    "5": {
+      "name": "Egg Mayo Roll",
+      "attrs": [
+        101
+      ]
+    },
+    "6": {
+      "name": "Eggsplosive",
+      "attrs": [
+        101
+      ]
+    },
+    "7": {
+      "name": "Tomato Soup",
+      "attrs": [
+        101
+      ]
+    },
+    "8": {
+      "name": "Tomato Juice",
+      "attrs": [
+        101
+      ]
+    },
+    "9": {
+      "name": "Raw Tomato",
+      "attrs": [
+        101
+      ]
+    },
+    "10": {
+      "name": "Tomato Miso Soup",
+      "attrs": [
+        101
+      ]
+    },
+    "11": {
+      "name": "Tomato Salad",
+      "attrs": [
+        101
+      ]
+    },
+    "12": {
+      "name": "Red Hot Tomatoes",
+      "attrs": [
+        101
+      ]
+    },
+    "13": {
+      "name": "Ohitashi",
+      "attrs": [
+        101
+      ]
+    },
+    "14": {
+      "name": "Spinach Cake",
+      "attrs": [
+        101
+      ]
+    },
+    "15": {
+      "name": "Spinach Juice",
+      "attrs": [
+        101
+      ]
+    },
+    "16": {
+      "name": "Spinach Saute",
+      "attrs": [
+        101
+      ]
+    },
+    "17": {
+      "name": "Spinach Salad",
+      "attrs": [
+        101
+      ]
+    },
+    "18": {
+      "name": "Spicy Stir Fry",
+      "attrs": [
+        101
+      ]
+    },
+    "19": {
+      "name": "Salad",
+      "attrs": [
+        101
+      ]
+    },
+    "20": {
+      "name": "Sweet Salad",
+      "attrs": [
+        101
+      ]
+    },
+    "21": {
+      "name": "Pickled Cabbage",
+      "attrs": [
+        101
+      ]
+    },
+    "22": {
+      "name": "Island Salad",
+      "attrs": [
+        101
+      ]
+    },
+    "23": {
+      "name": "Green Salad",
+      "attrs": [
+        101
+      ]
+    },
+    "24": {
+      "name": "Veggie Stir Fry",
+      "attrs": [
+        101
+      ]
+    },
+    "25": {
+      "name": "Gyoza",
+      "attrs": [
+        101
+      ]
+    },
+    "26": {
+      "name": "Fruit Gyoza",
+      "attrs": [
+        101
+      ]
+    },
+    "27": {
+      "name": "Steamed Gyoza",
+      "attrs": [
+        101
+      ]
+    },
+    "28": {
+      "name": "Fried Gyoza",
+      "attrs": [
+        101
+      ]
+    },
+    "29": {
+      "name": "Deep-Fried Gyoza",
+      "attrs": [
+        101
+      ]
+    },
+    "30": {
+      "name": "Szechuan Gyoza",
+      "attrs": [
+        101
+      ]
+    },
+    "31": {
+      "name": "Chowder",
+      "attrs": [
+        101
+      ]
+    },
+    "32": {
+      "name": "Potato Pudding",
+      "attrs": [
+        101
+      ]
+    },
+    "33": {
+      "name": "Vichyssoise",
+      "attrs": [
+        101
+      ]
+    },
+    "34": {
+      "name": "Dark Chowder",
+      "attrs": [
+        101
+      ]
+    },
+    "35": {
+      "name": "Egg Soup",
+      "attrs": [
+        101
+      ]
+    },
+    "36": {
+      "name": "Gumbo",
+      "attrs": [
+        101
+      ]
+    },
+    "37": {
+      "name": "BBQ Meat Bun",
+      "attrs": [
+        101
+      ]
+    },
+    "38": {
+      "name": "Sweet Bean Bun",
+      "attrs": [
+        101
+      ]
+    },
+    "39": {
+      "name": "Ginger Beef Bun",
+      "attrs": [
+        101
+      ]
+    },
+    "40": {
+      "name": "Ma Bo Bun",
+      "attrs": [
+        101
+      ]
+    },
+    "41": {
+      "name": "Pirate's Bun",
+      "attrs": [
+        102
+      ]
+    },
+    "42": {
+      "name": "Pizza Bun",
+      "attrs": [
+        102
+      ]
+    },
+    "43": {
+      "name": "Buttered Clams",
+      "attrs": [
+        102
+      ]
+    },
+    "44": {
+      "name": "Clam Pudding",
+      "attrs": [
+        102
+      ]
+    },
+    "45": {
+      "name": "Grilled Scallops",
+      "attrs": [
+        102
+      ]
+    },
+    "46": {
+      "name": "Steamed Abalone",
+      "attrs": [
+        102
+      ]
+    },
+    "47": {
+      "name": "Clam Mayonnaise",
+      "attrs": [
+        102
+      ]
+    },
+    "48": {
+      "name": "Mai Mai??",
+      "attrs": [
+        102
+      ]
+    },
+    "49": {
+      "name": "Fish Fry",
+      "attrs": [
+        102
+      ]
+    },
+    "50": {
+      "name": "Fish Donuts",
+      "attrs": [
+        102
+      ]
+    },
+    "51": {
+      "name": "Deep-Fried Fish",
+      "attrs": [
+        102
+      ]
+    },
+    "52": {
+      "name": "Tatsuta Age",
+      "attrs": [
+        102
+      ]
+    },
+    "53": {
+      "name": "French Fries",
+      "attrs": [
+        102
+      ]
+    },
+    "54": {
+      "name": "Fried Tacos",
+      "attrs": [
+        102
+      ]
+    },
+    "55": {
+      "name": "Ice Cream",
+      "attrs": [
+        102
+      ]
+    },
+    "56": {
+      "name": "Pudding",
+      "attrs": [
+        102
+      ]
+    },
+    "57": {
+      "name": "Nanami Ice",
+      "attrs": [
+        102
+      ]
+    },
+    "58": {
+      "name": "Soy Ice",
+      "attrs": [
+        102
+      ]
+    },
+    "59": {
+      "name": "Fried Ice Cream",
+      "attrs": [
+        102
+      ]
+    },
+    "60": {
+      "name": "Red Pepper Ice",
+      "attrs": [
+        102
+      ]
+    },
+    "61": {
+      "name": "Quiche",
+      "attrs": [
+        102
+      ]
+    },
+    "62": {
+      "name": "Pineapple Rice",
+      "attrs": [
+        102
+      ]
+    },
+    "63": {
+      "name": "Egg Porridge",
+      "attrs": [
+        102
+      ]
+    },
+    "64": {
+      "name": "Baked Mochi",
+      "attrs": [
+        102
+      ]
+    },
+    "65": {
+      "name": "Cream Quiche",
+      "attrs": [
+        102
+      ]
+    },
+    "66": {
+      "name": "Lasagna",
+      "attrs": [
+        102
+      ]
+    },
+    "67": {
+      "name": "Sandwich",
+      "attrs": [
+        102
+      ]
+    },
+    "68": {
+      "name": "French Toast",
+      "attrs": [
+        102
+      ]
+    },
+    "69": {
+      "name": "Steak Sandwich",
+      "attrs": [
+        102
+      ]
+    },
+    "70": {
+      "name": "Teriyaki Sandwich",
+      "attrs": [
+        102
+      ]
+    },
+    "71": {
+      "name": "Veggie Sandwich",
+      "attrs": [
+        102
+      ]
+    },
+    "72": {
+      "name": "Spicy Sandwich",
+      "attrs": [
+        102
+      ]
+    },
+    "73": {
+      "name": "Meat Pie",
+      "attrs": [
+        102
+      ]
+    },
+    "74": {
+      "name": "Cream Pie",
+      "attrs": [
+        102
+      ]
+    },
+    "75": {
+      "name": "Meringue Pie",
+      "attrs": [
+        102
+      ]
+    },
+    "76": {
+      "name": "Kobold Pie",
+      "attrs": [
+        102
+      ]
+    },
+    "77": {
+      "name": "Mayonnaise Pie",
+      "attrs": [
+        102
+      ]
+    },
+    "78": {
+      "name": "Chili Pie",
+      "attrs": [
+        102
+      ]
+    },
+    "79": {
+      "name": "Simmered Fish",
+      "attrs": [
+        102
+      ]
+    },
+    "80": {
+      "name": "Simmered Carp",
+      "attrs": [
+        103
+      ]
+    },
+    "81": {
+      "name": "Tai-Chili Style",
+      "attrs": [
+        103
+      ]
+    },
+    "82": {
+      "name": "Sole",
+      "attrs": [
+        103
+      ]
+    },
+    "83": {
+      "name": "Fish with Sauce",
+      "attrs": [
+        103
+      ]
+    },
+    "84": {
+      "name": "Blackened Sole",
+      "attrs": [
+        103
+      ]
+    },
+    "85": {
+      "name": "Fried Fish Balls",
+      "attrs": [
+        103
+      ]
+    },
+    "86": {
+      "name": "Sweet&Sour Fish",
+      "attrs": [
+        103
+      ]
+    },
+    "87": {
+      "name": "Crab Cakes",
+      "attrs": [
+        103
+      ]
+    },
+    "88": {
+      "name": "Meatballs",
+      "attrs": [
+        103
+      ]
+    },
+    "89": {
+      "name": "Greasy Fish",
+      "attrs": [
+        103
+      ]
+    },
+    "90": {
+      "name": "Fiery Fish Balls",
+      "attrs": [
+        103
+      ]
+    },
+    "91": {
+      "name": "Sunomono",
+      "attrs": [
+        103
+      ]
+    },
+    "92": {
+      "name": "Sour Shrimp",
+      "attrs": [
+        103
+      ]
+    },
+    "93": {
+      "name": "Nonpei Sunomono",
+      "attrs": [
+        103
+      ]
+    },
+    "94": {
+      "name": "Gourmet Sunomono",
+      "attrs": [
+        103
+      ]
+    },
+    "95": {
+      "name": "Weird Sunomono",
+      "attrs": [
+        103
+      ]
+    },
+    "96": {
+      "name": "Cajun Shrimp",
+      "attrs": [
+        103
+      ]
+    },
+    "97": {
+      "name": "Cake",
+      "attrs": [
+        103
+      ]
+    },
+    "98": {
+      "name": "Short Cake",
+      "attrs": [
+        103
+      ]
+    },
+    "99": {
+      "name": "Nanami Cake",
+      "attrs": [
+        103
+      ]
+    },
+    "100": {
+      "name": "Black Cake",
+      "attrs": [
+        103
+      ]
+    },
+    "101": {
+      "name": "Cheesecake",
+      "attrs": [
+        103
+      ]
+    },
+    "103": {
+      "name": "Croquettes",
+      "attrs": [
+        103
+      ]
+    },
+    "104": {
+      "name": "Sweet Croquettes",
+      "attrs": [
+        103
+      ]
+    },
+    "105": {
+      "name": "Eilie Croquettes",
+      "attrs": [
+        103
+      ]
+    },
+    "106": {
+      "name": "Black Croquettes",
+      "attrs": [
+        103
+      ]
+    },
+    "107": {
+      "name": "Cream Croquettes",
+      "attrs": [
+        103
+      ]
+    },
+    "108": {
+      "name": "Hot Croquettes",
+      "attrs": [
+        103
+      ]
+    },
+    "109": {
+      "name": "Pasta",
+      "attrs": [
+        103
+      ]
+    },
+    "110": {
+      "name": "Kiddie Pasta",
+      "attrs": [
+        103
+      ]
+    },
+    "111": {
+      "name": "Pasta Parmesan",
+      "attrs": [
+        103
+      ]
+    },
+    "112": {
+      "name": "Downtown Pasta",
+      "attrs": [
+        103
+      ]
+    },
+    "113": {
+      "name": "Pasta Salad",
+      "attrs": [
+        103
+      ]
+    },
+    "114": {
+      "name": "Chili Pasta",
+      "attrs": [
+        103
+      ]
+    },
+    "115": {
+      "name": "Tempura",
+      "attrs": [
+        103
+      ]
+    },
+    "116": {
+      "name": "Snack Tempura",
+      "attrs": [
+        103
+      ]
+    },
+    "117": {
+      "name": "Real Tempura",
+      "attrs": [
+        103
+      ]
+    },
+    "118": {
+      "name": "Tempura-Don",
+      "attrs": [
+        103
+      ]
+    },
+    "119": {
+      "name": "Amazing Tempura",
+      "attrs": [
+        103
+      ]
+    },
+    "120": {
+      "name": "Spicy Tempura",
+      "attrs": [
+        103
+      ]
+    },
+    "121": {
+      "name": "Grilled Fish",
+      "attrs": [
+        104
+      ]
+    },
+    "122": {
+      "name": "Broiled Eel",
+      "attrs": [
+        104
+      ]
+    },
+    "123": {
+      "name": "Salted Fish",
+      "attrs": [
+        104
+      ]
+    },
+    "124": {
+      "name": "Dried Fish",
+      "attrs": [
+        104
+      ]
+    },
+    "125": {
+      "name": "Salmon Meunire",
+      "attrs": [
+        104
+      ]
+    },
+    "126": {
+      "name": "Grilled Red Fish",
+      "attrs": [
+        104
+      ]
+    },
+    "127": {
+      "name": "Gratin",
+      "attrs": [
+        104
+      ]
+    },
+    "128": {
+      "name": "Apple Gratin",
+      "attrs": [
+        104
+      ]
+    },
+    "129": {
+      "name": "Salty Gratin",
+      "attrs": [
+        104
+      ]
+    },
+    "130": {
+      "name": "Crispy Gratin",
+      "attrs": [
+        104
+      ]
+    },
+    "131": {
+      "name": "Creamy Gratin",
+      "attrs": [
+        104
+      ]
+    },
+    "132": {
+      "name": "Chili Gratin",
+      "attrs": [
+        104
+      ]
+    },
+    "133": {
+      "name": "Rice Omelet",
+      "attrs": [
+        104
+      ]
+    },
+    "134": {
+      "name": "Kid's Lunch",
+      "attrs": [
+        104
+      ]
+    },
+    "135": {
+      "name": "Salty Omelet",
+      "attrs": [
+        104
+      ]
+    },
+    "136": {
+      "name": "Soy Rice Omelet",
+      "attrs": [
+        104
+      ]
+    },
+    "137": {
+      "name": "Mayo Rice Omelet",
+      "attrs": [
+        104
+      ]
+    },
+    "138": {
+      "name": "Red Pepper Rice",
+      "attrs": [
+        104
+      ]
+    },
+    "139": {
+      "name": "Fried Rice",
+      "attrs": [
+        104
+      ]
+    },
+    "140": {
+      "name": "Shrimp Pilaf",
+      "attrs": [
+        104
+      ]
+    },
+    "141": {
+      "name": "Salty Fried Rice",
+      "attrs": [
+        104
+      ]
+    },
+    "142": {
+      "name": "Gunpowder Rice",
+      "attrs": [
+        104
+      ]
+    },
+    "143": {
+      "name": "Heavy Pilaf",
+      "attrs": [
+        104
+      ]
+    },
+    "144": {
+      "name": "Spicy Pilaf",
+      "attrs": [
+        104
+      ]
+    },
+    "145": {
+      "name": "Pizza",
+      "attrs": [
+        104
+      ]
+    },
+    "146": {
+      "name": "Pancakes",
+      "attrs": [
+        104
+      ]
+    },
+    "147": {
+      "name": "Anchovy Pizza",
+      "attrs": [
+        104
+      ]
+    },
+    "148": {
+      "name": "Senbei",
+      "attrs": [
+        104
+      ]
+    },
+    "149": {
+      "name": "Okonomiyaki",
+      "attrs": [
+        104
+      ]
+    },
+    "150": {
+      "name": "Spicy Pizza",
+      "attrs": [
+        104
+      ]
+    },
+    "151": {
+      "name": "Teriyaki",
+      "attrs": [
+        104
+      ]
+    },
+    "152": {
+      "name": "Sweet Teriyaki",
+      "attrs": [
+        104
+      ]
+    },
+    "153": {
+      "name": "Hot Spareribs",
+      "attrs": [
+        104
+      ]
+    },
+    "154": {
+      "name": "Mild Teriyaki",
+      "attrs": [
+        104
+      ]
+    },
+    "155": {
+      "name": "Teri-Cream",
+      "attrs": [
+        104
+      ]
+    },
+    "156": {
+      "name": "BBQ-Bomb",
+      "attrs": [
+        104
+      ]
+    },
+    "157": {
+      "name": "Tonkatsu",
+      "attrs": [
+        104
+      ]
+    },
+    "158": {
+      "name": "Meat and Potato",
+      "attrs": [
+        104
+      ]
+    },
+    "159": {
+      "name": "Ginger Pork",
+      "attrs": [
+        104
+      ]
+    },
+    "160": {
+      "name": "Soy Cutlet",
+      "attrs": [
+        104
+      ]
+    },
+    "161": {
+      "name": "Cream Cutlets",
+      "attrs": [
+        105
+      ]
+    },
+    "162": {
+      "name": "Spicy Cutlets",
+      "attrs": [
+        105
+      ]
+    },
+    "163": {
+      "name": "Curry Rice",
+      "attrs": [
+        105
+      ]
+    },
+    "164": {
+      "name": "Kiddie Curry",
+      "attrs": [
+        105
+      ]
+    },
+    "165": {
+      "name": "Salty Curry",
+      "attrs": [
+        105
+      ]
+    },
+    "166": {
+      "name": "Japanese Curry",
+      "attrs": [
+        105
+      ]
+    },
+    "167": {
+      "name": "Creamy Curry",
+      "attrs": [
+        105
+      ]
+    },
+    "168": {
+      "name": "Red Curry",
+      "attrs": [
+        105
+      ]
+    },
+    "169": {
+      "name": "Grilled Beef",
+      "attrs": [
+        105
+      ]
+    },
+    "170": {
+      "name": "Sukiyaki",
+      "attrs": [
+        105
+      ]
+    },
+    "171": {
+      "name": "Grilled Tongue",
+      "attrs": [
+        105
+      ]
+    },
+    "172": {
+      "name": "Beef Rice Bowl",
+      "attrs": [
+        105
+      ]
+    },
+    "173": {
+      "name": "Meat Salad",
+      "attrs": [
+        105
+      ]
+    },
+    "174": {
+      "name": "Chige Nabe",
+      "attrs": [
+        105
+      ]
+    },
+    "175": {
+      "name": "Ramen",
+      "attrs": [
+        105
+      ]
+    },
+    "176": {
+      "name": "Chinese Noodles",
+      "attrs": [
+        105
+      ]
+    },
+    "177": {
+      "name": "Salty Ramen",
+      "attrs": [
+        105
+      ]
+    },
+    "178": {
+      "name": "Soy Sauce Ramen",
+      "attrs": [
+        105
+      ]
+    },
+    "179": {
+      "name": "Gourmet Ramen",
+      "attrs": [
+        105
+      ]
+    },
+    "180": {
+      "name": "Red Hot Ramen",
+      "attrs": [
+        105
+      ]
+    },
+    "181": {
+      "name": "Hamburger",
+      "attrs": [
+        105
+      ]
+    },
+    "182": {
+      "name": "Sugar-Cured Meat",
+      "attrs": [
+        105
+      ]
+    },
+    "183": {
+      "name": "Kobold Burger",
+      "attrs": [
+        105
+      ]
+    },
+    "184": {
+      "name": "Japan Burger",
+      "attrs": [
+        105
+      ]
+    },
+    "185": {
+      "name": "Tinto Burger",
+      "attrs": [
+        105
+      ]
+    },
+    "186": {
+      "name": "Surprise Burger",
+      "attrs": [
+        105
+      ]
+    },
+    "187": {
+      "name": "Obento",
+      "attrs": [
+        105
+      ]
+    },
+    "188": {
+      "name": "Ladie's Lunch",
+      "attrs": [
+        105
+      ]
+    },
+    "189": {
+      "name": "Rising Sun Bento",
+      "attrs": [
+        105
+      ]
+    },
+    "190": {
+      "name": "Sashimi Bento",
+      "attrs": [
+        105
+      ]
+    },
+    "191": {
+      "name": "Diet Lunch",
+      "attrs": [
+        105
+      ]
+    },
+    "192": {
+      "name": "Shrimp Lunch",
+      "attrs": [
+        105
+      ]
+    },
+    "193": {
+      "name": "Sushi",
+      "attrs": [
+        105
+      ]
+    },
+    "194": {
+      "name": "Chirashi-Zashi",
+      "attrs": [
+        105
+      ]
+    },
+    "195": {
+      "name": "Salty Rice Ball",
+      "attrs": [
+        105
+      ]
+    },
+    "196": {
+      "name": "Fancy Rice Ball",
+      "attrs": [
+        105
+      ]
+    },
+    "197": {
+      "name": "French Roll",
+      "attrs": [
+        105
+      ]
+    },
+    "198": {
+      "name": "Tekka-don",
+      "attrs": [
+        105
+      ]
+    },
+    "199": {
+      "name": "Japanese Stew",
+      "attrs": [
+        105
+      ]
+    },
+    "200": {
+      "name": "Sweet Tofu",
+      "attrs": [
+        105
+      ]
+    },
+    "201": {
+      "name": "Bouillabaise",
+      "attrs": [
+        106
+      ]
+    },
+    "202": {
+      "name": "Shabu Shabu",
+      "attrs": [
+        106
+      ]
+    },
+    "203": {
+      "name": "Dark Stew",
+      "attrs": [
+        106
+      ]
+    },
+    "204": {
+      "name": "Spicy Stew",
+      "attrs": [
+        106
+      ]
+    },
+    "205": {
+      "name": "Full Course",
+      "attrs": [
+        106
+      ]
+    },
+    "206": {
+      "name": "Elf Course",
+      "attrs": [
+        106
+      ]
+    },
+    "207": {
+      "name": "Kobold Course",
+      "attrs": [
+        106
+      ]
+    },
+    "208": {
+      "name": "Rokkaku Course",
+      "attrs": [
+        106
+      ]
+    },
+    "209": {
+      "name": "Matilda Course",
+      "attrs": [
+        106
+      ]
+    },
+    "210": {
+      "name": "Tinto Specialty",
+      "attrs": [
+        106
+      ]
+    },
+    "211": {
+      "name": "Genghis Khan",
+      "attrs": [
+        106
+      ]
+    },
+    "212": {
+      "name": "Fa Chu Chin",
+      "attrs": [
+        106
+      ]
+    },
+    "213": {
+      "name": "Coopa",
+      "attrs": [
+        106
+      ]
+    },
+    "214": {
+      "name": "Genghis Stew",
+      "attrs": [
+        106
+      ]
+    },
+    "215": {
+      "name": "Cream Stew",
+      "attrs": [
+        106
+      ]
+    },
+    "216": {
+      "name": "Tom Yum Stew",
+      "attrs": [
+        106
+      ]
+    },
+    "217": {
+      "name": "Steak",
+      "attrs": [
+        106
+      ]
+    },
+    "218": {
+      "name": "Sweet Steak",
+      "attrs": [
+        106
+      ]
+    },
+    "219": {
+      "name": "Beefsteak",
+      "attrs": [
+        106
+      ]
+    },
+    "220": {
+      "name": "Japanese Steak",
+      "attrs": [
+        106
+      ]
+    },
+    "221": {
+      "name": "Piccata",
+      "attrs": [
+        106
+      ]
+    },
+    "222": {
+      "name": "Pepper Steak",
+      "attrs": [
+        106
+      ]
+    },
+    "223": {
+      "name": "Sashimi Combo",
+      "attrs": [
+        106
+      ]
+    },
+    "224": {
+      "name": "Queen of the Sea",
+      "attrs": [
+        106
+      ]
+    },
+    "225": {
+      "name": "Sea Treasure",
+      "attrs": [
+        106
+      ]
+    },
+    "226": {
+      "name": "Ship Combo",
+      "attrs": [
+        106
+      ]
+    },
+    "227": {
+      "name": "Salad Combo",
+      "attrs": [
+        106
+      ]
+    },
+    "228": {
+      "name": "Spicy Sashimi",
+      "attrs": [
+        106
+      ]
+    },
+    "229": {
+      "name": "Special Stew",
+      "attrs": [
+        106
+      ]
+    },
+    "230": {
+      "name": "Sweet Syrup",
+      "attrs": [
+        106
+      ]
+    },
+    "231": {
+      "name": "Adult Stew",
+      "attrs": [
+        106
+      ]
+    },
+    "232": {
+      "name": "Clear or Cream Soup",
+      "attrs": [
+        106
+      ]
+    },
+    "233": {
+      "name": "Mellow Stew",
+      "attrs": [
+        106
+      ]
+    },
+    "234": {
+      "name": "Spicy Stew",
+      "attrs": [
+        106
+      ]
+    },
+    "235": {
+      "name": "Kaiseki Dinner",
+      "attrs": [
+        106
+      ]
+    },
+    "236": {
+      "name": "Candy House",
+      "attrs": [
+        106
+      ]
+    },
+    "237": {
+      "name": "Salt House",
+      "attrs": [
+        106
+      ]
+    },
+    "238": {
+      "name": "Complete Kaiseki",
+      "attrs": [
+        106
+      ]
+    },
+    "239": {
+      "name": "Special Salad",
+      "attrs": [
+        106
+      ]
+    },
+    "240": {
+      "name": "Flaming Sea Special",
+      "attrs": [
+        106
+      ]
+    }
+  },
+  "RUNES": {
+    "0": {
+      "name": "None",
+      "attrs": []
+    },
+    "1": {
+      "name": "Fire Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "2": {
+      "name": "Rage Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "3": {
+      "name": "Water Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "4": {
+      "name": "Flowing Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "5": {
+      "name": "Wind Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "6": {
+      "name": "Cyclone Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "7": {
+      "name": "Earth Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "8": {
+      "name": "Mother Earth Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "9": {
+      "name": "Lightning Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "10": {
+      "name": "Thunder Orb",
+      "attrs": [
+        "N",
+        "Wep"
+      ]
+    },
+    "11": {
+      "name": "Soul Eater",
+      "attrs": [
+        "82",
+        "RH",
+        "X"
+      ]
+    },
+    "12": {
+      "name": "Resurrection Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "13": {
+      "name": "Bright Shield Orb",
+      "attrs": [
+        "1",
+        "RH",
+        "X"
+      ]
+    },
+    "14": {
+      "name": "Black Sword Orb",
+      "attrs": [
+        "80",
+        "81",
+        "RH",
+        "X"
+      ]
+    },
+    "15": {
+      "name": "Blinking Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "16": {
+      "name": "Darkness Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "17": {
+      "name": "Blue Gate Orb",
+      "attrs": [
+        "N",
+        "HR"
+      ]
+    },
+    "18": {
+      "name": "White Saint Orb",
+      "attrs": [
+        "72",
+        "LH",
+        "X"
+      ]
+    },
+    "19": {
+      "name": "Titan Orb",
+      "attrs": [
+        "3",
+        "10",
+        "11",
+        "13",
+        "16",
+        "32",
+        "34"
+      ]
+    },
+    "20": {
+      "name": "Viper Orb",
+      "attrs": [
+        "2",
+        "5",
+        "7",
+        "23",
+        "25",
+        "33",
+        "35",
+        "64"
+      ]
+    },
+    "21": {
+      "name": "Great Hawk Orb",
+      "attrs": [
+        "30",
+        "43",
+        "67"
+      ]
+    },
+    "22": {
+      "name": "Lion Orb",
+      "attrs": [
+        "45",
+        "46",
+        "68",
+        "69"
+      ]
+    },
+    "23": {
+      "name": "Kite Orb",
+      "attrs": [
+        "6",
+        "8",
+        "19",
+        "20",
+        "24",
+        "29",
+        "31",
+        "41",
+        "60",
+        "62",
+        "65"
+      ]
+    },
+    "24": {
+      "name": "Unicorn Orb",
+      "attrs": [
+        "9",
+        "17",
+        "37",
+        "38",
+        "52",
+        "54",
+        "56",
+        "57"
+      ]
+    },
+    "25": {
+      "name": "Gozu Orb",
+      "attrs": [
+        "14",
+        "58",
+        "59"
+      ]
+    },
+    "26": {
+      "name": "Pixie Orb",
+      "attrs": [
+        "4",
+        "53",
+        "70",
+        "71"
+      ]
+    },
+    "27": {
+      "name": "Banshee Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "28": {
+      "name": "Sylph Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "29": {
+      "name": "Chimera Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "30": {
+      "name": "Nymph Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "31": {
+      "name": "Dryad Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "39": {
+      "name": "Gadget Orb",
+      "attrs": [
+        "41",
+        "RH",
+        "X"
+      ]
+    },
+    "40": {
+      "name": "Shrike Orb",
+      "attrs": [
+        "73",
+        "HR",
+        "X"
+      ]
+    },
+    "41": {
+      "name": "Falcon Orb",
+      "attrs": [
+        "12",
+        "39",
+        "RH",
+        "X"
+      ]
+    },
+    "42": {
+      "name": "Mayfly Orb",
+      "attrs": [
+        "63",
+        "HR",
+        "X"
+      ]
+    },
+    "43": {
+      "name": "Swallow Orb",
+      "attrs": [
+        "47",
+        "RH",
+        "X"
+      ]
+    },
+    "44": {
+      "name": "Fire Breath Orb",
+      "attrs": [
+        "21",
+        "RH",
+        "X"
+      ]
+    },
+    "45": {
+      "name": "Groundhog Orb",
+      "attrs": [
+        "24",
+        "LH",
+        "X"
+      ]
+    },
+    "46": {
+      "name": "Fire Dragon Orb",
+      "attrs": [
+        "27",
+        "RH",
+        "X"
+      ]
+    },
+    "47": {
+      "name": "Shining Wind Orb",
+      "attrs": [
+        "50",
+        "HR",
+        "X"
+      ]
+    },
+    "48": {
+      "name": "Blue Drop Orb",
+      "attrs": [
+        "49",
+        "74",
+        "HR",
+        "X"
+      ]
+    },
+    "49": {
+      "name": "White Tiger Orb",
+      "attrs": [
+        "68",
+        "RH"
+      ]
+    },
+    "50": {
+      "name": "Howling Orb",
+      "attrs": [
+        "51",
+        "LH",
+        "X"
+      ]
+    },
+    "51": {
+      "name": "Spider Slay Orb",
+      "attrs": [
+        "15",
+        "RH"
+      ]
+    },
+    "52": {
+      "name": "Angry Dragon Orb",
+      "attrs": [
+        "46",
+        "LH",
+        "X"
+      ]
+    },
+    "53": {
+      "name": "Twin Ring Orb",
+      "attrs": [
+        "25",
+        "RH",
+        "X"
+      ]
+    },
+    "54": {
+      "name": "Rabid Fang Orb",
+      "attrs": [
+        "40",
+        "HR",
+        "X"
+      ]
+    },
+    "62": {
+      "name": "Fortune Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "63": {
+      "name": "Prosperity Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "64": {
+      "name": "Champion's Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "65": {
+      "name": "Double-Jab Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "66": {
+      "name": "Killer Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "67": {
+      "name": "Counter Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "68": {
+      "name": "Spark Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "69": {
+      "name": "Gale Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "70": {
+      "name": "Sunbeam Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "71": {
+      "name": "Phero Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "72": {
+      "name": "Knight Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "73": {
+      "name": "Wall Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "74": {
+      "name": "Haziness Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "75": {
+      "name": "Drain Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "76": {
+      "name": "Barrier Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "77": {
+      "name": "Balance Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "78": {
+      "name": "Fire Sealing Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "79": {
+      "name": "Skunk Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "80": {
+      "name": "Firefly Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "81": {
+      "name": "Medicine Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "82": {
+      "name": "Double-Edged Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "83": {
+      "name": "Wizard Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "84": {
+      "name": "Warrior Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "85": {
+      "name": "Waking Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "86": {
+      "name": "Alertness Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "87": {
+      "name": "Fury Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "88": {
+      "name": "Violence Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "89": {
+      "name": "Godspeed Orb",
+      "attrs": [
+        "67",
+        "HR",
+        "X"
+      ]
+    },
+    "92": {
+      "name": "Fire Lizard Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "93": {
+      "name": "Magic Drain Orb",
+      "attrs": [
+        "N"
+      ]
+    },
+    "94": {
+      "name": "Hunter Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    },
+    "95": {
+      "name": "Technique Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    },
+    "96": {
+      "name": "Silence Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    },
+    "97": {
+      "name": "Poison Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    },
+    "98": {
+      "name": "Knockdown Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    },
+    "99": {
+      "name": "Sleep Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    },
+    "100": {
+      "name": "Friendship Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    },
+    "101": {
+      "name": "Solitude Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    },
+    "102": {
+      "name": "Kindness Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    },
+    "105": {
+      "name": "Exertion Orb",
+      "attrs": [
+        "Wep",
+        "ExR"
+      ]
+    }
+  },
+  "HELMET": {
+    "0": "None",
+    "1": {
+      "name": "Bandanna",
+      "attrs": [
+        "C"
+      ]
+    },
+    "2": {
+      "name": "Leather Hat",
+      "attrs": [
+        "C",
+        "E"
+      ]
+    },
+    "3": {
+      "name": "Wind Feather Ornament",
+      "attrs": [
+        "C"
+      ]
+    },
+    "4": {
+      "name": "Pointed Hat",
+      "attrs": [
+        "C"
+      ]
+    },
+    "5": {
+      "name": "Circlet",
+      "attrs": [
+        "C",
+        "E"
+      ]
+    },
+    "6": {
+      "name": "Half Helmet",
+      "attrs": [
+        "C",
+        "E"
+      ]
+    },
+    "7": {
+      "name": "Headgear",
+      "attrs": [
+        "C"
+      ]
+    },
+    "8": {
+      "name": "Silver Hat",
+      "attrs": [
+        "C"
+      ]
+    },
+    "9": {
+      "name": "Full Helmet",
+      "attrs": [
+        "E"
+      ]
+    },
+    "10": {
+      "name": "Wind Hat",
+      "attrs": [
+        "C"
+      ]
+    },
+    "11": {
+      "name": "Flame Helmet",
+      "attrs": [
+        "E"
+      ]
+    },
+    "12": {
+      "name": "Horned Helmet",
+      "attrs": [
+        "E"
+      ]
+    },
+    "85": {
+      "name": "Mole Helmet",
+      "attrs": [
+        "C",
+        "E"
+      ]
+    }
+  },
+  "ARMOR": {
+    "0": "None",
+    "13": {
+      "name": "Robe",
+      "attrs": [
+        "L",
+        "V",
+        "R"
+      ]
+    },
+    "14": {
+      "name": "Tunic",
+      "attrs": [
+        "L",
+        "V"
+      ]
+    },
+    "15": {
+      "name": "Fur Coat",
+      "attrs": [
+        "L",
+        "H",
+        "V"
+      ]
+    },
+    "16": {
+      "name": "Brass Armor",
+      "attrs": [
+        "L",
+        "H"
+      ]
+    },
+    "17": {
+      "name": "Guard Robe",
+      "attrs": [
+        "L",
+        "V",
+        "R"
+      ]
+    },
+    "18": {
+      "name": "Karate Uniform",
+      "attrs": [
+        "L",
+        "V"
+      ]
+    },
+    "19": {
+      "name": "Leather Armor",
+      "attrs": [
+        "L",
+        "H"
+      ]
+    },
+    "20": {
+      "name": "Chain Mail",
+      "attrs": [
+        "L"
+      ]
+    },
+    "21": {
+      "name": "Ninja Suit",
+      "attrs": [
+        "L",
+        "V"
+      ]
+    },
+    "22": {
+      "name": "Half Plate",
+      "attrs": [
+        "H"
+      ]
+    },
+    "23": {
+      "name": "Magic Robe",
+      "attrs": [
+        "L",
+        "V",
+        "R"
+      ]
+    },
+    "24": {
+      "name": "Thunder God Garb",
+      "attrs": [
+        "V"
+      ]
+    },
+    "25": {
+      "name": "Scale Mail",
+      "attrs": [
+        "L"
+      ]
+    },
+    "26": {
+      "name": "Dragon Armor",
+      "attrs": [
+        "L",
+        "H"
+      ]
+    },
+    "27": {
+      "name": "Master Robe",
+      "attrs": [
+        "V",
+        "R"
+      ]
+    },
+    "28": {
+      "name": "Full Plate",
+      "attrs": [
+        "H"
+      ]
+    },
+    "29": {
+      "name": "Taikyoku Wear",
+      "attrs": [
+        "V"
+      ]
+    },
+    "30": {
+      "name": "Master Garb",
+      "attrs": [
+        "L",
+        "H"
+      ]
+    },
+    "31": {
+      "name": "Robe of Mist",
+      "attrs": [
+        "V",
+        "R"
+      ]
+    },
+    "32": {
+      "name": "Earth Armor",
+      "attrs": [
+        "L",
+        "H"
+      ]
+    },
+    "33": {
+      "name": "Dream Robe",
+      "attrs": [
+        "V"
+      ]
+    },
+    "34": {
+      "name": "Silver Armor",
+      "attrs": [
+        "L"
+      ]
+    },
+    "35": {
+      "name": "Knight Armor",
+      "attrs": [
+        "H"
+      ]
+    },
+    "36": {
+      "name": "Blood Armor",
+      "attrs": [
+        "L",
+        "H"
+      ]
+    },
+    "37": {
+      "name": "Windspun Armor",
+      "attrs": [
+        "H"
+      ]
+    },
+    "86": {
+      "name": "Mole Suit",
+      "attrs": [
+        "L",
+        "H",
+        "V",
+        "R"
+      ]
+    }
+  },
+  "SHIELD": {
+    "0": "None",
+    "38": "Wooden Shield",
+    "39": "Iron Shield",
+    "40": "Kite Shield",
+    "41": "Main-Gauche",
+    "42": "Silver Shield",
+    "43": "Chaos Shield",
+    "44": "Earth Shield",
+    "87": "Mole Shield"
+  },
+  "OTHER_EQUIP_GEAR": {
+    "0": "None",
+    "45": "Wooden Shoes",
+    "46": "Boots",
+    "47": "Toe Shoes",
+    "48": "Winged Boots",
+    "49": "Iron Boots",
+    "50": "Gloves",
+    "51": "Gauntlet",
+    "52": "Silverlet",
+    "53": "Power Gloves",
+    "54": "Goldlet",
+    "55": "Cape",
+    "56": "Leather Cape",
+    "57": "Fur Cape",
+    "58": "Cape of Darkness",
+    "59": "Crimson Cape",
+    "60": "Collar",
+    "61": "Heavy Collar",
+    "62": "Silver Collar",
+    "63": "Gold Collar",
+    "64": "Wing Ornament",
+    "65": "Greaves",
+    "66": "Shoulder Pads",
+    "67": "Cheeks Guards",
+    "68": "Belt of Strength",
+    "69": "Fire Emblem",
+    "70": "Gold Emblem",
+    "71": "Blue Ribbon",
+    "72": "Star Earrings",
+    "73": "Sun Badge",
+    "74": "Fish Badge",
+    "75": "Rose Brooch",
+    "76": "Water Amulet",
+    "77": "Thunder Amulet",
+    "78": "Wind Amulet",
+    "79": "Guard Ring",
+    "80": "Magic Ring",
+    "81": "Speed Ring",
+    "82": "Power Ring",
+    "83": "Skill Ring",
+    "84": "Lucky Ring"
+  },
+  "BEASTS": [
+    26,
+    42,
+    48,
+    49,
+    50,
+    72,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+  ]
+}
