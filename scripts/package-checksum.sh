@@ -8,6 +8,13 @@ if [[ $# -ne 1 ]]; then
     exit 2
 fi
 
+for tool in realpath sha256sum; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "$tool is required for package checksum validation." >&2
+        exit 1
+    fi
+done
+
 package="$(realpath "$1")"
 [[ -f $package ]] || { echo "Package does not exist: $package" >&2; exit 2; }
 checksum="$package.sha256"

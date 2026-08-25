@@ -38,12 +38,12 @@ The normal UI exposes only fields supported by inspected source code and supplie
 
 ## Download and install
 
-Download the standalone archive for your platform from a GitHub or Gitea release. No .NET installation is required.
+Download the standalone executable for your platform from a GitHub or Gitea release. No .NET installation or extraction is required.
 
-- **Windows x64:** extract `SuikodenHdSaveEditor-vX.Y.Z-windows-x64.zip`, then run `SuikodenHdSaveEditor.App.exe`.
-- **Linux x64:** extract `SuikodenHdSaveEditor-vX.Y.Z-linux-x64.tar.gz`, make `SuikodenHdSaveEditor.App` executable if needed, and run it from a desktop session.
+- **Windows x64:** download and run `SuikodenHdSaveEditor-vX.Y.Z-windows-x64.exe`.
+- **Linux x64:** download `SuikodenHdSaveEditor-vX.Y.Z-linux-x64`, run `chmod +x SuikodenHdSaveEditor-vX.Y.Z-linux-x64`, then launch it from a desktop session.
 
-Keep the application and its included `LICENSE`, `LICENSES/`, and `THIRD_PARTY_NOTICES.md` together. Linux still needs normal system graphics/font libraries such as Fontconfig; the distro packages install these automatically.
+The executable is self-contained and single-file. Complete third-party terms remain available offline in **Credits / Licenses** inside the application. Linux still needs normal system graphics/font libraries such as Fontconfig; the distro packages install these automatically.
 
 ### Arch Linux repository
 

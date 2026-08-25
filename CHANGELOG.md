@@ -6,11 +6,18 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## 1.0.6 - 2026-08-25
 
+### Changed
+
+- Generic Windows and Linux releases are now genuine self-contained, untrimmed single-file executables with embedded native libraries and no loose runtime files.
+- Complete license and notice texts are embedded in the in-app Credits/Licenses view; Arch and RPM packages continue installing their normal license and documentation payloads.
+
 ### Fixed
 
-- GitHub tag releases now reuse the exact successful `main` build artifact through the run-scoped API instead of searching all repository artifacts or rebuilding the application.
-- Linux CI validates the dynamically loaded `libSkiaSharp.so` dependency chain before its Avalonia smoke launch; the Gitea Debian container installs Fontconfig, X11, Xvfb, and `xauth` first.
-- Future GitHub and Gitea releases attach only the standalone archives and native packages, without standalone checksum text assets.
+- Packaging no longer creates or inspects obsolete ZIP/tar archives, eliminating the undeclared `unzip` failure on the Gitea Docker-in-Docker runner.
+- Linux native validation now launches the final single-file executable under Xvfb instead of requiring a loose `libSkiaSharp.so`.
+- GitHub tag releases now build and validate the tagged source directly, then create or update one release without polling another workflow run.
+- Linux CI launches the embedded SkiaSharp native stack under Xvfb; the Gitea Debian container installs Fontconfig, X11, Xvfb, and `xauth` first.
+- Future GitHub and Gitea releases attach only the standalone executable assets and native packages, without standalone checksum text assets.
 
 ## 1.0.5 - 2026-08-25
 

@@ -17,6 +17,13 @@ bundle="${1:-$default_bundle}"
 bundle="$(realpath "$bundle")"
 [[ -d $bundle ]] || { echo "Linux publish directory does not exist: $bundle" >&2; exit 2; }
 
+for tool in file ldd grep realpath; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "$tool is required for Linux executable dependency validation." >&2
+        exit 1
+    fi
+done
+
 check_elf_dependencies() {
     local path="$1"
     local description="$2"
@@ -37,4 +44,3 @@ check_elf_dependencies() {
 }
 
 check_elf_dependencies "$bundle/$app_executable" "Linux application executable"
-check_elf_dependencies "$bundle/libSkiaSharp.so" "SkiaSharp native library"

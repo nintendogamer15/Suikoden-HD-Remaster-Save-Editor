@@ -3,10 +3,13 @@
 
 set -euo pipefail
 source "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/common.sh"
+require_commands file find grep sort
 
-linux_archive="$ARTIFACTS_DIRECTORY/$LINUX_BUNDLE_NAME.tar.gz"
-windows_archive="$ARTIFACTS_DIRECTORY/$WINDOWS_BUNDLE_NAME.zip"
-"$SCRIPT_DIRECTORY/archive.sh"
+"$SCRIPT_DIRECTORY/check-licenses.sh"
+assert_single_file_publish "$LINUX_PUBLISH_DIRECTORY" "$APP_EXECUTABLE"
+assert_single_file_publish "$WINDOWS_PUBLISH_DIRECTORY" "$APP_EXECUTABLE.exe"
 
-tar --list --file "$linux_archive" "$LINUX_BUNDLE_NAME/LICENSES/Avalonia-MIT.txt" >/dev/null
-unzip -t "$windows_archive" "$WINDOWS_BUNDLE_NAME/LICENSES/Avalonia-MIT.txt" >/dev/null
+file "$LINUX_PUBLISH_DIRECTORY/$APP_EXECUTABLE" | grep -q 'ELF 64-bit.*x86-64'
+file "$WINDOWS_PUBLISH_DIRECTORY/$APP_EXECUTABLE.exe" | grep -q 'PE32+ executable.*x86-64'
+
+echo "Verified executable-only Linux and Windows publish outputs."

@@ -2,7 +2,7 @@
 
 ## Normal local and CI checks
 
-Install the .NET 10 SDK, `xvfb`, and `zip`, then run:
+Install the .NET 10 SDK, `xvfb`, `file`, desktop-file-utils, and libxml2-utils, then run:
 
 ```bash
 ./scripts/restore.sh
@@ -52,4 +52,4 @@ Both paths reject private saves, references, tests, fixtures, debug symbols, pac
 
 ## Release artifact audit
 
-`check-linux-native-dependencies.sh` runs `ldd` against both the Linux apphost and `libSkiaSharp.so`, which catches dynamically loaded Skia dependencies that apphost-only inspection misses. `package.sh` requires the complete legal-file set in both publish directories, rejects private-save filenames, creates the `.tar.gz` and `.zip`, and confirms license entries in each archive. Manual game acceptance remains separate; see [MANUAL_GAME_TESTING.md](MANUAL_GAME_TESTING.md).
+`check-linux-native-dependencies.sh` runs `file` and `ldd` against the Linux single-file apphost. Because Skia and the other native libraries are embedded, `smoke-test.sh` supplies the decisive native startup check by launching the executable under Xvfb. `package.sh` requires exactly one ELF or PE x86-64 executable in each publish directory, and `prepare-release-assets.sh` requires an empty destination and produces exactly those two versioned executable assets. Required legal texts are embedded in the application and staged into distro packages. Manual game acceptance remains separate; see [MANUAL_GAME_TESTING.md](MANUAL_GAME_TESTING.md).

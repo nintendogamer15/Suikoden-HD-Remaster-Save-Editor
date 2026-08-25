@@ -4,6 +4,10 @@
 set -euo pipefail
 
 repository_root="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+if ! command -v sed >/dev/null 2>&1; then
+    echo "sed is required to read the project version." >&2
+    exit 1
+fi
 if [[ $# -gt 1 ]]; then
     echo "Usage: $0 [vX.Y.Z]" >&2
     exit 2

@@ -3,6 +3,7 @@
 
 set -euo pipefail
 source "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/common.sh"
+require_commands find sort
 
 mkdir -p "$ARTIFACTS_DIRECTORY/publish"
 if [[ -d "$LINUX_PUBLISH_DIRECTORY" ]]; then
@@ -16,9 +17,16 @@ dotnet publish "$APP_PROJECT" \
     --no-restore \
     --output "$LINUX_PUBLISH_DIRECTORY" \
     -p:Version="$APP_VERSION" \
+    -p:SelfContained=true \
+    -p:PublishSingleFile=true \
+    -p:IncludeNativeLibrariesForSelfExtract=true \
+    -p:PublishTrimmed=false \
     -p:DebugType=None \
     -p:DebugSymbols=false
 
 find "$LINUX_PUBLISH_DIRECTORY" -type f -name '*.pdb' -delete
-stage_legal_files "$LINUX_PUBLISH_DIRECTORY"
-test -x "$LINUX_PUBLISH_DIRECTORY/$APP_EXECUTABLE"
+assert_single_file_publish "$LINUX_PUBLISH_DIRECTORY" "$APP_EXECUTABLE"
+[[ -x $LINUX_PUBLISH_DIRECTORY/$APP_EXECUTABLE ]] || {
+    echo "Linux single-file executable is not executable: $LINUX_PUBLISH_DIRECTORY/$APP_EXECUTABLE" >&2
+    exit 1
+}

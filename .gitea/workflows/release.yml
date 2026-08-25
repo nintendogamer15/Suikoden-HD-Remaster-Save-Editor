@@ -27,7 +27,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-            git curl jq ca-certificates file zip desktop-file-utils libxml2-utils shellcheck \
+            git curl jq ca-certificates file desktop-file-utils libxml2-utils shellcheck \
             xvfb xauth \
             libfontconfig1 libfreetype6 libharfbuzz0b \
             libx11-6 libxext6 libxrender1 libxcb1 libxi6 \
@@ -42,7 +42,7 @@ jobs:
           git -c http.extraHeader="Authorization: token ${GITEA_TOKEN}" fetch --depth 1 origin "${COMMIT_SHA}"
           git checkout --detach FETCH_HEAD
 
-      - name: Test and build self-contained Windows and Linux archives
+      - name: Test and build single-file Windows and Linux executables
         working-directory: source
         run: |
           if [ "${IS_RELEASE_TAG}" = "true" ]; then
@@ -64,8 +64,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           source/scripts/gitea-release-assets.sh "${REF_NAME}" \
-            "${GITHUB_WORKSPACE}/release/SuikodenHdSaveEditor-${REF_NAME}-linux-x64.tar.gz" \
-            "${GITHUB_WORKSPACE}/release/SuikodenHdSaveEditor-${REF_NAME}-windows-x64.zip"
+            "${GITHUB_WORKSPACE}/release/SuikodenHdSaveEditor-${REF_NAME}-linux-x64" \
+            "${GITHUB_WORKSPACE}/release/SuikodenHdSaveEditor-${REF_NAME}-windows-x64.exe"
 
   arch-package:
     needs: build
@@ -94,12 +94,14 @@ jobs:
           git -c http.extraHeader="Authorization: token ${GITEA_TOKEN}" fetch --depth 1 origin "${COMMIT_SHA}"
           git checkout --detach FETCH_HEAD
 
-      - name: Obtain self-contained Linux package input
+      - name: Obtain single-file Linux package input
         run: |
           mkdir -p "${GITHUB_WORKSPACE}/package-input" "${GITHUB_WORKSPACE}/packages"
           if [ "${IS_RELEASE_TAG}" = "true" ]; then
             version="$(source/scripts/project-version.sh "${REF_NAME}")"
-            asset="SuikodenHdSaveEditor-${REF_NAME}-linux-x64.tar.gz"
+            asset="SuikodenHdSaveEditor-${REF_NAME}-linux-x64"
+            bundle="${GITHUB_WORKSPACE}/package-input/SuikodenHdSaveEditor-linux-x64"
+            mkdir -p "${bundle}"
             release_json="$(curl --silent --show-error --fail \
               --header "Authorization: token ${GITEA_TOKEN}" \
               "${GITEA_SERVER_URL}/api/v1/repos/${REPOSITORY_NAME}/releases/tags/${REF_NAME}")"
@@ -107,10 +109,8 @@ jobs:
               '.assets[] | select(.name == $name) | .browser_download_url')"
             curl --silent --show-error --fail --location \
               --header "Authorization: token ${GITEA_TOKEN}" \
-              --output "${GITHUB_WORKSPACE}/package-input/${asset}" "${url}"
-            tar -xzf "${GITHUB_WORKSPACE}/package-input/${asset}" \
-              -C "${GITHUB_WORKSPACE}/package-input"
-            bundle="${GITHUB_WORKSPACE}/package-input/SuikodenHdSaveEditor-linux-x64"
+              --output "${bundle}/SuikodenHdSaveEditor.App" "${url}"
+            chmod 0755 "${bundle}/SuikodenHdSaveEditor.App"
           else
             version="$(source/scripts/project-version.sh)"
             pacman -S --noconfirm --needed dotnet-sdk-10.0
@@ -146,7 +146,8 @@ jobs:
           pacman -Qlp "${package}"
           pacman -U --noconfirm "${package}"
           source/scripts/validate-installed-package.sh
-          diff -qr "${bundle}" /usr/lib/suikoden-hd-remaster-save-editor
+          cmp "${bundle}/SuikodenHdSaveEditor.App" \
+            /usr/lib/suikoden-hd-remaster-save-editor/SuikodenHdSaveEditor.App
           checksum="$(source/scripts/package-checksum.sh "${package}")"
           (cd "$(dirname "${checksum}")" && sha256sum --check "$(basename "${checksum}")")
 
@@ -196,12 +197,14 @@ jobs:
           git -c http.extraHeader="Authorization: token ${GITEA_TOKEN}" fetch --depth 1 origin "${COMMIT_SHA}"
           git checkout --detach FETCH_HEAD
 
-      - name: Obtain self-contained Linux package input
+      - name: Obtain single-file Linux package input
         run: |
           mkdir -p "${GITHUB_WORKSPACE}/package-input" "${GITHUB_WORKSPACE}/packages"
           if [ "${IS_RELEASE_TAG}" = "true" ]; then
             version="$(source/scripts/project-version.sh "${REF_NAME}")"
-            asset="SuikodenHdSaveEditor-${REF_NAME}-linux-x64.tar.gz"
+            asset="SuikodenHdSaveEditor-${REF_NAME}-linux-x64"
+            bundle="${GITHUB_WORKSPACE}/package-input/SuikodenHdSaveEditor-linux-x64"
+            mkdir -p "${bundle}"
             release_json="$(curl --silent --show-error --fail \
               --header "Authorization: token ${GITEA_TOKEN}" \
               "${GITEA_SERVER_URL}/api/v1/repos/${REPOSITORY_NAME}/releases/tags/${REF_NAME}")"
@@ -209,10 +212,8 @@ jobs:
               '.assets[] | select(.name == $name) | .browser_download_url')"
             curl --silent --show-error --fail --location \
               --header "Authorization: token ${GITEA_TOKEN}" \
-              --output "${GITHUB_WORKSPACE}/package-input/${asset}" "${url}"
-            tar -xzf "${GITHUB_WORKSPACE}/package-input/${asset}" \
-              -C "${GITHUB_WORKSPACE}/package-input"
-            bundle="${GITHUB_WORKSPACE}/package-input/SuikodenHdSaveEditor-linux-x64"
+              --output "${bundle}/SuikodenHdSaveEditor.App" "${url}"
+            chmod 0755 "${bundle}/SuikodenHdSaveEditor.App"
           else
             version="$(source/scripts/project-version.sh)"
             dnf install -y dotnet-sdk-10.0
@@ -249,7 +250,8 @@ jobs:
           # the package's licenses and notices are actually installation-tested.
           dnf install -y --setopt=install_weak_deps=False --setopt=tsflags= "${package}"
           source/scripts/validate-installed-package.sh
-          diff -qr "${bundle}" /usr/lib/suikoden-hd-remaster-save-editor
+          cmp "${bundle}/SuikodenHdSaveEditor.App" \
+            /usr/lib/suikoden-hd-remaster-save-editor/SuikodenHdSaveEditor.App
           checksum="$(source/scripts/package-checksum.sh "${package}")"
           (cd "$(dirname "${checksum}")" && sha256sum --check "$(basename "${checksum}")")
 

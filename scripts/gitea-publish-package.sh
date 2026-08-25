@@ -10,6 +10,13 @@ if [[ $# -ne 6 ]]; then
     exit 2
 fi
 
+for tool in curl jq mktemp realpath sha256sum; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "$tool is required for Gitea package publication." >&2
+        exit 1
+    fi
+done
+
 package_type="$1"
 owner="$2"
 registry="$3"

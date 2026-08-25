@@ -39,11 +39,30 @@ export TMPDIR="${TMPDIR:-$REPOSITORY_ROOT/.tools/test-tmp}"
 
 mkdir -p "$DOTNET_CLI_HOME" "$NUGET_PACKAGES" "$TMPDIR" "$ARTIFACTS_DIRECTORY"
 
-stage_legal_files() {
-    local destination="$1"
-    mkdir -p "$destination"
-    cp "$REPOSITORY_ROOT/LICENSE" "$destination/LICENSE"
-    cp "$REPOSITORY_ROOT/README.md" "$destination/README.md"
-    cp "$REPOSITORY_ROOT/THIRD_PARTY_NOTICES.md" "$destination/THIRD_PARTY_NOTICES.md"
-    cp -R "$REPOSITORY_ROOT/LICENSES" "$destination/LICENSES"
+require_commands() {
+    local command_name
+    for command_name in "$@"; do
+        if ! command -v "$command_name" >/dev/null 2>&1; then
+            echo "$command_name is required but was not found." >&2
+            exit 1
+        fi
+    done
+}
+
+assert_single_file_publish() {
+    local directory="$1"
+    local expected_name="$2"
+    local -a entries
+
+    [[ -d $directory ]] || { echo "Publish directory does not exist: $directory" >&2; exit 1; }
+    mapfile -t entries < <(find "$directory" -mindepth 1 -maxdepth 1 -printf '%f\n' | sort)
+    if [[ ${#entries[@]} -ne 1 || ${entries[0]:-} != "$expected_name" ]]; then
+        echo "Expected exactly one publish output named $expected_name in $directory." >&2
+        printf 'Found: %s\n' "${entries[*]:-<nothing>}" >&2
+        exit 1
+    fi
+    [[ -f $directory/$expected_name && ! -L $directory/$expected_name ]] || {
+        echo "Single-file publish output is not a regular file: $directory/$expected_name" >&2
+        exit 1
+    }
 }

@@ -19,6 +19,12 @@ output_directory="$(realpath -m "$3")"
 [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid package version: $version" >&2; exit 2; }
 [[ -d $bundle ]] || { echo "Linux publish directory does not exist: $bundle" >&2; exit 2; }
 "$repository_root/scripts/validate-package-input.sh" "$bundle"
+for tool in install makepkg mktemp realpath tar; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "$tool is required to build the Arch package." >&2
+        exit 1
+    fi
+done
 
 temporary_root="${TMPDIR:-$repository_root/.tools/package-tmp}"
 mkdir -p "$temporary_root" "$output_directory"
@@ -30,8 +36,7 @@ install -m 0644 "$repository_root/packaging/linux/suikoden-hd-remaster-save-edit
     "$work_directory/suikoden-hd-remaster-save-editor.desktop"
 install -m 0644 "$repository_root/packaging/linux/suikoden-hd-remaster-save-editor.svg" \
     "$work_directory/suikoden-hd-remaster-save-editor.svg"
-mkdir -p "$work_directory/app-bundle"
-cp -a "$bundle/." "$work_directory/app-bundle/"
+"$repository_root/scripts/stage-package-files.sh" "$bundle" "$work_directory/app-bundle"
 tar --directory "$work_directory" --create --gzip --file "$work_directory/app-bundle.tar.gz" app-bundle
 
 (

@@ -1,6 +1,6 @@
 # Distributed dependency inventory
 
-This inventory reflects the locked `net10.0` standalone application graph inspected on 2026-08-25. Runtime identifiers select the matching native assets; test-only packages are not shipped in the standalone bundles.
+This inventory reflects the locked `net10.0` standalone application graph inspected on 2026-08-25. Runtime identifiers select the matching native assets; test-only packages are not embedded in the standalone executables.
 
 | Component | Locked version | Role | License material |
 |---|---:|---|---|
@@ -12,7 +12,8 @@ This inventory reflects the locked `net10.0` standalone application graph inspec
 | SkiaSharp and native assets | 3.119.4 | Graphics | `SkiaSharp-MIT.txt` |
 | Tmds.DBus.Protocol | 0.94.1 | Linux desktop integration | `Tmds.DBus-MIT.txt` |
 | .NET self-contained runtime | .NET 10 runtime selected by SDK 10.0.400 | Managed runtime and base class libraries | `dotnet-MIT.txt`, `dotnet-THIRD-PARTY-NOTICES.txt` |
+| Microsoft.NET.ILLink.Tasks | 10.0.11 | Single-file publish infrastructure; trimming is disabled | `dotnet-MIT.txt`, `dotnet-THIRD-PARTY-NOTICES.txt` |
 
-The package lock files are authoritative for exact dependency resolution. Avalonia.BuildServices 11.3.2 is build-time infrastructure and is not copied into published application bundles.
+The package lock files are authoritative for exact dependency resolution. Avalonia.BuildServices 11.3.2 and Microsoft.NET.ILLink.Tasks are build-time infrastructure and are not embedded in published application executables.
 
 The source repository's Gitea release and immutable package-publication helpers are adapted from the MIT-licensed `ffix-save-editor`; its source notice is preserved in `ffix-save-editor-MIT.txt`. It is build/release automation, not an application runtime dependency.

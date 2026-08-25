@@ -15,13 +15,19 @@ output_directory="$(realpath -m "$3")"
 [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid package version: $version" >&2; exit 2; }
 [[ -d $bundle ]] || { echo "Linux publish directory does not exist: $bundle" >&2; exit 2; }
 "$repository_root/scripts/validate-package-input.sh" "$bundle"
+for tool in find install mktemp realpath rpmbuild tar; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "$tool is required to build the RPM package." >&2
+        exit 1
+    fi
+done
 
 temporary_root="${TMPDIR:-$repository_root/.tools/package-tmp}"
 mkdir -p "$temporary_root" "$output_directory"
 top_directory="$(mktemp -d "$temporary_root/suikoden-rpm-package.XXXXXXXX")"
 trap 'rm -rf -- "$top_directory"' EXIT
 mkdir -p "$top_directory"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS,app-bundle}
-cp -a "$bundle/." "$top_directory/app-bundle/"
+"$repository_root/scripts/stage-package-files.sh" "$bundle" "$top_directory/app-bundle"
 tar --directory "$top_directory" --create --gzip --file "$top_directory/SOURCES/app-bundle.tar.gz" app-bundle
 install -m 0644 "$repository_root/packaging/linux/suikoden-hd-remaster-save-editor.desktop" \
     "$top_directory/SOURCES/suikoden-hd-remaster-save-editor.desktop"

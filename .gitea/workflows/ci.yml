@@ -25,7 +25,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-            git curl jq ca-certificates file zip desktop-file-utils libxml2-utils shellcheck \
+            git curl ca-certificates file desktop-file-utils libxml2-utils shellcheck \
             xvfb xauth \
             libfontconfig1 libfreetype6 libharfbuzz0b \
             libx11-6 libxext6 libxrender1 libxcb1 libxi6 \

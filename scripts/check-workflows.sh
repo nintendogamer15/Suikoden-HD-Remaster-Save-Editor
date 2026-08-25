@@ -16,6 +16,7 @@ elif [[ ! -x "$actionlint_binary" ]]; then
         echo "actionlint is not available in this offline Gitea container; workflow files were validated before mirroring."
         exit 0
     fi
+    require_commands curl sha256sum tar
     archive="$actionlint_directory/actionlint.tar.gz"
     mkdir -p "$actionlint_directory"
     curl --fail --location --silent --show-error \

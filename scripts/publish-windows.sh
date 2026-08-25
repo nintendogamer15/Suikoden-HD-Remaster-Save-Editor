@@ -3,6 +3,7 @@
 
 set -euo pipefail
 source "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/common.sh"
+require_commands find sort
 
 mkdir -p "$ARTIFACTS_DIRECTORY/publish"
 if [[ -d "$WINDOWS_PUBLISH_DIRECTORY" ]]; then
@@ -16,9 +17,12 @@ dotnet publish "$APP_PROJECT" \
     --no-restore \
     --output "$WINDOWS_PUBLISH_DIRECTORY" \
     -p:Version="$APP_VERSION" \
+    -p:SelfContained=true \
+    -p:PublishSingleFile=true \
+    -p:IncludeNativeLibrariesForSelfExtract=true \
+    -p:PublishTrimmed=false \
     -p:DebugType=None \
     -p:DebugSymbols=false
 
 find "$WINDOWS_PUBLISH_DIRECTORY" -type f -name '*.pdb' -delete
-stage_legal_files "$WINDOWS_PUBLISH_DIRECTORY"
-test -f "$WINDOWS_PUBLISH_DIRECTORY/$APP_EXECUTABLE.exe"
+assert_single_file_publish "$WINDOWS_PUBLISH_DIRECTORY" "$APP_EXECUTABLE.exe"

@@ -5,6 +5,13 @@ set -euo pipefail
 
 script_directory="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
+for tool in cmp desktop-file-validate diff file find grep readlink xmllint; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "$tool is required for installed-package validation." >&2
+        exit 1
+    fi
+done
+
 package_name="suikoden-hd-remaster-save-editor"
 application_directory="/usr/lib/$package_name"
 command_path="/usr/bin/$package_name"

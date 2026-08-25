@@ -2,32 +2,32 @@
 
 ## Identity and outputs
 
-The source application remains `SuikodenHdSaveEditor.App`. Linux packages install its complete self-contained bundle under `/usr/lib/suikoden-hd-remaster-save-editor` and provide `/usr/bin/suikoden-hd-remaster-save-editor` as a symlink to the real executable. This preserves the established .NET assembly/executable identity while providing the requested distro command.
+The source application remains `SuikodenHdSaveEditor.App`. Generic Windows and Linux releases are genuine self-contained single-file executables: there are no loose assemblies, runtime JSON files, native libraries, or framework files. Linux packages install that executable plus legal/documentation files under `/usr/lib/suikoden-hd-remaster-save-editor` and provide `/usr/bin/suikoden-hd-remaster-save-editor` as a symlink to it.
 
 For a valid `vX.Y.Z` tag, the Gitea workflow produces:
 
-- `SuikodenHdSaveEditor-vX.Y.Z-linux-x64.tar.gz`
-- `SuikodenHdSaveEditor-vX.Y.Z-windows-x64.zip`
+- `SuikodenHdSaveEditor-vX.Y.Z-linux-x64`
+- `SuikodenHdSaveEditor-vX.Y.Z-windows-x64.exe`
 - `suikoden-hd-remaster-save-editor-X.Y.Z-1-x86_64.pkg.tar.zst`
 - `suikoden-hd-remaster-save-editor-X.Y.Z-1.x86_64.rpm`
 
 Standalone checksum text files are not public release assets. Package-manager integrity metadata and the private SHA-256 comparisons used to enforce immutable package versions remain in place.
 
-The Arch and RPM packages also install the desktop entry, scalable icon, root license, complete third-party license directory, notices, and README in normal system locations. Neither package depends on a system .NET runtime.
+The raw Linux download may need `chmod +x SuikodenHdSaveEditor-vX.Y.Z-linux-x64`. Complete license and notice texts are embedded in the application's Credits/Licenses view. The Arch and RPM packages also install the desktop entry, scalable icon, root license, complete third-party license directory, notices, and README in normal system locations. Neither package depends on a system .NET runtime.
 
 ## Native dependency evidence
 
-The `linux-x64` publish is inspected with `file`, `readelf`, and `ldd`, including its bundled .NET, SkiaSharp, and HarfBuzz native libraries. `libSkiaSharp.so` directly requires Fontconfig even though .NET itself is self-contained, so Debian-based CI installs `libfontconfig1` before the unpackaged GUI smoke test and fails early if `ldd` reports an unresolved library. Its other ELF/runtime requirements cover glibc, libgcc/libstdc++, the image/font stack, ICU, OpenSSL, Kerberos, X11, ICE/SM, timezone, and zlib facilities. The dependency names were compared with the working FFIX and FFIV Avalonia packages and are verified by installing and launching each package in a clean distro job. Although `Avalonia.Fonts.Inter` is bundled, clean-system startup still needs a discoverable default system font; the packages therefore install DejaVu Sans. They do not add a system .NET dependency.
+The `linux-x64` executable is inspected with `file` and `ldd`. Embedded native libraries cannot be validated by looking for loose files, so CI launches the real application under Xvfb; this forces .NET to extract and load SkiaSharp, HarfBuzz, and their dependencies. Debian-based CI retains `libfontconfig1`, the X11 libraries, Xvfb, `xauth`, and DejaVu fonts, and the smoke test rejects missing-library crashes. The dependency names were compared with the working FFIX and FFIV Avalonia packages and are also verified by installing and launching each distro package in a clean job. The packages retain their explicit `fontconfig` runtime dependency and do not add a system .NET dependency.
 
 The self-contained .NET publish also carries the optional diagnostics-only `libcoreclrtraceptprovider.so`, which still declares the retired `liblttng-ust.so.0` ABI. Current Fedora provides `liblttng-ust.so.1`, and the editor does not load the diagnostics provider during normal execution. The RPM therefore excludes only that obsolete automatic requirement; all application startup dependencies remain enforced and are tested by DNF installation plus the Xvfb smoke launch.
 
 ## Checked-in package tooling
 
-- `build-arch-package.sh` stages the existing Linux publish into a real `makepkg` build.
-- `build-rpm-package.sh` builds the same publish through `rpmbuild` and the checked-in spec.
-- `validate-package-input.sh` rejects private saves, references, tests, build products, package files, debug symbols, and package infrastructure strings.
-- `check-linux-native-dependencies.sh` checks both the managed apphost and dynamically loaded `libSkiaSharp.so`, reporting unresolved libraries before startup.
-- `validate-installed-package.sh` checks the installed command target, application bundle, licenses, desktop file, icon, architecture, apphost/Skia ELF resolution, and forbidden content.
+- `build-arch-package.sh` stages the Linux executable and repository legal files into a real `makepkg` build.
+- `build-rpm-package.sh` builds the same staged payload through `rpmbuild` and the checked-in spec.
+- `validate-package-input.sh` requires exactly one executable ELF file and rejects private saves, references, tests, build products, package files, debug symbols, and package infrastructure strings.
+- `check-linux-native-dependencies.sh` reports unresolved dependencies declared directly by the single-file apphost; the Xvfb launch validates embedded native functionality.
+- `validate-installed-package.sh` checks the installed command target, executable, licenses, desktop file, icon, architecture, ELF resolution, and forbidden content.
 - `gitea-release-assets.sh` creates a native Gitea release and treats existing release assets as immutable.
 - `gitea-publish-package.sh` authenticates package operations as `Robert`, safely skips byte-identical existing packages, rejects different bytes for an existing version, and treats optional repository linking failures as warnings.
 
@@ -37,7 +37,7 @@ The self-contained .NET publish also carries the optional diagnostics-only `libc
 
 `.gitea/workflows/ci.yml` runs normal CI on `main`, pull requests when available, and manual dispatches. `.gitea/workflows/release.yml` runs three isolated jobs on the `ubuntu-latest` runner label:
 
-1. the .NET 10 container installs the native Avalonia/Skia runtime libraries, tests, cross-publishes Windows/Linux, checks the apphost and Skia dependencies, smoke-tests Linux, audits payloads, and creates release assets;
+1. the .NET 10 container installs the native Avalonia/Skia runtime libraries, tests, cross-publishes single-file Windows/Linux executables, checks the Linux apphost, smoke-tests embedded native functionality, audits payloads, and creates release assets;
 2. a clean Arch `base-devel` container builds, installs, validates, and smoke-tests the Arch package;
 3. a clean current Fedora container builds, installs, validates, and smoke-tests the RPM.
 
@@ -58,11 +58,12 @@ The public pull mirror at `Robert/Suikoden-HD-Remaster-Save-Editor` was verified
 Published tags must never be moved or reused. For another release, choose a new unused version and:
 
 1. Pull `main` with `git pull --ff-only` and confirm `git status --short` is empty.
-2. Update `Directory.Build.props` and `CHANGELOG.md` to the chosen `X.Y.Z`, commit, push `main`, and wait for GitHub CI plus mirrored Gitea CI to pass. The RPM changelog obtains the version from the build and does not need a duplicated manual edit.
+2. Update `Directory.Build.props` and `CHANGELOG.md` to the chosen `X.Y.Z`, run the complete local CI/package validation, commit, and push `main`. The RPM changelog obtains the version from the build and does not need a duplicated manual edit.
 3. Confirm `git ls-remote --tags origin refs/tags/vX.Y.Z` returns no existing tag.
 4. Create one annotated tag with `git tag -a vX.Y.Z -m "Suikoden I & II HD Remaster Save Editor vX.Y.Z"`.
 5. Push only that tag with `git push origin vX.Y.Z`; do not force-push.
-6. Ask Gitea to synchronize the pull mirror if an immediate run is desired, then verify the tag-triggered workflow before announcing the release.
+6. Create the non-draft GitHub release with the two locally verified executable assets. The GitHub tag workflow can create or update the same release without making a duplicate.
+7. Ask Gitea to synchronize the pull mirror if an immediate run is desired, then inspect the tag-triggered workflow and package publication.
 
 The workflow derives package version `X.Y.Z` from the tag and fixes Arch/RPM release to `1`. If any same-version package or release asset already exists with different bytes, publication stops instead of replacing it.
 

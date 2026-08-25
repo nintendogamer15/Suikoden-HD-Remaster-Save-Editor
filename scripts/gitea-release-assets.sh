@@ -10,6 +10,13 @@ if [[ $# -lt 2 ]]; then
     exit 2
 fi
 
+for tool in curl jq mktemp sha256sum; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "$tool is required for Gitea release publication." >&2
+        exit 1
+    fi
+done
+
 tag="$1"
 shift
 [[ $tag =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid release tag: $tag" >&2; exit 2; }

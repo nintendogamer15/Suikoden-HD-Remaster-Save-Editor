@@ -13,7 +13,7 @@ namespace SuikodenHdSaveEditor.App.ViewModels;
 public sealed class MainWindowViewModel : ObservableObject
 {
     public const string ApplicationTitle = "Suikoden I & II HD Remaster Save Editor";
-    public const string CreditsAndLicenses = """
+    private const string CreditsSummary = """
         Suikoden I & II HD Remaster Save Editor
 
         CREDITS — PROJECTS THAT MADE THIS EDITOR POSSIBLE
@@ -63,13 +63,16 @@ public sealed class MainWindowViewModel : ObservableObject
         Original project code: Zero-Clause BSD (0BSD).
         Substantially ported upstream portions: MIT, with retained copyright notices.
         Avalonia and .NET: MIT. Inter font: SIL Open Font License 1.1.
-        Full texts ship in LICENSES/ and THIRD_PARTY_NOTICES.md.
+        Full license and notice texts are embedded below and remain available offline.
 
         FAN-PROJECT DISCLAIMER
 
         This independent fan project is not affiliated with, authorized by, sponsored by, or endorsed by Konami or any upstream author. Suikoden and related names are trademarks of their respective owners. No Konami logos, extracted artwork, music, fonts, or other proprietary game assets are included.
 
         """;
+
+    public static readonly string CreditsAndLicenses =
+        $"{CreditsSummary}{Environment.NewLine}{EmbeddedLegalNotices.Load()}";
 
     private static readonly string[] SectionNames =
     [
