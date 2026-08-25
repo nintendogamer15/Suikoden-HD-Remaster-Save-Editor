@@ -27,7 +27,7 @@ The self-contained .NET publish also carries the optional diagnostics-only `libc
 - `build-rpm-package.sh` builds the same staged payload through `rpmbuild` and the checked-in spec.
 - `validate-package-input.sh` requires exactly one executable ELF file and rejects private saves, references, tests, build products, package files, debug symbols, and package infrastructure strings.
 - `check-linux-native-dependencies.sh` reports unresolved dependencies declared directly by the single-file apphost; the Xvfb launch validates embedded native functionality.
-- `validate-installed-package.sh` checks the installed command target, executable, licenses, desktop file, icon, architecture, ELF resolution, and forbidden content.
+- `validate-installed-package.sh` checks the installed command target, executable, licenses, notices, desktop file, icon, architecture, ELF resolution, and forbidden content. Each assertion is named, so a failing job reports every broken expectation instead of exiting on the first one. The Arch job clears the container image's `NoExtract` rules before installing, because they would otherwise silently discard everything the package installs under `/usr/share/doc`.
 - `gitea-release-assets.sh` creates a native Gitea release and treats existing release assets as immutable.
 - `gitea-publish-package.sh` authenticates package operations as `Robert`, safely skips byte-identical existing packages, rejects different bytes for an existing version, and treats optional repository linking failures as warnings.
 
