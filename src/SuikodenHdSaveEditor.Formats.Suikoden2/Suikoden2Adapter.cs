@@ -78,7 +78,7 @@ public sealed class Suikoden2Adapter
     public void SetParty(IReadOnlyList<int> characterIds)
     {
         ArgumentNullException.ThrowIfNull(characterIds);
-        Guard.Valid(characterIds.Count == TotalPartySize, $"Suikoden II requires six battle slots and two convoy slots ({TotalPartySize} total)." );
+        Guard.Valid(characterIds.Count == TotalPartySize, $"Suikoden II requires six battle slots and two convoy slots ({TotalPartySize} total).");
         for (int index = 0; index < characterIds.Count; index++)
         {
             int maximum = index < BattlePartySize ? 83 : 124;
@@ -335,24 +335,34 @@ public sealed class Suikoden2Adapter
     public IReadOnlyList<string> CompatibilityNotes(bool betterLeonaEnabled, bool krakenPatchEnabled)
     {
         List<string> notes = [];
+        JsonArray flags = document.Root["chara_flag"]!.AsArray();
         string importedHero = GameData["macd_name"]?.GetValue<string>() ?? string.Empty;
         if (importedHero.Length > 0)
         {
-            notes.Add("An imported Suikoden I hero name is present; McDohl (82) and Gremio (125) can use import-specific behavior.");
+            string gremioStatus = flags.Count > 125 ? flags[125]!.GetValue<int>().ToString(System.Globalization.CultureInfo.InvariantCulture) : "unavailable";
+            notes.Add($"An imported Suikoden I hero name is present. McDohl (82) status is {flags[82]!.GetValue<int>()}; Gremio (125) status is {gremioStatus}. The import can make them available without rewriting either status.");
         }
 
         if (betterLeonaEnabled)
         {
-            notes.Add("Better Leona mode treats Valeria (12) and Kasumi (73) as an optional-mod pair; the editor does not fabricate the mod's runtime state.");
+            bool valeria = IsNormallyRecruited(flags[12]!.GetValue<int>());
+            bool kasumi = IsNormallyRecruited(flags[73]!.GetValue<int>());
+            string effective = valeria == kasumi ? "their stored states agree" : valeria ? "Kasumi is treated as recruited through Valeria" : "Valeria is treated as recruited through Kasumi";
+            notes.Add($"Better Leona mode: {effective}. Stored Valeria (12) and Kasumi (73) flags remain unchanged.");
         }
 
         if (krakenPatchEnabled)
         {
-            notes.Add("Kraken Patch mode reports Abizboah (49) and Rulodia (74) alongside Chuchara (79); the editor does not fabricate patch state.");
+            bool chuchara = IsNormallyRecruited(flags[79]!.GetValue<int>());
+            notes.Add(chuchara
+                ? "Kraken recruitment mode: recruited Chuchara (79) makes Abizboah (49) and Rulodia (74) effective recruits without rewriting their stored flags."
+                : "Kraken recruitment mode: Chuchara (79) is not normally recruited, so no effective Abizboah/Rulodia recruitment is inferred.");
         }
 
         return notes;
     }
+
+    private static bool IsNormallyRecruited(int status) => status is 70 or 71;
 
     public IReadOnlyList<ValidationIssue> Validate()
     {

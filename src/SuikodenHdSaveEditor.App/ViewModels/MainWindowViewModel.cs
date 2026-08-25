@@ -62,6 +62,8 @@ public sealed class MainWindowViewModel : ObservableObject
         "Credits / Licenses",
     ];
 
+    private static readonly string[] CharacterFilterNames = ["All", "Recruited", "Unrecruited", "Current party"];
+
     private readonly IUserInteraction interaction;
     private readonly RecentFileStore recentFileStore;
     private readonly SaveFileService saveFileService = new();
@@ -70,6 +72,7 @@ public sealed class MainWindowViewModel : ObservableObject
     private readonly List<EditorFieldViewModel> allFields = [];
     private SaveDocument? document;
     private string selectedSection = SectionNames[0];
+    private string selectedCharacterFilter = CharacterFilterNames[0];
     private string searchText = string.Empty;
     private string statusMessage = "Open an encrypted Data file or a save folder to begin.";
     private string errorMessage = string.Empty;
@@ -90,6 +93,7 @@ public sealed class MainWindowViewModel : ObservableObject
         this.interaction = interaction ?? throw new ArgumentNullException(nameof(interaction));
         this.recentFileStore = recentFileStore ?? new RecentFileStore();
         Sections = new ObservableCollection<string>(SectionNames);
+        CharacterFilters = new ObservableCollection<string>(CharacterFilterNames);
         Fields = [];
         CharacterChoices = [];
         AvailableSlots = [];
@@ -111,6 +115,8 @@ public sealed class MainWindowViewModel : ObservableObject
     public ObservableCollection<string> Sections { get; }
 
     public ObservableCollection<EditorFieldViewModel> Fields { get; }
+
+    public ObservableCollection<string> CharacterFilters { get; }
 
     public ObservableCollection<ChoiceViewModel> CharacterChoices { get; }
 
@@ -164,6 +170,19 @@ public sealed class MainWindowViewModel : ObservableObject
         set
         {
             if (SetProperty(ref searchText, value))
+            {
+                RefreshCharacterFilter();
+                RebuildFields();
+            }
+        }
+    }
+
+    public string SelectedCharacterFilter
+    {
+        get => selectedCharacterFilter;
+        set
+        {
+            if (SetProperty(ref selectedCharacterFilter, value))
             {
                 RefreshCharacterFilter();
                 RebuildFields();
@@ -613,11 +632,15 @@ public sealed class MainWindowViewModel : ObservableObject
 
         int? current = preferredId ?? SelectedCharacter?.Id;
         IEnumerable<ChoiceViewModel> choices = allCharacters;
-        if (SelectedSection == "Characters" && SearchText.Trim().Length > 0)
+        if (SelectedSection == "Characters")
         {
-            string query = SearchText.Trim();
-            choices = choices.Where(choice => choice.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
-                || choice.Id.ToString(CultureInfo.InvariantCulture).Contains(query, StringComparison.OrdinalIgnoreCase));
+            choices = choices.Where(MatchesCharacterFilter);
+            if (SearchText.Trim().Length > 0)
+            {
+                string query = SearchText.Trim();
+                choices = choices.Where(choice => choice.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+                    || choice.Id.ToString(CultureInfo.InvariantCulture).Contains(query, StringComparison.OrdinalIgnoreCase));
+            }
         }
 
         ChoiceViewModel[] filtered = choices.ToArray();
@@ -628,6 +651,37 @@ public sealed class MainWindowViewModel : ObservableObject
         }
 
         SelectedCharacter = CharacterChoices.FirstOrDefault(choice => choice.Id == current) ?? CharacterChoices.FirstOrDefault();
+    }
+
+    private bool MatchesCharacterFilter(ChoiceViewModel choice)
+    {
+        if (document is null || SelectedCharacterFilter == "All")
+        {
+            return true;
+        }
+
+        bool inParty;
+        bool recruited;
+        if (document.Game == GameKind.Suikoden1)
+        {
+            Suikoden1Adapter adapter = new(document);
+            inParty = adapter.PartyCharacterIds.Contains(choice.Id);
+            recruited = adapter.RecruitedCharacterIds.Contains(choice.Id);
+        }
+        else
+        {
+            Suikoden2CharacterView character = new Suikoden2Adapter(document).Characters[choice.Id];
+            inParty = character.IsInParty;
+            recruited = character.RecruitmentStatus is 70 or 71;
+        }
+
+        return SelectedCharacterFilter switch
+        {
+            "Recruited" => recruited,
+            "Unrecruited" => !recruited,
+            "Current party" => inParty,
+            _ => true,
+        };
     }
 
     private void RebuildFields()

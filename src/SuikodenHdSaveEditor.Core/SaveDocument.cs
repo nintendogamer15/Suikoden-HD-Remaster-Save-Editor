@@ -39,7 +39,7 @@ public sealed class SaveDocument
 
     public string? OriginalPath { get; private set; }
 
-    public int? Slot { get; }
+    public int? Slot { get; private set; }
 
     public bool HasUnsavedChanges { get; private set; }
 
@@ -97,9 +97,9 @@ public sealed class SaveDocument
     public void MarkSaved(string path)
     {
         OriginalPath = Path.GetFullPath(path);
+        Slot = SlotDetector.FromPath(OriginalPath);
         HasUnsavedChanges = false;
     }
 
     public static bool SemanticallyEquals(JsonNode? left, JsonNode? right) => JsonNode.DeepEquals(left, right);
 }
-

@@ -9,10 +9,10 @@ Status values: `pending`, `in progress`, `verified`, or `blocked`.
 | 3. Lossless JSON infrastructure and automatic game detection | verified | Schema detection and semantic unknown-field/no-edit round trips pass for both games |
 | 4. Suikoden II adapter and verified editor features | verified | 11 tests; all supplied S2 copies validate; MIT data/restrictions ported with attribution |
 | 5. Suikoden I adapter and verified field research | verified | 8 tests; all supplied S1 copies validate; inactive-item and empty-party semantics verified |
-| 6. Avalonia MVVM UI and editing workflows | verified | Clean Release build; 6 view-model tests; Xvfb source smoke launch |
+| 6. Avalonia MVVM UI and editing workflows | verified | Clean Release build; 7 view-model tests; Xvfb source smoke launch |
 | 7. Safe save, backup, undo/redo, and validation | verified | Save-As, refusal, backup, atomic failure, revalidation, history, and UI command tests |
-| 8. CI, standalone builds, smoke tests, archives, documentation | pending | Local Linux/Windows publish; Xvfb; workflow lint; archive audit |
-| 9. Final corruption-risk, licensing, claims, and portability review | pending | Clean tests/builds; original hashes unchanged; Git status reviewed |
+| 8. CI, standalone builds, smoke tests, archives, documentation | verified | Shared `ci.sh`; both RIDs published; Xvfb passed; actionlint 1.7.12 passed; both archives audited |
+| 9. Final corruption-risk, licensing, claims, and portability review | verified | 55 tests; private/oracle suite passed; original hashes unchanged; clones clean; no remotes or deferred packaging |
 
 ## Known verification boundary
 

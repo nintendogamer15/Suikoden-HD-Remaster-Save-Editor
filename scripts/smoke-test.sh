@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: 0BSD
+
+set -euo pipefail
+source "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/common.sh"
+
+if ! command -v xvfb-run >/dev/null 2>&1; then
+    echo "xvfb-run is required for the Linux GUI smoke test." >&2
+    exit 1
+fi
+
+test -x "$LINUX_PUBLISH_DIRECTORY/SuikodenHdSaveEditor.App"
+export XDG_CONFIG_HOME="$REPOSITORY_ROOT/.tools/smoke-config"
+export LIBGL_ALWAYS_SOFTWARE=1
+mkdir -p "$XDG_CONFIG_HOME"
+cd "$REPOSITORY_ROOT"
+# Debian's xvfb-run mishandles an authentication temp path containing spaces.
+# A repository-relative path keeps the smoke test local and space-safe.
+export TMPDIR=".tools/test-tmp"
+
+timeout 30s xvfb-run -a -s "-screen 0 1280x800x24 -nolisten tcp" \
+    bash -c '
+        display_number=${DISPLAY#:}
+        for attempt in 1 2 3 4 5; do
+            [[ -S "/tmp/.X11-unix/X${display_number}" ]] && break
+            sleep 1
+        done
+        [[ -S "/tmp/.X11-unix/X${display_number}" ]]
+        sleep 1
+        exec "$1" --smoke-test
+    ' smoke-runner "$LINUX_PUBLISH_DIRECTORY/SuikodenHdSaveEditor.App"

@@ -89,6 +89,20 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task CharacterFilterShowsOnlyCurrentParty()
+    {
+        using TestDirectory directory = new();
+        MainWindowViewModel viewModel = CreateViewModel(directory);
+        await viewModel.OpenPathAsync(directory.CreateSave());
+        viewModel.SelectedSection = "Characters";
+
+        viewModel.SelectedCharacterFilter = "Current party";
+
+        ChoiceViewModel character = Assert.Single(viewModel.CharacterChoices);
+        Assert.Equal(8, character.Id);
+    }
+
+    [Fact]
     public async Task PrivateOptInCopiesAndOpensEverySaveInViewModel()
     {
         string? saveRoot = Environment.GetEnvironmentVariable("SUIKODEN_PRIVATE_SAVE_ROOT");

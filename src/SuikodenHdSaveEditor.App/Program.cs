@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: 0BSD
+// SPDX-License-Identifier: 0BSD
 using Avalonia;
 
 namespace SuikodenHdSaveEditor.App;

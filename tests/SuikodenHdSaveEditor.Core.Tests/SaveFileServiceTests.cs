@@ -18,6 +18,7 @@ public sealed class SaveFileServiceTests
         Assert.Equal(destination, result.DestinationPath);
         Assert.Null(result.BackupPath);
         Assert.True(File.Exists(destination));
+        Assert.Equal(3, document.Slot);
         Assert.True(SaveDocument.SemanticallyEquals(document.Root, SaveDocument.OpenEncrypted(destination).Root));
     }
 

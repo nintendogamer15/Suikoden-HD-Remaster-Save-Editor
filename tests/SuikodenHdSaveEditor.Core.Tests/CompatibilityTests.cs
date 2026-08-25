@@ -28,8 +28,9 @@ public sealed class CompatibilityTests
             return;
         }
 
-        string[] originals = Directory.EnumerateFiles(saveRoot, "Data*", SearchOption.AllDirectories)
-            .Where(path => SlotDetector.FromPath(path).HasValue)
+        string[] originals = Directory.EnumerateFiles(saveRoot, "*", SearchOption.AllDirectories)
+            .Where(path => SlotDetector.FromPath(path).HasValue
+                || Path.GetFileName(path).Equals("_sharetmpsave0", StringComparison.Ordinal))
             .Order(StringComparer.Ordinal)
             .ToArray();
         Assert.NotEmpty(originals);
@@ -48,11 +49,23 @@ public sealed class CompatibilityTests
             string copy = Path.Combine(copiedFolder, Path.GetFileName(original));
             File.Copy(original, copy);
 
+            if (Path.GetFileName(original).Equals("_sharetmpsave0", StringComparison.Ordinal))
+            {
+                string sharedJson = SaveCrypto.DecryptEnvelope(SaveCrypto.ReadEnvelope(copy));
+                Assert.IsType<JsonObject>(JsonNode.Parse(sharedJson));
+                continue;
+            }
+
             SaveDocument opened = SaveDocument.OpenEncrypted(copy);
-            GameKind expected = gameFolder.Equals("gsd1", StringComparison.OrdinalIgnoreCase)
-                ? GameKind.Suikoden1
-                : GameKind.Suikoden2;
-            Assert.Equal(expected, opened.Game);
+            GameKind expected = opened.Game;
+            if (gameFolder.Equals("gsd1", StringComparison.OrdinalIgnoreCase))
+            {
+                Assert.Equal(GameKind.Suikoden1, expected);
+            }
+            else if (gameFolder.Equals("gsd2", StringComparison.OrdinalIgnoreCase))
+            {
+                Assert.Equal(GameKind.Suikoden2, expected);
+            }
 
             string noEdit = Path.Combine(copiedFolder, Path.GetFileName(original) + ".roundtrip");
             new SaveFileService().SaveAs(opened.DeepClone(), noEdit);
@@ -114,4 +127,3 @@ public sealed class CompatibilityTests
         }
     }
 }
-

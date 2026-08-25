@@ -26,11 +26,10 @@ Exact inspected commits and usage details are recorded in `docs/UPSTREAM_SOURCES
 
 ## Distributed runtime dependencies
 
-The standalone application distributes Avalonia and a self-contained .NET runtime, plus their transitive components. AvaloniaUI OÜ and contributors license Avalonia under MIT; see `LICENSES/Avalonia-MIT.txt`. The .NET Foundation and contributors license .NET under MIT; see `LICENSES/dotnet-MIT.txt` and `LICENSES/dotnet-THIRD-PARTY-NOTICES.txt`. A generated dependency inventory and applicable license texts are included in every release archive.
+The standalone application distributes Avalonia and a self-contained .NET runtime, plus their transitive components. AvaloniaUI OÜ and contributors license Avalonia under MIT; see `LICENSES/Avalonia-MIT.txt`. Avalonia's desktop graph also distributes ANGLE, Inter, HarfBuzzSharp, MicroCom.Runtime, SkiaSharp, and Tmds.DBus.Protocol under the terms identified in `LICENSES/DEPENDENCIES.md`, with each applicable license text in `LICENSES/`. The .NET Foundation and contributors license .NET under MIT; see `LICENSES/dotnet-MIT.txt` and `LICENSES/dotnet-THIRD-PARTY-NOTICES.txt`. The dependency inventory and applicable license texts are included in every release archive.
 
 Test-only packages are not included in standalone application archives. Their package metadata and licenses remain visible through the locked NuGet dependency graph and source project files.
 
 ## Original project code
 
 Unless a source file says otherwise, original code in this repository is licensed under the Zero-Clause BSD license (`0BSD`); see `LICENSE`. Third-party terms above remain in force for copied or substantially ported portions.
-

@@ -77,24 +77,30 @@
             </Border>
 
             <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*" Margin="20" RowSpacing="12">
-                <Grid ColumnDefinitions="*,300,300" ColumnSpacing="10">
+                <Grid ColumnDefinitions="*,300" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="8">
                     <StackPanel Spacing="3">
                         <TextBlock Text="{Binding SelectedSection}" FontSize="25" FontWeight="SemiBold" />
                         <TextBlock Text="All edits stay local. Apply each field after changing it." Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding IsSuikoden2}">
-                            <Button Content="Give all safe party items" Command="{Binding GiveAllSafeItemsCommand}" />
-                            <CheckBox Content="Better Leona installed" IsChecked="{Binding BetterLeonaEnabled}" />
-                            <CheckBox Content="Kraken recruitment installed" IsChecked="{Binding KrakenRecruitmentEnabled}" />
-                        </StackPanel>
                     </StackPanel>
                     <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search characters, items, IDs, or paths" />
-                    <ComboBox Grid.Column="2" ItemsSource="{Binding CharacterChoices}" SelectedItem="{Binding SelectedCharacter}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate x:DataType="vm:ChoiceViewModel">
-                                <TextBlock Text="{Binding DisplayName}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                    <ScrollViewer Grid.Row="1" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                            <TextBlock Text="Character filter" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <ComboBox Width="160" ItemsSource="{Binding CharacterFilters}" SelectedItem="{Binding SelectedCharacterFilter}" />
+                            <ComboBox Width="260" ItemsSource="{Binding CharacterChoices}" SelectedItem="{Binding SelectedCharacter}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ChoiceViewModel">
+                                        <TextBlock Text="{Binding DisplayName}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsSuikoden2}">
+                                <Button Content="Give all safe party items" Command="{Binding GiveAllSafeItemsCommand}" />
+                                <CheckBox Content="Better Leona installed" IsChecked="{Binding BetterLeonaEnabled}" />
+                                <CheckBox Content="Kraken recruitment installed" IsChecked="{Binding KrakenRecruitmentEnabled}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
                 </Grid>
 
                 <Border Grid.Row="1" IsVisible="{Binding HasError}" Background="#FDE7E9" BorderBrush="#D65C66" BorderThickness="1" CornerRadius="7" Padding="12">
