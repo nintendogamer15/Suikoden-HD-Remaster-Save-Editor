@@ -4,6 +4,12 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 1.0.5 - 2026-08-25
+
+### Fixed
+
+- Gitea CI/release `dotnet/sdk:10.0` container now installs full Avalonia/Skia runtime deps (`libfontconfig1 libfreetype6 libharfbuzz0b` + more X11 libs) and runs `ldconfig`. This makes the Linux smoke-test succeed instead of crashing on `libSkiaSharp` / `libfontconfig.so.1` DllNotFound during Avalonia init.
+
 ## 1.0.2 - 2026-08-25
 
 ### Added

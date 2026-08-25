@@ -28,7 +28,11 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends \
             git curl jq ca-certificates file zip desktop-file-utils libxml2-utils shellcheck \
-            xvfb xauth libfontconfig1 libx11-6 libice6 libsm6 fonts-dejavu-core
+            xvfb xauth \
+            libfontconfig1 libfreetype6 libharfbuzz0b \
+            libx11-6 libxext6 libxrender1 libxcb1 libxi6 \
+            libice6 libsm6 fonts-dejavu-core
+          ldconfig
 
       - name: Check out from this Gitea repository
         run: |
