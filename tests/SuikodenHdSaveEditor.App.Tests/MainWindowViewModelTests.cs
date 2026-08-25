@@ -215,6 +215,27 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task MaximizeAndEquipPartyCommandIsCharacterOnlyAndUndoable()
+    {
+        using TestDirectory directory = new();
+        MainWindowViewModel viewModel = CreateViewModel(directory);
+        await viewModel.OpenPathAsync(directory.CreateSave());
+        Assert.False(viewModel.MaximizeAndEquipPartyCommand.CanExecute(null));
+        viewModel.SelectedSection = "Characters";
+        Assert.True(viewModel.MaximizeAndEquipPartyCommand.CanExecute(null));
+
+        viewModel.MaximizeAndEquipPartyCommand.Execute(null);
+
+        JsonObject optimized = JsonNode.Parse(viewModel.RawJson)!["player_base"]![0]!.AsObject();
+        Assert.Equal(99, optimized["level"]!.GetValue<int>());
+        Assert.Equal(9999, optimized["hp"]!.GetValue<int>());
+        Assert.Equal(16, optimized["buki_data"]!["level"]!.GetValue<int>());
+        Assert.Contains("Maximized 1 active battle character", viewModel.StatusMessage, StringComparison.Ordinal);
+        viewModel.UndoCommand.Execute(null);
+        Assert.Equal(1, JsonNode.Parse(viewModel.RawJson)!["player_base"]![0]!["level"]!.GetValue<int>());
+    }
+
+    [Fact]
     public async Task HeadquartersLevelIsCappedChoiceAndInvalidApplyAllIsAtomic()
     {
         using TestDirectory directory = new();

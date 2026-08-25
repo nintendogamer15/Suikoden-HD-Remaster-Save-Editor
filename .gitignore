@@ -40,6 +40,8 @@ Thumbs.db
 *.coverage
 *.coveragexml
 coverage.*
+core
+core.*
 *.nupkg
 *.snupkg
 *.log

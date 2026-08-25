@@ -90,6 +90,10 @@
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
+                                <Button Classes="danger"
+                                        Content="Max stats + best party gear"
+                                        Command="{Binding MaximizeAndEquipPartyCommand}"
+                                        ToolTip.Tip="Maximize all active battle characters and equip researched end-game recommendations." />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" IsVisible="{Binding IsInventory}">
                                 <Button IsVisible="{Binding IsSuikoden2}" Content="Give all safe party items" Command="{Binding GiveAllSafeItemsCommand}" />
@@ -164,7 +168,15 @@
                     <TextBlock Text="{Binding OriginalPath, StringFormat='Current path: {0}'}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding BackupPath, StringFormat='Last backup: {0}'}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
-                <Button Grid.Column="1" Classes="primary" Content="Apply All" Command="{Binding ApplyAllCommand}" IsVisible="{Binding IsApplyAllVisible}" VerticalAlignment="Center" MinWidth="120" />
+                <Button Grid.Column="1"
+                        Classes="primary"
+                        Content="Apply All"
+                        Command="{Binding ApplyAllCommand}"
+                        IsVisible="{Binding IsApplyAllVisible}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        VerticalAlignment="Center"
+                        MinWidth="120" />
             </Grid>
         </Border>
     </Grid>

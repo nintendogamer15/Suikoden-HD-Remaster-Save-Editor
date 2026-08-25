@@ -72,6 +72,42 @@ public sealed class Suikoden1AdapterTests
     }
 
     [Fact]
+    public void MaximizeAndEquipPartyUsesCapsRecommendationsAndPreservesLockedGear()
+    {
+        SaveDocument document = Suikoden1TestFactory.Create();
+        JsonObject heroData = document.Root["player_base"]!.AsArray()[0]!.AsObject();
+        JsonObject lockedHelmet = heroData["item"]!.AsArray()[0]!.AsObject();
+        lockedHelmet["item_id"] = 37;
+        lockedHelmet["soubi"] = 129;
+        lockedHelmet["data"] = 0;
+        Suikoden1Adapter adapter = new(document);
+        Dictionary<int, int> weaponIds = adapter.Characters.ToDictionary(character => character.Id, character => character.WeaponId);
+
+        PartyOptimizationResult result = adapter.MaximizeAndEquipParty();
+
+        Assert.Equal(6, result.CharactersUpdated);
+        Assert.True(result.EquipmentSlotsUpdated > 0);
+        Assert.True(result.LockedOrUnavailableSlotsPreserved > 0);
+        Assert.All(adapter.Characters, character =>
+        {
+            Assert.Equal(Suikoden1Adapter.MaximumCharacterLevel, character.Level);
+            Assert.Equal(Suikoden1Adapter.MaximumCharacterHp, character.CurrentHp);
+            Assert.Equal(Suikoden1Adapter.MaximumCharacterHp, character.MaximumHp);
+            Assert.All(character.CurrentMagicPoints.Skip(1), value => Assert.Equal(9, value));
+            Assert.All(character.Stats, value => Assert.Equal(Suikoden1Adapter.MaximumCharacterStat, value));
+            Assert.Equal(Suikoden1Adapter.MaximumWeaponLevel, character.WeaponLevel);
+            Assert.Equal(weaponIds[character.Id], character.WeaponId);
+        });
+        Assert.Equal(37, lockedHelmet["item_id"]!.GetValue<int>());
+        Assert.Equal(129, lockedHelmet["soubi"]!.GetValue<int>());
+        Assert.True(document.Root["unknown_root"]!["keep"]!.GetValue<bool>());
+        Assert.DoesNotContain(adapter.Validate(), issue => issue.Severity == ValidationSeverity.Error);
+        Assert.Throws<SaveEditorException>(() => adapter.SetCharacterStat(8, 0, 256));
+        Assert.Throws<SaveEditorException>(() => adapter.SetCharacterScalar(8, "level", 100));
+        Assert.Throws<SaveEditorException>(() => adapter.SetWeapon(8, 1, 17));
+    }
+
+    [Fact]
     public void InventoryEditsPreserveOrderDuplicatesAndSynchronizeCounts()
     {
         Suikoden1Adapter adapter = new(Suikoden1TestFactory.Create());

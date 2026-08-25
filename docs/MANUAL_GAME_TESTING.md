@@ -19,6 +19,9 @@ Automated tests prove encryption and structural intent, not game acceptance. Nev
 - [ ] No unrelated inventory entry, duplicate, order, character, flag, coordinate, or metadata changed.
 - [ ] Recruitment and required-party transitions survive an area change and battle.
 - [ ] The editor can reopen the game-written result.
+- [ ] On a copied save, run **Max stats + best party gear** and confirm all six active battle characters show level 99, full 9,999 HP, maximum MP/base stats, and weapon level 16 where applicable.
+- [ ] Confirm the recommended helmet/body/shield/accessory loadout is accepted for each current party member, known fixed equipment remains fixed, monsters retain empty equipment, and combat completes without stat overflow or display corruption.
+- [ ] Use Undo immediately after the bulk action and confirm every affected stat and equipment slot returns to its prior value.
 
 ## Suikoden I
 

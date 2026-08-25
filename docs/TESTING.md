@@ -18,7 +18,7 @@ Install the .NET 10 SDK, `xvfb`, and `zip`, then run:
 
 `./scripts/ci.sh` runs that sequence. The tests use only synthetic fixtures in CI. No real or sanitized derivative save is committed.
 
-The suites cover envelope compatibility/error handling, schema detection, lossless unknown nodes, no-edit round trips, character/stat/MP/inventory/recruitment/party edits, count synchronization, restrictions, bulk-safe items, named dropdown contents, transactional Apply All (including party and HP dependencies), backups, atomic failure behavior, output revalidation, slot browsing, edit history, recent-path privacy, and view-model behavior.
+The suites cover envelope compatibility/error handling, schema detection, lossless unknown nodes, no-edit round trips, character/stat/MP/inventory/recruitment/party edits, count synchronization, restrictions, bulk-safe items, named dropdown contents, transactional Apply All (including party and HP dependencies), max-stat/equipment recommendations and lock preservation, undo of the bulk party action, backups, atomic failure behavior, output revalidation, slot browsing, edit history, recent-path privacy, and view-model behavior.
 
 ## Opt-in private-save integration
 
@@ -31,7 +31,7 @@ DOTNET_HOST_PATH=/absolute/path/to/dotnet \
 ./scripts/test.sh
 ```
 
-The test enumerates recognized `Data0`–`Data16` files plus `_sharetmpsave0`, hashes originals, copies each into the test temporary directory, and performs all writes there. It opens/detects each game-slot copy, checks semantic no-edit output, makes a single controlled Potch edit, reopens it, asks the upstream tool to decrypt representative output, and then verifies original hashes. The shared temporary file decrypts and parses as JSON but deliberately is not passed to a game adapter because it lacks either verified game signature. Adapter and app tests also open temporary copies for each game.
+The test enumerates recognized `Data0`–`Data16` files plus `_sharetmpsave0`, hashes originals, copies each into the test temporary directory, and performs all writes there. It opens/detects each game-slot copy, checks semantic no-edit output, makes a single controlled Potch edit, runs the max-stat/equipment action on a separate in-memory copy, re-encrypts and reopens the intended optimized document, asks the upstream tool to decrypt representative output, and then verifies original hashes. The shared temporary file decrypts and parses as JSON but deliberately is not passed to a game adapter because it lacks either verified game signature. Adapter and app tests also open temporary copies for each game.
 
 Keep `TMPDIR` inside an ignored project directory when the working-scope policy requires all temporary work to remain in this repository. The checked-in scripts do that by default.
 

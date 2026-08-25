@@ -8,6 +8,10 @@
 - **asilverthorn — [Suikoden reference documentation](https://github.com/asilverthorn/suikoden_ref)**: Suikoden I save research and factual reference documentation. No obvious license file was present when inspected, so this project credits the research, independently verifies mappings, and does not treat it as MIT.
 - Additional factual provenance credited by the projects above: **[Suikosource's Suikoden II item guide](https://suikosource.com/games/gs2/guides/itemdigits.php)**, **[makotech222's suiko2edit](https://github.com/makotech222/suiko2edit)**, and **[nesrak1's UABEA](https://github.com/nesrak1/UABEA)**.
 - **Cyril — [Suikoden Guide and Walkthrough](https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/80674/part-10-to-live-and-die-freely)**: factual corroboration that Suikoden I headquarters level 4 is the final development level; guide copyright remains with its author.
+- **Shiro — [Suikoden Character Power-Up FAQ](https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/10601)**: Suikoden I level, weapon, armor-class, and end-game equipment recommendations; no guide prose is distributed.
+- **DHolmes — [Suikoden II Game Save Hacking Guide](https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/7234)** and **Feral — [Suikoden II Armor/Equipment List](https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/6620)**: stat storage, weapon cap, equipment classes, and defensive ranking research. These copyrighted guides have no software-license grant; only factual mappings are used.
+- **[Gensopedia's Suikoden II equipment reference](https://gensopedia.org/w/Equipment_%28Suikoden_II%29)**: CC BY-NC-SA factual cross-checks for equipment effects and compatibility. Its prose and tables are not redistributed.
+- **WiduraGoez — [Suikoden I & II HD Remaster 1.0.3 runtime-code research](https://www.nsboy.net/thread-31928-1-1.html)**: factual corroboration of remaster status and HP limits. No reuse license is claimed, and no cheat code or site prose is distributed.
 
 Full terms, exact inspected commits, and material-use details are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [docs/UPSTREAM_SOURCES.md](docs/UPSTREAM_SOURCES.md).
 
@@ -19,7 +23,8 @@ Full terms, exact inspected commits, and material-use details are in [THIRD_PART
 - Detects Suikoden I or II from verified decrypted schema signatures rather than trusting the filename.
 - Preserves unknown JSON properties, arrays, ordering, duplicate items, and unrelated values.
 - Provides game-specific overview, party, character, inventory, recruitment, headquarters/progress, and read-only Advanced Data views.
-- Includes searchable, name-first dropdowns for inventory and party editing; explained recruitment states; capped headquarters-level choices; per-field Apply and transactional Apply All; undo/redo; reload; recent-file paths; and slot-folder browsing.
+- Includes searchable, name-first dropdowns for inventory and party editing; explained recruitment states; capped headquarters-level choices; per-field Apply and centered transactional Apply All; undo/redo; reload; recent-file paths; and slot-folder browsing.
+- Provides a confirmation-gated **Max stats + best party gear** action for the six active battle characters. It uses documented caps, keeps fixed weapon identities and runes, preserves known locked gear, and applies researched/class-compatible end-game equipment recommendations as one undoable change.
 - Defaults to Save As. Explicit overwrite first creates a timestamped backup, then uses validated temporary output and atomic replacement.
 - Works fully offline with no telemetry and never sends save data anywhere.
 

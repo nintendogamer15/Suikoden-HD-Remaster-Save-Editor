@@ -26,4 +26,8 @@ The imported recruit count is read-only because safe McDohl/Gremio state synthes
 
 Packed MP accepts the reviewed encoded range 0–153. Weapon level accepts 1–16. Castle level accepts 0–4. Recruitment accepts the reviewed set `0, 1, 70, 71, 86, 212, 213`. Byte arrays accept 0–255. Equipment and rune edits must match the current character, slot, lock/exclusivity, and creature restrictions from the reviewed catalogue. Containers never grow, and `use_cnt` is synchronized from the selected catalogue entry.
 
-No undocumented scalar maximum is invented. Unknown root, game, character, inventory-record, and array data remains in the lossless tree. The data-values view presents names, IDs, categories, use counts, and warnings without reconstructing the save.
+The Characters-tab party optimizer uses documented storage/gameplay caps: level 99, HP 9,999, packed MP 153 (`0x99`), base stats 255, and weapon level 16 for weapon users. It applies only to the six battle slots, not the two convoy slots. Equipment is chosen by the upstream-reviewed character classes: Wind Hat or Horned Helmet; Windspun, Silver, Dream, or Robe of Mist body armor; and Earth Shield for shield users. Native pre-edit Strength versus Magic selects Power Rings or Magic Rings. Beasts receive stats/MP only, while runes, fixed weapon identities, known locked gear/accessories, EXP, kills, and all unrelated data remain unchanged.
+
+The gear ranking is a researched recommendation, not an official per-character build. Known fixed equipment is preserved from the credited equipment references. Automated tests enforce catalog compatibility and encrypted round trips; manual in-game validation remains required for inferred recommendations.
+
+Unknown root, game, character, inventory-record, and array data remains in the lossless tree. The data-values view presents names, IDs, categories, use counts, and warnings without reconstructing the save.

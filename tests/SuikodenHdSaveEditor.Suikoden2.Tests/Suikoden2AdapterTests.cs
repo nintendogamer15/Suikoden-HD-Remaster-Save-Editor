@@ -51,6 +51,63 @@ public sealed class Suikoden2AdapterTests
     }
 
     [Fact]
+    public void MaximizeAndEquipPartyUsesCapsRolesRestrictionsAndPreservesLockedGear()
+    {
+        SaveDocument document = Suikoden2TestFactory.Create();
+        JsonObject riou = document.Root["chara_data"]!["c_varia_dat"]![1]!.AsObject();
+        riou["para"]![0] = 30;
+        riou["para"]![1] = 10;
+        JsonObject sheenaLocked = document.Root["chara_data"]!["c_varia_dat"]![5]!["item_eqp"]![0]!.AsObject();
+        sheenaLocked["item_no"] = 72;
+        sheenaLocked["use_cnt"] = 16;
+        Suikoden2Adapter adapter = new(document);
+
+        PartyOptimizationResult result = adapter.MaximizeAndEquipParty();
+
+        Assert.Equal(6, result.CharactersUpdated);
+        Assert.True(result.EquipmentSlotsUpdated > 0);
+        Assert.True(result.LockedOrUnavailableSlotsPreserved > 0);
+        foreach (int id in adapter.PartyCharacterIds.Take(Suikoden2Adapter.BattlePartySize).Distinct())
+        {
+            Suikoden2CharacterView character = adapter.Characters[id];
+            Assert.Equal(Suikoden2Adapter.MaximumCharacterLevel, character.Level);
+            Assert.Equal(Suikoden2Adapter.MaximumCharacterHp, character.CurrentHp);
+            Assert.Equal(Suikoden2Adapter.MaximumCharacterHp, character.MaximumHp);
+            Assert.All(character.MagicPoints, value => Assert.Equal(Suikoden2Adapter.MaximumMagicValue, value));
+            Assert.All(character.Stats, value => Assert.Equal(Suikoden2Adapter.MaximumCharacterStat, value));
+            Assert.Equal(16, character.WeaponLevel);
+        }
+        Assert.Equal([10, 34, 0], adapter.Characters[1].Equipment);
+        Assert.All(adapter.Characters[1].Accessories, item => Assert.Equal(82, item!["item_no"]!.GetValue<int>()));
+        Assert.Equal(72, sheenaLocked["item_no"]!.GetValue<int>());
+        Assert.True(document.Root["unknown_root"]!["keep"]!.GetValue<bool>());
+        Assert.DoesNotContain(adapter.Validate(), issue => issue.Severity == ValidationSeverity.Error);
+        Assert.Throws<SaveEditorException>(() => adapter.SetStat(1, 0, 256));
+        Assert.Throws<SaveEditorException>(() => adapter.SetCharacterScalar(1, "level", 100));
+    }
+
+    [Fact]
+    public void MaximizeAndEquipPartySkipsEmptySlotsAndLeavesBeastsUnequipped()
+    {
+        SaveDocument document = Suikoden2TestFactory.Create();
+        document.Root["party_data"]!["party_cha_no"] = new JsonArray(26, 0, 0, 0, 0, 0, 0, 0);
+        Suikoden2Adapter adapter = new(document);
+
+        PartyOptimizationResult result = adapter.MaximizeAndEquipParty();
+
+        Assert.Equal(1, result.CharactersUpdated);
+        Suikoden2CharacterView beast = adapter.Characters[26];
+        Assert.Equal(Suikoden2Adapter.MaximumCharacterHp, beast.CurrentHp);
+        Assert.Equal([0, 0, 0], beast.Equipment);
+        Assert.All(beast.Accessories, item =>
+        {
+            Assert.Equal(0, item!["item_no"]!.GetValue<int>());
+            Assert.Equal(0, item["use_cnt"]!.GetValue<int>());
+        });
+        Assert.Equal(10, adapter.Characters[0].Level);
+    }
+
+    [Fact]
     public void EnforcesRuneEquipmentAndBeastRestrictions()
     {
         Suikoden2Adapter adapter = new(Suikoden2TestFactory.Create());

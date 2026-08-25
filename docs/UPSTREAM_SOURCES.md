@@ -15,6 +15,11 @@ Inspected on 2026-08-25. Research clones live only in ignored `reference/`; no c
 - [makotech222/suiko2edit](https://github.com/makotech222/suiko2edit), credited by faospark for Suikoden II data research. No code was copied directly during this phase.
 - [nesrak1/UABEA](https://github.com/nesrak1/UABEA), named by asilverthorn as the extraction tool used during reference research. It is credited for provenance but is not a dependency and no code is copied.
 - [Cyril's Suikoden Guide and Walkthrough](https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/80674/part-10-to-live-and-die-freely), used to corroborate that Suikoden I headquarters level 4 is its final development. Only that fact was used; guide prose is not redistributed.
+- [Shiro's Suikoden Character Power-Up FAQ](https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/10601), used for factual Suikoden I level/weapon caps and per-character end-game equipment recommendations. It has no software-license grant; no prose is copied.
+- [DHolmes's Suikoden II Game Save Hacking Guide](https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/7234), used to corroborate one-byte base-stat storage, level/HP field widths, MP encoding, and the useful weapon-level-16 cap. It has no software-license grant; no prose or code is copied.
+- [Feral's Suikoden II Armor/Equipment List](https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/6620), used to compare armor classes, defensive values, side effects, and known fixed equipment against the upstream editor data. It has no software-license grant; no prose or table is copied.
+- [Gensopedia's Suikoden II equipment reference](https://gensopedia.org/w/Equipment_%28Suikoden_II%29), available under CC BY-NC-SA unless otherwise noted, used only as a factual cross-check for equipment effects and compatibility. Its prose and tables are not redistributed.
+- WiduraGoez's Suikoden I & II HD Remaster 1.0.3 runtime-code research, [archived at NSboy](https://www.nsboy.net/thread-31928-1-1.html), was used only to corroborate the remaster's 255 stored-stat and 9,999 HP behavior. No cheat code or site prose is distributed, and no reuse license is claimed.
 
 ## Evidence policy
 

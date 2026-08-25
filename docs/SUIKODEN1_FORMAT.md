@@ -27,7 +27,11 @@ Four supplied encrypted Suikoden I slot files (`Data0`, `Data1`, `Data2`, and `D
 
 Inventory, rune, equipment-state, recruitment, and party controls show names first while retaining their IDs/flags for verification. Party and inventory choices are searchable. Apply All treats the six party slots as one validated party operation, so moving Tir does not create a transient invalid party.
 
-The catalogue keeps character, item, equipment-state, and rune mappings outside UI code. Weapon-name mappings and maximum-stat/maximum-level synthesis were not verified well enough to expose as named bulk operations. “Max selected” and “max all” are therefore deliberately absent instead of using invented caps.
+The catalogue keeps character, item, equipment-state, and rune mappings outside UI code. Weapon-name mappings remain unverified, so the bulk optimizer preserves each character's fixed weapon ID and changes only its reviewed sharpening level.
+
+The Characters-tab bulk action operates on the six active party entries as one undoable transaction. It sets level 99, current/maximum HP 9,999, current MP 9 at spell levels 1–4, every `noryoku` value to 255, and weapon level 16. These caps are supported by original-game storage research and remaster runtime-code corroboration listed in `UPSTREAM_SOURCES.md`. Equipment profiles use Shiro's per-fighter recommendations where available and conservative class-based inferences for omitted fighters. Normal equipped items may be replaced; high-bit non-removable equipment is preserved. If no safe free carried-item slot exists for a missing equipment category, the optimizer skips that slot instead of deleting an unrelated item.
+
+The action deliberately does not alter EXP, weapon IDs, character runes, weapon rune pieces, recruitment, party formation, or unrelated carried items. Automated tests cover structure and encrypted round trips, but the synthesized high values and inferred profiles remain part of the manual in-game verification boundary.
 
 ## Count preservation nuance
 

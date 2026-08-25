@@ -33,6 +33,14 @@ public sealed class PrivateSaveIntegrationTests
                 string output = copy + ".roundtrip";
                 new SaveFileService().SaveAs(document.DeepClone(), output);
                 Assert.True(SaveDocument.SemanticallyEquals(document.Root, SaveDocument.OpenEncrypted(output).Root));
+
+                SaveDocument optimized = document.DeepClone();
+                PartyOptimizationResult result = new Suikoden2Adapter(optimized).MaximizeAndEquipParty();
+                Assert.True(result.CharactersUpdated > 0);
+                Assert.DoesNotContain(new Suikoden2Adapter(optimized).Validate(), issue => issue.Severity == ValidationSeverity.Error);
+                string optimizedOutput = copy + ".optimized";
+                new SaveFileService().SaveAs(optimized, optimizedOutput);
+                Assert.True(SaveDocument.SemanticallyEquals(optimized.Root, SaveDocument.OpenEncrypted(optimizedOutput).Root));
                 Assert.Equal(before, SHA256.HashData(File.ReadAllBytes(original)));
             }
         }
@@ -42,4 +50,3 @@ public sealed class PrivateSaveIntegrationTests
         }
     }
 }
-

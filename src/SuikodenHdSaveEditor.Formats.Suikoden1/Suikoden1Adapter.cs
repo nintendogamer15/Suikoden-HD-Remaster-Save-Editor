@@ -10,9 +10,18 @@ public sealed class Suikoden1Adapter
     public const int PartySize = 6;
     public const int PartyInventorySize = 8;
     public const int CharacterInventorySize = 9;
+    public const int MaximumCharacterLevel = 99;
+    public const int MaximumCharacterHp = 9999;
+    public const int MaximumCharacterStat = 255;
+    public const int MaximumWeaponLevel = 16;
     public static readonly IReadOnlyList<string> StatNames = ["Strength", "Dexterity", "Protection", "Speed", "Magic", "Luck"];
 
     private static readonly HashSet<int> EquipmentSlotValues = [0, 1, 2, 3, 4, 5, 129, 130, 131, 132, 133];
+    private static readonly HashSet<int> HornedHelmetUsers = [1, 5, 10, 12, 14, 16, 19, 21, 25, 29, 36, 37, 41, 42, 47, 48, 49, 63, 65, 67, 74, 80, 82, 107];
+    private static readonly HashSet<int> WindspunArmorUsers = [12, 21, 25, 40, 73, 74];
+    private static readonly HashSet<int> TaikyokuTunicUsers = [6, 11, 13, 15, 18, 22, 23, 31, 32, 38, 39, 52, 54, 55, 65, 66, 67, 68, 91, 95, 101, 102];
+    private static readonly HashSet<int> MasterRobeUsers = [0, 9, 33, 59, 97];
+    private static readonly HashSet<int> EarthShieldUsers = [7, 10, 14, 17, 19, 25, 28, 29, 30, 36, 42, 47, 48, 49, 63, 74, 80, 82, 101, 102, 107];
     private readonly SaveDocument document;
 
     public Suikoden1Adapter(SaveDocument document)
@@ -107,6 +116,8 @@ public sealed class Suikoden1Adapter
         HashSet<string> allowed = ["level", "exp", "hp", "max_hp", "status"];
         Guard.Valid(allowed.Contains(field), $"Field {field} is not a reviewed scalar character field.");
         Guard.Valid(value >= 0, $"{field} cannot be negative.");
+        Guard.Valid(field != "level" || value <= MaximumCharacterLevel, $"Level cannot exceed {MaximumCharacterLevel}.");
+        Guard.Valid(field is not ("hp" or "max_hp") || value <= MaximumCharacterHp, $"HP cannot exceed {MaximumCharacterHp}.");
         JsonObject player = FindPlayer(characterId);
         if (field == "hp")
         {
@@ -125,7 +136,7 @@ public sealed class Suikoden1Adapter
     {
         JsonArray stats = FindPlayer(characterId)["noryoku"]!.AsArray();
         Guard.Index(statIndex, stats.Count, "Stat");
-        Guard.Valid(value >= 0, "A base stat cannot be negative.");
+        Guard.Valid(value is >= 0 and <= MaximumCharacterStat, $"A base stat must be 0 through {MaximumCharacterStat}.");
         stats[statIndex] = value;
         document.MarkChanged();
     }
@@ -143,7 +154,7 @@ public sealed class Suikoden1Adapter
     public void SetWeapon(int characterId, int weaponId, int weaponLevel)
     {
         Guard.Valid(weaponId >= 0, "Weapon ID cannot be negative.");
-        Guard.Valid(weaponLevel >= 0, "Weapon level cannot be negative.");
+        Guard.Valid(weaponLevel is >= 0 and <= MaximumWeaponLevel, $"Weapon level must be 0 through {MaximumWeaponLevel}.");
         JsonObject weapon = FindPlayer(characterId)["buki_data"]!.AsObject();
         weapon["buki_id"] = weaponId;
         weapon["level"] = weaponLevel;
@@ -189,6 +200,42 @@ public sealed class Suikoden1Adapter
         Guard.Index(characterId, MemberFlags.Count, "Recruitment character");
         MemberFlags[characterId] = recruited ? 9 : 0;
         document.MarkChanged();
+    }
+
+    public PartyOptimizationResult MaximizeAndEquipParty()
+    {
+        int charactersUpdated = 0;
+        int equipmentUpdated = 0;
+        int preserved = 0;
+        foreach (int characterId in PartyCharacterIds.Where(id => id >= 0).Distinct())
+        {
+            JsonObject player = FindPlayer(characterId);
+            player["level"] = MaximumCharacterLevel;
+            player["max_hp"] = MaximumCharacterHp;
+            player["hp"] = MaximumCharacterHp;
+
+            JsonArray magic = player["magic_point"]!.AsArray();
+            for (int index = 1; index < Math.Min(magic.Count, 5); index++)
+            {
+                magic[index] = 9;
+            }
+
+            JsonArray stats = player["noryoku"]!.AsArray();
+            for (int index = 0; index < stats.Count; index++)
+            {
+                stats[index] = MaximumCharacterStat;
+            }
+
+            player["buki_data"]!["level"] = MaximumWeaponLevel;
+            (int changed, int skipped) = ApplyRecommendedEquipment(player, RecommendedEquipmentFor(characterId));
+            equipmentUpdated += changed;
+            preserved += skipped;
+            charactersUpdated++;
+        }
+
+        Guard.Valid(charactersUpdated > 0, "The active party has no battle characters to optimize.");
+        document.MarkChanged();
+        return new(charactersUpdated, equipmentUpdated, preserved);
     }
 
     public IReadOnlyList<ValidationIssue> Validate()
@@ -266,6 +313,109 @@ public sealed class Suikoden1Adapter
 
         return player;
     }
+
+    private static (int Changed, int Preserved) ApplyRecommendedEquipment(JsonObject player, RecommendedEquipment equipment)
+    {
+        JsonArray items = player["item"]!.AsArray();
+        int activeCount = Math.Clamp(player["item_kazu"]!.GetValue<int>(), 0, items.Count);
+        int changed = 0;
+        int preserved = 0;
+        int[] recommendations = [equipment.Helmet, equipment.Armor, equipment.Shield, equipment.Other1, equipment.Other2];
+        for (int equipmentSlot = 1; equipmentSlot <= recommendations.Length; equipmentSlot++)
+        {
+            int recommendedItem = recommendations[equipmentSlot - 1];
+            int existingIndex = Enumerable.Range(0, activeCount).FirstOrDefault(
+                index => EquipmentBaseSlot(items[index]!["soubi"]!.GetValue<int>()) == equipmentSlot,
+                -1);
+            if (existingIndex >= 0)
+            {
+                JsonObject existing = items[existingIndex]!.AsObject();
+                int state = existing["soubi"]!.GetValue<int>();
+                if (state >= 129)
+                {
+                    preserved++;
+                    continue;
+                }
+
+                if (recommendedItem == 0)
+                {
+                    existing["soubi"] = 0;
+                }
+                else
+                {
+                    existing["item_id"] = recommendedItem;
+                    existing["soubi"] = equipmentSlot;
+                    existing["data"] = 0;
+                }
+
+                changed++;
+                continue;
+            }
+
+            if (recommendedItem == 0)
+            {
+                continue;
+            }
+
+            int destination = Enumerable.Range(0, activeCount).FirstOrDefault(
+                index => items[index]!["item_id"]!.GetValue<int>() == 0,
+                -1);
+            if (destination < 0 && activeCount < items.Count && items[activeCount]!["item_id"]!.GetValue<int>() == 0)
+            {
+                destination = activeCount++;
+            }
+
+            if (destination < 0)
+            {
+                preserved++;
+                continue;
+            }
+
+            JsonObject target = items[destination]!.AsObject();
+            target["item_id"] = recommendedItem;
+            target["soubi"] = equipmentSlot;
+            target["data"] = 0;
+            changed++;
+        }
+
+        player["item_kazu"] = activeCount;
+        return (changed, preserved);
+    }
+
+    private static int EquipmentBaseSlot(int state) => state is >= 129 and <= 133 ? state - 128 : state;
+
+    // Item IDs and the per-character groupings are factual recommendations from Shiro's
+    // Suikoden Character Power-Up FAQ. A few absent fighters use conservative armor-class
+    // inferences; see docs/SUIKODEN1_FORMAT.md and THIRD_PARTY_NOTICES.md.
+    private static RecommendedEquipment RecommendedEquipmentFor(int characterId)
+    {
+        int helmet = HornedHelmetUsers.Contains(characterId) ? 8 : 7;
+        int armor = characterId switch
+        {
+            26 or 76 => 13, // Guard Robe
+            61 => 17,       // Magic Robe
+            107 => 19,      // Dragon Armor
+            _ when WindspunArmorUsers.Contains(characterId) => 24,
+            _ when TaikyokuTunicUsers.Contains(characterId) => 22,
+            _ when MasterRobeUsers.Contains(characterId) => 20,
+            _ => 23,        // Master's Garb
+        };
+        int shield = EarthShieldUsers.Contains(characterId) ? 70 : 0;
+        (int other1, int other2) = characterId switch
+        {
+            0 => (49, 41),       // Star Earrings, Crimson Cape
+            14 or 80 => (56, 56), // Gold Collars for kobolds
+            26 => (52, 41),      // Speed Ring, Crimson Cape
+            28 => (50, 41),      // Rose Brooch, Crimson Cape
+            61 => (29, 41),      // Toe Shoes, Crimson Cape
+            64 => (48, 41),      // Emblem, Crimson Cape
+            75 => (30, 41),      // Winged Boots, Crimson Cape
+            _ => (41, 41),       // Crimson Capes
+        };
+        return new(helmet, armor, shield, other1, other2);
+    }
+
+    private sealed record RecommendedEquipment(int Helmet, int Armor, int Shield, int Other1, int Other2);
 
     private static void ValidateCount(List<ValidationIssue> issues, JsonObject owner, string arrayName, string countName, string path)
     {

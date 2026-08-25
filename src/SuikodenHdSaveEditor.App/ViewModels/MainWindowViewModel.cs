@@ -40,6 +40,24 @@ public sealed class MainWindowViewModel : ObservableObject
         https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/80674/part-10-to-live-and-die-freely
         Credited factual corroboration that Suikoden I headquarters level 4 is its final development. No guide prose is distributed.
 
+        Shiro — Suikoden Character Power-Up FAQ
+        https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/10601
+        Factual Suikoden I level, weapon, equipment-class, and end-game recommendation research. No guide prose is distributed.
+
+        DHolmes — Suikoden II Game Save Hacking Guide
+        https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/7234
+        Feral — Suikoden II Armor/Equipment List
+        https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/6620
+        Factual stat storage, weapon cap, armor-class, locked-item, and defensive-ranking research. These copyrighted guides have no software-license grant; no prose or tables are distributed.
+
+        Gensopedia — Suikoden II equipment reference
+        https://gensopedia.org/w/Equipment_%28Suikoden_II%29
+        CC BY-NC-SA unless otherwise noted. Consulted only for factual equipment cross-checks; no wiki prose or tables are distributed.
+
+        WiduraGoez — Suikoden I & II HD Remaster 1.0.3 runtime-code research
+        https://www.nsboy.net/thread-31928-1-1.html
+        Factual corroboration of remaster status and HP limits. No cheat code or site prose is distributed, and no reuse license is claimed.
+
         LICENSES
 
         Original project code: Zero-Clause BSD (0BSD).
@@ -112,6 +130,7 @@ public sealed class MainWindowViewModel : ObservableObject
         UndoCommand = new RelayCommand(Undo, () => history.CanUndo);
         RedoCommand = new RelayCommand(Redo, () => history.CanRedo);
         ApplyAllCommand = new RelayCommand(ApplyAll, () => document is not null && IsFieldEditor && Fields.Any(field => !field.IsReadOnly));
+        MaximizeAndEquipPartyCommand = new AsyncRelayCommand(MaximizeAndEquipPartyAsync, () => document is not null && IsCharacters);
         GiveAllSafeItemsCommand = new AsyncRelayCommand(GiveAllSafeItemsAsync, () => document?.Game == GameKind.Suikoden2);
         AboutCommand = new AsyncRelayCommand(() => interaction.ShowAboutAsync(CreditsAndLicenses));
     }
@@ -147,6 +166,8 @@ public sealed class MainWindowViewModel : ObservableObject
     public ICommand RedoCommand { get; }
 
     public ICommand ApplyAllCommand { get; }
+
+    public ICommand MaximizeAndEquipPartyCommand { get; }
 
     public ICommand GiveAllSafeItemsCommand { get; }
 
@@ -572,6 +593,35 @@ public sealed class MainWindowViewModel : ObservableObject
         }
     }
 
+    private async Task MaximizeAndEquipPartyAsync()
+    {
+        if (document is null)
+        {
+            return;
+        }
+
+        bool accepted = await interaction.ConfirmAsync(
+            "Max and optimize the active battle party?",
+            "This sets every active battle character to level 99, 9,999 current/maximum HP, maximum MP, maximum base stats, and weapon level 16 where a weapon exists. It also replaces removable gear with researched, class-compatible end-game equipment and physical or magic accessories. Fixed weapon identities, runes, known locked gear, and unrelated data are preserved.\n\nSome equipment choices are informed recommendations rather than official character builds. Use Undo if the result is not what you want, and verify a copied save in game before overwriting anything important.",
+            "Max and equip party").ConfigureAwait(true);
+        if (!accepted)
+        {
+            return;
+        }
+
+        PartyOptimizationResult? result = null;
+        ApplyEdit("Maximized stats and equipped recommended party gear", () =>
+        {
+            result = document.Game == GameKind.Suikoden1
+                ? new Suikoden1Adapter(document).MaximizeAndEquipParty()
+                : new Suikoden2Adapter(document).MaximizeAndEquipParty();
+        });
+        if (!HasError && result is not null)
+        {
+            StatusMessage = $"Maximized {result.CharactersUpdated} active battle character(s); updated {result.EquipmentSlotsUpdated} gear slot(s) and preserved {result.LockedOrUnavailableSlotsPreserved} locked or unavailable slot(s).";
+        }
+    }
+
     private void ApplyAll()
     {
         if (document is null)
@@ -817,6 +867,7 @@ public sealed class MainWindowViewModel : ObservableObject
         }
 
         ((RelayCommand)ApplyAllCommand).RaiseCanExecuteChanged();
+        ((AsyncRelayCommand)MaximizeAndEquipPartyCommand).RaiseCanExecuteChanged();
     }
 
     private void BuildSuikoden1Fields(Suikoden1Adapter adapter)
@@ -1577,6 +1628,7 @@ public sealed class MainWindowViewModel : ObservableObject
         ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
         ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
         ((RelayCommand)ApplyAllCommand).RaiseCanExecuteChanged();
+        ((AsyncRelayCommand)MaximizeAndEquipPartyCommand).RaiseCanExecuteChanged();
         ((AsyncRelayCommand)GiveAllSafeItemsCommand).RaiseCanExecuteChanged();
     }
 }

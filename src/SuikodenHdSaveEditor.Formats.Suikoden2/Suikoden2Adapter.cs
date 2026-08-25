@@ -22,6 +22,9 @@ public sealed class Suikoden2Adapter
     public const int ConvoySize = 2;
     public const int TotalPartySize = BattlePartySize + ConvoySize;
     public const int MaximumMagicValue = 153;
+    public const int MaximumCharacterLevel = 99;
+    public const int MaximumCharacterHp = 9999;
+    public const int MaximumCharacterStat = 255;
     public static readonly IReadOnlyList<string> StatNames =
         ["Strength", "Magic", "Protection", "Magic Defence", "Dexterity", "Speed", "Luck"];
     public static readonly IReadOnlySet<int> RecruitmentStatuses = new HashSet<int> { 0, 1, 70, 71, 86, 212, 213 };
@@ -94,6 +97,8 @@ public sealed class Suikoden2Adapter
         HashSet<string> allowed = ["level", "exp", "now_hp", "max_hp", "buki_lv", "buki_mon", "todome"];
         Guard.Valid(allowed.Contains(field), $"Field {field} is not a reviewed Suikoden II character scalar.");
         Guard.Valid(value >= 0, $"{field} cannot be negative.");
+        Guard.Valid(field != "level" || value <= MaximumCharacterLevel, $"Level cannot exceed {MaximumCharacterLevel}.");
+        Guard.Valid(field is not ("now_hp" or "max_hp") || value <= MaximumCharacterHp, $"HP cannot exceed {MaximumCharacterHp}.");
         JsonObject character = FindCharacter(characterId);
         if (field == "now_hp")
         {
@@ -130,7 +135,7 @@ public sealed class Suikoden2Adapter
     {
         JsonArray stats = FindCharacter(characterId)["para"]!.AsArray();
         Guard.Index(statIndex, stats.Count, "Stat");
-        Guard.Valid(value >= 0, "A base stat cannot be negative.");
+        Guard.Valid(value is >= 0 and <= MaximumCharacterStat, $"A base stat must be 0 through {MaximumCharacterStat}.");
         stats[statIndex] = value;
         document.MarkChanged();
     }
@@ -254,6 +259,87 @@ public sealed class Suikoden2Adapter
         Guard.Valid(RecruitmentStatuses.Contains(status), $"Recruitment status {status} is not one of the reviewed states.");
         flags[characterId] = status;
         document.MarkChanged();
+    }
+
+    public PartyOptimizationResult MaximizeAndEquipParty()
+    {
+        int charactersUpdated = 0;
+        int equipmentUpdated = 0;
+        int preserved = 0;
+        foreach (int characterId in PartyCharacterIds.Take(BattlePartySize).Where(id => id > 0).Distinct())
+        {
+            JsonObject character = FindCharacter(characterId);
+            int originalStrength = character["para"]!.AsArray()[0]!.GetValue<int>();
+            int originalMagic = character["para"]!.AsArray()[1]!.GetValue<int>();
+            character["level"] = MaximumCharacterLevel;
+            character["max_hp"] = MaximumCharacterHp;
+            character["now_hp"] = MaximumCharacterHp;
+
+            JsonArray magic = character["mp"]!.AsArray();
+            for (int index = 0; index < magic.Count; index++)
+            {
+                magic[index] = MaximumMagicValue;
+            }
+
+            JsonArray stats = character["para"]!.AsArray();
+            for (int index = 0; index < stats.Count; index++)
+            {
+                stats[index] = MaximumCharacterStat;
+            }
+
+            bool beast = Suikoden2Catalog.Beasts.Contains(characterId);
+            if (!beast)
+            {
+                character["buki_lv"] = 16;
+            }
+
+            RecommendedEquipment recommendation = RecommendedEquipmentFor(characterId);
+            JsonArray equipped = character["bogu_eqp"]!.AsArray();
+            int[] equipmentIds = [recommendation.Helmet, recommendation.Armor, recommendation.Shield];
+            for (int slot = 0; slot < Math.Min(equipped.Count, equipmentIds.Length); slot++)
+            {
+                int current = equipped[slot]!.GetValue<int>();
+                if (IsKnownLockedEquipment(characterId, slot, current))
+                {
+                    preserved++;
+                    continue;
+                }
+
+                if (current != equipmentIds[slot])
+                {
+                    SetEquipment(characterId, slot, equipmentIds[slot]);
+                    equipmentUpdated++;
+                }
+            }
+
+            Suikoden2ItemDefinition accessory = Suikoden2Catalog.FindItem(
+                Suikoden2ItemCategory.Accessory,
+                beast ? 0 : originalMagic > originalStrength ? 80 : 82);
+            int accessoryUseCount = accessory.Id == 0 ? 0 : accessory.UseCount;
+            JsonArray accessories = character["item_eqp"]!.AsArray();
+            for (int slot = 0; slot < accessories.Count; slot++)
+            {
+                JsonObject current = accessories[slot]!.AsObject();
+                int currentId = current["item_no"]!.GetValue<int>();
+                if (IsKnownLockedAccessory(characterId, currentId))
+                {
+                    preserved++;
+                    continue;
+                }
+
+                if (currentId != accessory.Id || current["use_cnt"]!.GetValue<int>() != accessoryUseCount)
+                {
+                    SetAccessory(characterId, slot, accessory);
+                    equipmentUpdated++;
+                }
+            }
+
+            charactersUpdated++;
+        }
+
+        Guard.Valid(charactersUpdated > 0, "The active battle party has no characters to optimize.");
+        document.MarkChanged();
+        return new(charactersUpdated, equipmentUpdated, preserved);
     }
 
     public void SetName(string field, string value)
@@ -428,6 +514,59 @@ public sealed class Suikoden2Adapter
         Guard.Index(characterId, CharacterData.Count, "Battle character");
         return CharacterData[characterId]!.AsObject();
     }
+
+    // Equipment ranks are cross-checked against the credited Feral and Gensopedia
+    // references; compatibility remains driven by faospark's reviewed character data.
+    private static RecommendedEquipment RecommendedEquipmentFor(int characterId)
+    {
+        if (Suikoden2Catalog.Beasts.Contains(characterId))
+        {
+            return new(0, 0, 0);
+        }
+
+        Suikoden2CharacterDefinition? character = Suikoden2Catalog.Character(characterId);
+        if (character is null)
+        {
+            return new(0, 0, 0);
+        }
+
+        int helmet = character.Attributes.Contains("E") ? 12 : character.Attributes.Contains("C") ? 10 : 0;
+        int armor = character.Attributes.Contains("H") ? 37
+            : character.Attributes.Contains("L") ? 34
+            : character.Attributes.Contains("V") ? 33
+            : character.Attributes.Contains("R") ? 31
+            : 0;
+        int shield = character.Attributes.Contains("S") ? 44 : 0;
+        return new(helmet, armor, shield);
+    }
+
+    private static bool IsKnownLockedEquipment(int characterId, int slot, int currentItemId) =>
+        (characterId, slot, currentItemId) is
+            (10, 1, 35) or  // Humphrey: Knight Armor
+            (11, 1, 34) or  // Georg: Silver Armor
+            (13, 0, 12) or  // Pesmerga: Horned Helmet
+            (13, 1, 35) or  // Pesmerga: Knight Armor
+            (13, 2, 43) or  // Pesmerga: Chaos Shield
+            (61, 1, 31);    // Mazus: Robe of Mist
+
+    private static bool IsKnownLockedAccessory(int characterId, int currentItemId) => (characterId, currentItemId) is
+        (5, 72) or   // Sheena: Star Earrings
+        (8, 78) or   // Tengaar: Wind Amulet
+        (14, 77) or  // Lorelai: Thunder Amulet
+        (32, 69) or  // Miklotov: Fire Emblem
+        (33, 59) or  // Camus: Crimson Cape
+        (41, 84) or  // Meg: Lucky Ring
+        (46, 53) or  // Oulan: Power Gloves
+        (53, 81) or  // Luc: Speed Ring
+        (57, 76) or  // Yoshino: Water Amulet
+        (64, 75) or  // Vincent: Rose Brooch
+        (65, 58) or  // Simone: Cape of Darkness
+        (65, 70) or  // Simone: Gold Emblem
+        (67, 48) or  // Stallion: Winged Boots
+        (13, 49) or  // Pesmerga: Iron Boots
+        (13, 79);    // Pesmerga: Guard Ring
+
+    private sealed record RecommendedEquipment(int Helmet, int Armor, int Shield);
 
     private JsonArray GetInventory(Suikoden2Inventory inventory) => inventory switch
     {

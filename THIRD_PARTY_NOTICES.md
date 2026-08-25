@@ -24,6 +24,10 @@ faospark also credits the [Suikosource item digits guide](https://suikosource.co
 
 Cyril's [Suikoden Guide and Walkthrough](https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/80674/part-10-to-live-and-die-freely) was used only to corroborate the factual Suikoden I headquarters cap: its level-4 form is described as the final development. No guide prose or other copyrighted material is distributed.
 
+Shiro's [Suikoden Character Power-Up FAQ](https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/10601), DHolmes's [Suikoden II Game Save Hacking Guide](https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/7234), and Feral's [Suikoden II Armor/Equipment List](https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/6620) informed factual level/stat/weapon limits, armor classes, known locked items, and end-game equipment recommendations. These copyrighted guides provide no software-license grant. No guide prose, code, or table is distributed.
+
+[Gensopedia's Suikoden II equipment reference](https://gensopedia.org/w/Equipment_%28Suikoden_II%29) is available under Creative Commons Attribution-NonCommercial-ShareAlike unless otherwise noted. It was consulted only to cross-check factual equipment effects and compatibility; its prose and tables are not incorporated into the application. WiduraGoez's remaster 1.0.3 runtime-code research, hosted at [NSboy](https://www.nsboy.net/thread-31928-1-1.html), was used only to corroborate the remaster's stored-stat and HP limits. No cheat code or site prose is distributed, and no reuse license is claimed.
+
 Exact inspected commits and usage details are recorded in `docs/UPSTREAM_SOURCES.md`.
 
 ## Distributed runtime dependencies
