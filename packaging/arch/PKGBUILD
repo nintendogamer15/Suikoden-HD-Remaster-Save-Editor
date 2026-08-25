@@ -1,0 +1,68 @@
+# Maintainer: Robert
+# SPDX-License-Identifier: 0BSD
+
+pkgname=suikoden-hd-remaster-save-editor
+pkgver="${PKGVER:-0.0.0}"
+pkgrel=1
+pkgdesc="Save editor for Suikoden I and II HD Remaster"
+arch=('x86_64')
+url="https://github.com/nintendogamer15/Suikoden-HD-Remaster-Save-Editor"
+license=('0BSD' 'MIT' 'BSD-3-Clause' 'OFL-1.1')
+depends=(
+  'fontconfig'
+  'glibc'
+  'hicolor-icon-theme'
+  'icu'
+  'krb5'
+  'libgcc'
+  'libice'
+  'libsm'
+  'libstdc++'
+  'libx11'
+  'openssl'
+  'ttf-dejavu'
+  'tzdata'
+  'zlib'
+)
+optdepends=('xdg-desktop-portal: native desktop file picker integration')
+checkdepends=('desktop-file-utils' 'libxml2')
+options=('!strip' '!debug')
+source=(
+  'app-bundle.tar.gz'
+  'suikoden-hd-remaster-save-editor.desktop'
+  'suikoden-hd-remaster-save-editor.svg'
+)
+sha256sums=(
+  'SKIP'
+  '2a57beceffbfe383466d18a5159ec24271b8be50dda0e564b2b553217a6ceed5'
+  '65f2b2793ef20e74480d983a9d6bd06ea5921e53df889b507d73369eeea167b2'
+)
+
+check() {
+  desktop-file-validate "${srcdir}/suikoden-hd-remaster-save-editor.desktop"
+  xmllint --noout "${srcdir}/suikoden-hd-remaster-save-editor.svg"
+}
+
+package() {
+  local appdir="${pkgdir}/usr/lib/${pkgname}"
+  install -d "${appdir}"
+  cp -a "${srcdir}/app-bundle/." "${appdir}/"
+  chmod 0755 "${appdir}/SuikodenHdSaveEditor.App"
+
+  install -d "${pkgdir}/usr/bin"
+  ln -s "/usr/lib/${pkgname}/SuikodenHdSaveEditor.App" "${pkgdir}/usr/bin/${pkgname}"
+  install -Dm0644 "${srcdir}/${pkgname}.desktop" \
+    "${pkgdir}/usr/share/applications/${pkgname}.desktop"
+  install -Dm0644 "${srcdir}/${pkgname}.svg" \
+    "${pkgdir}/usr/share/icons/hicolor/scalable/apps/${pkgname}.svg"
+
+  install -Dm0644 "${srcdir}/app-bundle/LICENSE" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -d "${pkgdir}/usr/share/licenses/${pkgname}/LICENSES"
+  cp -a "${srcdir}/app-bundle/LICENSES/." \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSES/"
+  install -Dm0644 "${srcdir}/app-bundle/THIRD_PARTY_NOTICES.md" \
+    "${pkgdir}/usr/share/doc/${pkgname}/THIRD_PARTY_NOTICES.md"
+  install -Dm0644 "${srcdir}/app-bundle/README.md" \
+    "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+}

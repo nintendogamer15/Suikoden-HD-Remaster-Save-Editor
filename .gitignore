@@ -22,6 +22,7 @@
 **/bin/
 **/obj/
 /artifacts/
+/packages/
 /.dotnet/
 /.tools/
 /TestResults/
@@ -44,6 +45,9 @@ core
 core.*
 *.nupkg
 *.snupkg
+*.pkg.tar.*
+*.rpm
+.SRCINFO
 *.log
 *.tmp
 *.bak

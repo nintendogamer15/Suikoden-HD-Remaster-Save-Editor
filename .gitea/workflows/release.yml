@@ -1,0 +1,259 @@
+# SPDX-License-Identifier: 0BSD
+name: Build and release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:10.0
+    env:
+      GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+      GITEA_SERVER_URL: ${{ github.server_url }}
+      REPOSITORY_NAME: ${{ github.repository }}
+      COMMIT_SHA: ${{ github.sha }}
+      REF_NAME: ${{ github.ref_name }}
+      IS_RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      ACTIONLINT_OFFLINE: true
+    steps:
+      - name: Install deterministic build and validation tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            git curl jq ca-certificates file xvfb zip desktop-file-utils libxml2-utils shellcheck
+
+      - name: Check out from this Gitea repository
+        run: |
+          git init source
+          cd source
+          git remote add origin "${GITEA_SERVER_URL}/${REPOSITORY_NAME}.git"
+          git -c http.extraHeader="Authorization: token ${GITEA_TOKEN}" fetch --depth 1 origin "${COMMIT_SHA}"
+          git checkout --detach FETCH_HEAD
+
+      - name: Test and build self-contained Windows and Linux archives
+        working-directory: source
+        run: |
+          if [ "${IS_RELEASE_TAG}" = "true" ]; then
+            version="$(./scripts/project-version.sh "${REF_NAME}")"
+            label="${REF_NAME}"
+          else
+            version="$(./scripts/project-version.sh)"
+            label="manual-${COMMIT_SHA:0:7}"
+          fi
+          APP_VERSION="${version}" ./scripts/ci.sh
+          ./scripts/prepare-release-assets.sh "${label}" "${GITHUB_WORKSPACE}/release"
+          cd "${GITHUB_WORKSPACE}/release"
+          sha256sum --check SHA256SUMS.txt
+
+      - name: Create or verify native Gitea release assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: source/scripts/gitea-release-assets.sh "${REF_NAME}" "${GITHUB_WORKSPACE}"/release/*
+
+  arch-package:
+    needs: build
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    env:
+      GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+      PACKAGE_PUBLISH_TOKEN: ${{ secrets.PACKAGE_PUBLISH_TOKEN }}
+      GITEA_PACKAGE_SERVER_URL: http://192.168.1.75:3001
+      GITEA_SERVER_URL: ${{ github.server_url }}
+      REPOSITORY_NAME: ${{ github.repository }}
+      COMMIT_SHA: ${{ github.sha }}
+      REF_NAME: ${{ github.ref_name }}
+      IS_RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - name: Install Arch build and validation tools
+        run: |
+          pacman -Syu --noconfirm --needed \
+            git curl jq ca-certificates file namcap desktop-file-utils libxml2 diffutils tar gzip
+
+      - name: Check out from this Gitea repository
+        run: |
+          git init source
+          cd source
+          git remote add origin "${GITEA_SERVER_URL}/${REPOSITORY_NAME}.git"
+          git -c http.extraHeader="Authorization: token ${GITEA_TOKEN}" fetch --depth 1 origin "${COMMIT_SHA}"
+          git checkout --detach FETCH_HEAD
+
+      - name: Obtain self-contained Linux package input
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/package-input" "${GITHUB_WORKSPACE}/packages"
+          if [ "${IS_RELEASE_TAG}" = "true" ]; then
+            version="$(source/scripts/project-version.sh "${REF_NAME}")"
+            asset="SuikodenHdSaveEditor-${REF_NAME}-linux-x64.tar.gz"
+            release_json="$(curl --silent --show-error --fail \
+              --header "Authorization: token ${GITEA_TOKEN}" \
+              "${GITEA_SERVER_URL}/api/v1/repos/${REPOSITORY_NAME}/releases/tags/${REF_NAME}")"
+            url="$(printf '%s' "${release_json}" | jq -er --arg name "${asset}" \
+              '.assets[] | select(.name == $name) | .browser_download_url')"
+            curl --silent --show-error --fail --location \
+              --header "Authorization: token ${GITEA_TOKEN}" \
+              --output "${GITHUB_WORKSPACE}/package-input/${asset}" "${url}"
+            tar -xzf "${GITHUB_WORKSPACE}/package-input/${asset}" \
+              -C "${GITHUB_WORKSPACE}/package-input"
+            bundle="${GITHUB_WORKSPACE}/package-input/SuikodenHdSaveEditor-linux-x64"
+          else
+            version="$(source/scripts/project-version.sh)"
+            pacman -S --noconfirm --needed dotnet-sdk-10.0
+            (
+              cd source
+              ./scripts/restore.sh
+              ./scripts/test.sh
+              APP_VERSION="${version}" ./scripts/publish-linux.sh
+            )
+            bundle="${GITHUB_WORKSPACE}/source/artifacts/publish/SuikodenHdSaveEditor-linux-x64"
+          fi
+          source/scripts/validate-package-input.sh "${bundle}"
+          printf '%s\n' "${version}" > "${GITHUB_WORKSPACE}/package-version"
+          printf '%s\n' "${bundle}" > "${GITHUB_WORKSPACE}/linux-bundle-path"
+          file "${bundle}/SuikodenHdSaveEditor.App"
+          ldd "${bundle}/SuikodenHdSaveEditor.App"
+
+      - name: Build, install, and validate Arch package
+        run: |
+          version="$(cat "${GITHUB_WORKSPACE}/package-version")"
+          bundle="$(cat "${GITHUB_WORKSPACE}/linux-bundle-path")"
+          useradd --create-home builder
+          chown -R builder:builder source "${GITHUB_WORKSPACE}/package-input" "${GITHUB_WORKSPACE}/packages"
+          runuser -u builder -- env TMPDIR="${GITHUB_WORKSPACE}/source/.tools/package-tmp" \
+            source/scripts/build-arch-package.sh "${version}" "${bundle}" "${GITHUB_WORKSPACE}/packages"
+          package="${GITHUB_WORKSPACE}/packages/suikoden-hd-remaster-save-editor-${version}-1-x86_64.pkg.tar.zst"
+          (
+            cd source/packaging/arch
+            runuser -u builder -- env PKGVER="${version}" makepkg --printsrcinfo
+          )
+          namcap source/packaging/arch/PKGBUILD "${package}"
+          pacman -Qip "${package}"
+          pacman -Qlp "${package}"
+          pacman -U --noconfirm "${package}"
+          source/scripts/validate-installed-package.sh
+          diff -qr "${bundle}" /usr/lib/suikoden-hd-remaster-save-editor
+          checksum="$(source/scripts/package-checksum.sh "${package}")"
+          (cd "$(dirname "${checksum}")" && sha256sum --check "$(basename "${checksum}")")
+
+      - name: Smoke-test installed Arch package under Xvfb
+        run: |
+          pacman -S --noconfirm --needed xorg-server-xvfb xorg-xauth
+          xvfb-run -a -s "-screen 0 1280x800x24 -nolisten tcp" \
+            suikoden-hd-remaster-save-editor --smoke-test
+
+      - name: Publish immutable Arch package and release assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version="$(cat "${GITHUB_WORKSPACE}/package-version")"
+          package="${GITHUB_WORKSPACE}/packages/suikoden-hd-remaster-save-editor-${version}-1-x86_64.pkg.tar.zst"
+          source/scripts/gitea-publish-package.sh \
+            arch Robert robert suikoden-hd-remaster-save-editor "${version}" "${package}"
+          source/scripts/gitea-release-assets.sh "${REF_NAME}" "${package}" "${package}.sha256"
+
+  rpm-package:
+    needs: build
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    env:
+      GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+      PACKAGE_PUBLISH_TOKEN: ${{ secrets.PACKAGE_PUBLISH_TOKEN }}
+      GITEA_PACKAGE_SERVER_URL: http://192.168.1.75:3001
+      GITEA_SERVER_URL: ${{ github.server_url }}
+      REPOSITORY_NAME: ${{ github.repository }}
+      COMMIT_SHA: ${{ github.sha }}
+      REF_NAME: ${{ github.ref_name }}
+      IS_RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - name: Install Fedora build and validation tools
+        run: |
+          dnf install -y \
+            git curl jq ca-certificates file findutils rpm-build rpmdevtools rpmlint \
+            desktop-file-utils libxml2 util-linux diffutils tar gzip
+
+      - name: Check out from this Gitea repository
+        run: |
+          git init source
+          cd source
+          git remote add origin "${GITEA_SERVER_URL}/${REPOSITORY_NAME}.git"
+          git -c http.extraHeader="Authorization: token ${GITEA_TOKEN}" fetch --depth 1 origin "${COMMIT_SHA}"
+          git checkout --detach FETCH_HEAD
+
+      - name: Obtain self-contained Linux package input
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/package-input" "${GITHUB_WORKSPACE}/packages"
+          if [ "${IS_RELEASE_TAG}" = "true" ]; then
+            version="$(source/scripts/project-version.sh "${REF_NAME}")"
+            asset="SuikodenHdSaveEditor-${REF_NAME}-linux-x64.tar.gz"
+            release_json="$(curl --silent --show-error --fail \
+              --header "Authorization: token ${GITEA_TOKEN}" \
+              "${GITEA_SERVER_URL}/api/v1/repos/${REPOSITORY_NAME}/releases/tags/${REF_NAME}")"
+            url="$(printf '%s' "${release_json}" | jq -er --arg name "${asset}" \
+              '.assets[] | select(.name == $name) | .browser_download_url')"
+            curl --silent --show-error --fail --location \
+              --header "Authorization: token ${GITEA_TOKEN}" \
+              --output "${GITHUB_WORKSPACE}/package-input/${asset}" "${url}"
+            tar -xzf "${GITHUB_WORKSPACE}/package-input/${asset}" \
+              -C "${GITHUB_WORKSPACE}/package-input"
+            bundle="${GITHUB_WORKSPACE}/package-input/SuikodenHdSaveEditor-linux-x64"
+          else
+            version="$(source/scripts/project-version.sh)"
+            dnf install -y dotnet-sdk-10.0
+            (
+              cd source
+              ./scripts/restore.sh
+              ./scripts/test.sh
+              APP_VERSION="${version}" ./scripts/publish-linux.sh
+            )
+            bundle="${GITHUB_WORKSPACE}/source/artifacts/publish/SuikodenHdSaveEditor-linux-x64"
+          fi
+          source/scripts/validate-package-input.sh "${bundle}"
+          printf '%s\n' "${version}" > "${GITHUB_WORKSPACE}/package-version"
+          printf '%s\n' "${bundle}" > "${GITHUB_WORKSPACE}/linux-bundle-path"
+          file "${bundle}/SuikodenHdSaveEditor.App"
+          ldd "${bundle}/SuikodenHdSaveEditor.App"
+
+      - name: Build, install, and validate RPM package
+        run: |
+          version="$(cat "${GITHUB_WORKSPACE}/package-version")"
+          bundle="$(cat "${GITHUB_WORKSPACE}/linux-bundle-path")"
+          useradd --create-home builder
+          chown -R builder:builder source "${GITHUB_WORKSPACE}/package-input" "${GITHUB_WORKSPACE}/packages"
+          runuser -u builder -- env TMPDIR="${GITHUB_WORKSPACE}/source/.tools/package-tmp" \
+            source/scripts/build-rpm-package.sh "${version}" "${bundle}" "${GITHUB_WORKSPACE}/packages"
+          package="${GITHUB_WORKSPACE}/packages/suikoden-hd-remaster-save-editor-${version}-1.x86_64.rpm"
+          rpmlint -r source/packaging/rpm/rpmlintrc \
+            source/packaging/rpm/suikoden-hd-remaster-save-editor.spec "${package}"
+          rpm --checksig "${package}"
+          rpm -qip "${package}"
+          rpm -qlp "${package}"
+          rpm -qpR "${package}"
+          # Fedora's minimal container defaults to tsflags=nodocs. Clear it so
+          # the package's licenses and notices are actually installation-tested.
+          dnf install -y --setopt=install_weak_deps=False --setopt=tsflags= "${package}"
+          source/scripts/validate-installed-package.sh
+          diff -qr "${bundle}" /usr/lib/suikoden-hd-remaster-save-editor
+          checksum="$(source/scripts/package-checksum.sh "${package}")"
+          (cd "$(dirname "${checksum}")" && sha256sum --check "$(basename "${checksum}")")
+
+      - name: Smoke-test installed RPM package under Xvfb
+        run: |
+          dnf install -y xorg-x11-server-Xvfb
+          Xvfb :99 -screen 0 1280x800x24 -nolisten tcp \
+            >"${GITHUB_WORKSPACE}/xvfb.log" 2>&1 &
+          xvfb_pid=$!
+          trap 'kill "${xvfb_pid}" 2>/dev/null || true' EXIT
+          sleep 1
+          DISPLAY=:99 suikoden-hd-remaster-save-editor --smoke-test
+
+      - name: Publish immutable RPM package and release assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version="$(cat "${GITHUB_WORKSPACE}/package-version")"
+          package="${GITHUB_WORKSPACE}/packages/suikoden-hd-remaster-save-editor-${version}-1.x86_64.rpm"
+          source/scripts/gitea-publish-package.sh \
+            rpm Robert root suikoden-hd-remaster-save-editor "${version}" "${package}"
+          source/scripts/gitea-release-assets.sh "${REF_NAME}" "${package}" "${package}.sha256"

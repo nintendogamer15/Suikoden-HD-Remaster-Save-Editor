@@ -6,6 +6,7 @@ SCRIPT_DIRECTORY="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
 "$SCRIPT_DIRECTORY/restore.sh"
 "$SCRIPT_DIRECTORY/check-workflows.sh"
+"$SCRIPT_DIRECTORY/check-packaging.sh"
 "$SCRIPT_DIRECTORY/check-format.sh"
 "$SCRIPT_DIRECTORY/build.sh"
 "$SCRIPT_DIRECTORY/test.sh"

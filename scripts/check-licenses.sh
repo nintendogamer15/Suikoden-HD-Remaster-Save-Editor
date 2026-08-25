@@ -16,6 +16,7 @@ required_licenses=(
     "Tmds.DBus-MIT.txt"
     "dotnet-MIT.txt"
     "dotnet-THIRD-PARTY-NOTICES.txt"
+    "ffix-save-editor-MIT.txt"
     "suisaveeditor-MIT.txt"
 )
 

@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Until the first release, only the current `main` branch is supported. After releases begin, the latest published version and `main` will receive save-integrity and local-security fixes.
+The latest published version and the current `main` branch receive save-integrity, local-security, and release-supply-chain fixes.
 
 ## Reporting
 

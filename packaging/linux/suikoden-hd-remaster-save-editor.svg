@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: 0BSD -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="background" x1="32" y1="24" x2="224" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#274B8E" />
+      <stop offset="1" stop-color="#17213F" />
+    </linearGradient>
+    <linearGradient id="page" x1="72" y1="48" x2="184" y2="208" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5FAFF" />
+      <stop offset="1" stop-color="#C6DCF2" />
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="232" height="232" rx="48" fill="url(#background)" />
+  <path d="M70 42h91l31 31v141H70z" fill="url(#page)" stroke="#80B9E8" stroke-width="6" stroke-linejoin="round" />
+  <path d="M161 42v32h31" fill="none" stroke="#80B9E8" stroke-width="6" stroke-linejoin="round" />
+  <path d="M92 102h72M92 126h72" stroke="#568AB8" stroke-width="9" stroke-linecap="round" />
+  <rect x="91" y="151" width="74" height="38" rx="9" fill="#274B8E" />
+  <path d="M111 161v18M128 161v18M145 161v18" stroke="#F5FAFF" stroke-width="6" stroke-linecap="round" />
+</svg>

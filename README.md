@@ -12,6 +12,8 @@
 - **DHolmes — [Suikoden II Game Save Hacking Guide](https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/7234)** and **Feral — [Suikoden II Armor/Equipment List](https://gamefaqs.gamespot.com/ps/198844-suikoden-ii/faqs/6620)**: stat storage, weapon cap, equipment classes, and defensive ranking research. These copyrighted guides have no software-license grant; only factual mappings are used.
 - **[Gensopedia's Suikoden II equipment reference](https://gensopedia.org/w/Equipment_%28Suikoden_II%29)**: CC BY-NC-SA factual cross-checks for equipment effects and compatibility. Its prose and tables are not redistributed.
 - **WiduraGoez — [Suikoden I & II HD Remaster 1.0.3 runtime-code research](https://www.nsboy.net/thread-31928-1-1.html)**: factual corroboration of remaster status and HP limits. No reuse license is claimed, and no cheat code or site prose is distributed.
+- **nintendogamer15 — [FFIX Save Editor](https://github.com/nintendogamer15/ffix-save-editor)**: MIT-licensed reference implementation for Gitea-native releases, immutable package publication, and Arch/Fedora packaging conventions.
+- **nintendogamer15 — [Final Fantasy IV 3D Remake Save Editor](https://github.com/nintendogamer15/Final-Fantasy-IV-3D-Remake-Save-Editor)**: corroborating LGPL-3.0-or-later packaging and isolated Gitea runner reference. Its project-specific application code is not incorporated here.
 
 Full terms, exact inspected commits, and material-use details are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [docs/UPSTREAM_SOURCES.md](docs/UPSTREAM_SOURCES.md).
 
@@ -36,12 +38,42 @@ The normal UI exposes only fields supported by inspected source code and supplie
 
 ## Download and install
 
-Download the standalone archive for your platform from a GitHub Actions build or published GitHub release when one is available. No .NET installation is required.
+Download the standalone archive for your platform from a GitHub or Gitea release. No .NET installation is required.
 
-- **Windows x64:** extract `SuikodenHdSaveEditor-windows-x64.zip`, then run `SuikodenHdSaveEditor.App.exe`.
-- **Linux x64:** extract `SuikodenHdSaveEditor-linux-x64.tar.gz`, make `SuikodenHdSaveEditor.App` executable if needed, and run it from a desktop session.
+- **Windows x64:** extract `SuikodenHdSaveEditor-vX.Y.Z-windows-x64.zip`, then run `SuikodenHdSaveEditor.App.exe`.
+- **Linux x64:** extract `SuikodenHdSaveEditor-vX.Y.Z-linux-x64.tar.gz`, make `SuikodenHdSaveEditor.App` executable if needed, and run it from a desktop session.
 
 Compare the archive against `SHA256SUMS.txt`. Keep the application and its included `LICENSE`, `LICENSES/`, and `THIRD_PARTY_NOTICES.md` together.
+
+### Arch Linux repository
+
+Download the existing repository key, verify the fingerprint `8BB3 2088 A56D CBB2 33A2 5E0F AF39 628B EDB7 B74E`, and trust it locally:
+
+```bash
+curl -fsSLo /tmp/robert-arch-repository.key https://git.11091994.xyz/api/packages/Robert/arch/repository.key
+gpg --show-keys --with-fingerprint /tmp/robert-arch-repository.key
+sudo pacman-key --add /tmp/robert-arch-repository.key
+sudo pacman-key --lsign-key 8BB32088A56DCBB233A25E0FAF39628BEDB7B74E
+```
+
+Add the repository to `/etc/pacman.conf`, then install with `sudo pacman -Syu suikoden-hd-remaster-save-editor`:
+
+```ini
+[robert]
+SigLevel = Required
+Server = https://git.11091994.xyz/api/packages/Robert/arch/$repo/$arch
+```
+
+### Fedora repository
+
+On current Fedora, add Gitea's generated repository file and install the package:
+
+```bash
+sudo dnf config-manager addrepo --from-repofile=https://git.11091994.xyz/api/packages/Robert/rpm.repo
+sudo dnf install suikoden-hd-remaster-save-editor
+```
+
+Normal `pacman -Syu` or `dnf upgrade` runs deliver package updates.
 
 ## Save locations
 
@@ -84,4 +116,4 @@ Build automation and private opt-in integration tests are described in [docs/TES
 
 Original project code is licensed under the OSI-approved [Zero-Clause BSD license](LICENSE), SPDX `0BSD`. Substantially ported upstream work remains subject to its MIT notices. Avalonia, .NET, and distributed transitive-component notices are included under [LICENSES](LICENSES). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the complete summary.
 
-Technical documentation: [architecture](docs/ARCHITECTURE.md), [save envelope](docs/SAVE_FORMAT.md), [Suikoden I format](docs/SUIKODEN1_FORMAT.md), [Suikoden II format](docs/SUIKODEN2_FORMAT.md), and [testing](docs/TESTING.md).
+Technical documentation: [architecture](docs/ARCHITECTURE.md), [save envelope](docs/SAVE_FORMAT.md), [Suikoden I format](docs/SUIKODEN1_FORMAT.md), [Suikoden II format](docs/SUIKODEN2_FORMAT.md), [testing](docs/TESTING.md), and [packaging/releases](docs/PACKAGING.md).

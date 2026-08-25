@@ -7,6 +7,7 @@ Install the .NET 10 SDK, `xvfb`, and `zip`, then run:
 ```bash
 ./scripts/restore.sh
 ./scripts/check-workflows.sh
+./scripts/check-packaging.sh
 ./scripts/check-format.sh
 ./scripts/build.sh
 ./scripts/test.sh
@@ -41,7 +42,13 @@ Keep `TMPDIR` inside an ignored project directory when the working-scope policy 
 
 ## Workflow validation
 
-Both workflow YAML files are checked with `actionlint`. GitHub Actions can execute after the repository is published. The Gitea workflow cannot be live-tested until a mirror and compatible self-hosted runner exist; it deliberately has no release publication or credentials and calls the same `scripts/ci.sh` entry point. Change its single `runs-on` label if the runner uses a label other than `ubuntu-latest`.
+All GitHub and Gitea workflow YAML files are checked with `actionlint`. Gitea performs checkout with native Git and its built-in token rather than GitHub-hosted checkout/setup/artifact actions. Branch and manual CI call the same `scripts/ci.sh` entry point. A manual release-workflow dispatch builds and installs both native packages but publication conditions remain false unless the ref is a valid release tag.
+
+## Native package validation
+
+Arch validation runs in `archlinux:base-devel`: build with `makepkg`, inspect with `namcap` and pacman metadata tools, install with pacman, validate the command/desktop/icon/licenses/bundle, compare the installed application directory byte-for-byte with its input, and run `--smoke-test` under Xvfb. Fedora validation follows the equivalent `rpmbuild`, rpmlint, rpm query, DNF install, installed-payload comparison, and Xvfb launch sequence in a current Fedora container.
+
+Both paths reject private saves, references, tests, fixtures, debug symbols, package outputs, internal package infrastructure, and credentials from their input. Package and release helpers are syntax/static checked locally. Registry immutability and Gitea API calls reach their final live boundary only after an approved new tag; see [PACKAGING.md](PACKAGING.md).
 
 ## Release artifact audit
 

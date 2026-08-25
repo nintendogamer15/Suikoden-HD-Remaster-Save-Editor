@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: 0BSD
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Suikoden I & II HD Remaster Save Editor
+Comment=Safely edit Suikoden I and II HD Remaster save files
+TryExec=suikoden-hd-remaster-save-editor
+Exec=suikoden-hd-remaster-save-editor %f
+Icon=suikoden-hd-remaster-save-editor
+Terminal=false
+Categories=Game;
+Keywords=Suikoden;Save;Editor;
+StartupNotify=true

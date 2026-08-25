@@ -15,9 +15,10 @@ dotnet publish "$APP_PROJECT" \
     --self-contained true \
     --no-restore \
     --output "$LINUX_PUBLISH_DIRECTORY" \
+    -p:Version="$APP_VERSION" \
     -p:DebugType=None \
     -p:DebugSymbols=false
 
 find "$LINUX_PUBLISH_DIRECTORY" -type f -name '*.pdb' -delete
 stage_legal_files "$LINUX_PUBLISH_DIRECTORY"
-test -x "$LINUX_PUBLISH_DIRECTORY/SuikodenHdSaveEditor.App"
+test -x "$LINUX_PUBLISH_DIRECTORY/$APP_EXECUTABLE"

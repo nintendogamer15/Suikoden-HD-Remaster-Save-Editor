@@ -14,3 +14,5 @@ This inventory reflects the locked `net10.0` standalone application graph inspec
 | .NET self-contained runtime | .NET 10 runtime selected by SDK 10.0.400 | Managed runtime and base class libraries | `dotnet-MIT.txt`, `dotnet-THIRD-PARTY-NOTICES.txt` |
 
 The package lock files are authoritative for exact dependency resolution. Avalonia.BuildServices 11.3.2 is build-time infrastructure and is not copied into published application bundles.
+
+The source repository's Gitea release and immutable package-publication helpers are adapted from the MIT-licensed `ffix-save-editor`; its source notice is preserved in `ffix-save-editor-MIT.txt`. It is build/release automation, not an application runtime dependency.

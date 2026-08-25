@@ -4,6 +4,12 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+### Added
+
+- Native Arch Linux and Fedora RPM packaging for the self-contained Linux application.
+- Gitea-native CI and tag release workflows that build Linux/Windows archives, validate installed packages, create Gitea releases, and publish immutable packages to the existing repositories.
+- Public Arch and Fedora repository installation instructions plus package/release maintenance documentation.
+
 ## 1.0.0 - 2026-08-25
 
 ### Added

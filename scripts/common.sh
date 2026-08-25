@@ -8,10 +8,18 @@ REPOSITORY_ROOT="$(CDPATH= cd -- "$SCRIPT_DIRECTORY/.." && pwd)"
 SOLUTION="$REPOSITORY_ROOT/SuikodenHdSaveEditor.slnx"
 APP_PROJECT="$REPOSITORY_ROOT/src/SuikodenHdSaveEditor.App/SuikodenHdSaveEditor.App.csproj"
 ARTIFACTS_DIRECTORY="$REPOSITORY_ROOT/artifacts"
+PACKAGE_NAME="suikoden-hd-remaster-save-editor"
+APP_EXECUTABLE="SuikodenHdSaveEditor.App"
 LINUX_BUNDLE_NAME="SuikodenHdSaveEditor-linux-x64"
 WINDOWS_BUNDLE_NAME="SuikodenHdSaveEditor-windows-x64"
 LINUX_PUBLISH_DIRECTORY="$ARTIFACTS_DIRECTORY/publish/$LINUX_BUNDLE_NAME"
 WINDOWS_PUBLISH_DIRECTORY="$ARTIFACTS_DIRECTORY/publish/$WINDOWS_BUNDLE_NAME"
+PROJECT_VERSION="$("$SCRIPT_DIRECTORY/project-version.sh")"
+APP_VERSION="${APP_VERSION:-$PROJECT_VERSION}"
+if [[ ! $APP_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "APP_VERSION must be X.Y.Z, got: $APP_VERSION" >&2
+    exit 2
+fi
 
 if [[ -x "$REPOSITORY_ROOT/.dotnet/dotnet" ]]; then
     export DOTNET_ROOT="$REPOSITORY_ROOT/.dotnet"

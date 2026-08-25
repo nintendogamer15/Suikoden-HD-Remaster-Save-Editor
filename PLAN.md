@@ -14,6 +14,7 @@ Status values: `pending`, `in progress`, `verified`, or `blocked`.
 | 8. CI, standalone builds, smoke tests, archives, documentation | verified | Shared `ci.sh`; both RIDs published; Xvfb passed; actionlint 1.7.12 passed; both archives audited |
 | 9. Final corruption-risk, licensing, claims, and portability review | verified | 65 tests; private/oracle and every-section UI suite passed; originals unchanged; clones clean; licenses/artifacts and exact Git payload audited |
 | 10. Party max-stat and recommended-equipment action; v1.0.0 release | verified | 65 tests, full local/private/oracle verification, and hosted CI run 32824368228 passed; v1.0.0 published from the exact passing commit with audited Linux/Windows artifacts |
+| 11. Native Arch/Fedora packaging and Gitea-native releases | verified | Arch and Fedora 44 packages built and installed in isolated distro roots; command/metadata/license/payload checks and Xvfb launches passed; actionlint 1.7.12 passed |
 
 ## Known verification boundary
 

@@ -15,9 +15,10 @@ dotnet publish "$APP_PROJECT" \
     --self-contained true \
     --no-restore \
     --output "$WINDOWS_PUBLISH_DIRECTORY" \
+    -p:Version="$APP_VERSION" \
     -p:DebugType=None \
     -p:DebugSymbols=false
 
 find "$WINDOWS_PUBLISH_DIRECTORY" -type f -name '*.pdb' -delete
 stage_legal_files "$WINDOWS_PUBLISH_DIRECTORY"
-test -f "$WINDOWS_PUBLISH_DIRECTORY/SuikodenHdSaveEditor.App.exe"
+test -f "$WINDOWS_PUBLISH_DIRECTORY/$APP_EXECUTABLE.exe"

@@ -30,6 +30,12 @@ Shiro's [Suikoden Character Power-Up FAQ](https://gamefaqs.gamespot.com/ps/19884
 
 Exact inspected commits and usage details are recorded in `docs/UPSTREAM_SOURCES.md`.
 
+## Packaging and Gitea automation references
+
+The immutable package-publication and native Gitea release helpers are adapted from nintendogamer15's MIT-licensed [FFIX Save Editor](https://github.com/nintendogamer15/ffix-save-editor), copyright (c) 2026 ffix-save-editor contributors. Its notice is preserved in `LICENSES/ffix-save-editor-MIT.txt` and in the substantially adapted scripts.
+
+nintendogamer15's [Final Fantasy IV 3D Remake Save Editor](https://github.com/nintendogamer15/Final-Fantasy-IV-3D-Remake-Save-Editor), licensed LGPL-3.0-or-later, was also inspected to corroborate the Docker-in-Docker Gitea workflow, Arch repository, RPM repository, installation-validation, and documentation conventions. No FFIV-specific application code or LGPL-covered source was copied into this project.
+
 ## Distributed runtime dependencies
 
 The standalone application distributes Avalonia and a self-contained .NET runtime, plus their transitive components. AvaloniaUI OÜ and contributors license Avalonia under MIT; see `LICENSES/Avalonia-MIT.txt`. Avalonia's desktop graph also distributes ANGLE, Inter, HarfBuzzSharp, MicroCom.Runtime, SkiaSharp, and Tmds.DBus.Protocol under the terms identified in `LICENSES/DEPENDENCIES.md`, with each applicable license text in `LICENSES/`. The .NET Foundation and contributors license .NET under MIT; see `LICENSES/dotnet-MIT.txt` and `LICENSES/dotnet-THIRD-PARTY-NOTICES.txt`. The dependency inventory and applicable license texts are included in every release archive.

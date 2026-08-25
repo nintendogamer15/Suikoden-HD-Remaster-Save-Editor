@@ -1,0 +1,5 @@
+# This is a desktop GUI, so a command-line manual page is not useful.
+addFilter(r"no-manual-page-for-binary suikoden-hd-remaster-save-editor$")
+
+# .NET and Avalonia load these native platform libraries dynamically.
+addFilter(r"explicit-lib-dependency (krb5-libs|libICE|libSM|libX11|libgcc|libicu|libstdc\+\+|openssl-libs)$")

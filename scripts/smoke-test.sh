@@ -9,7 +9,7 @@ if ! command -v xvfb-run >/dev/null 2>&1; then
     exit 1
 fi
 
-test -x "$LINUX_PUBLISH_DIRECTORY/SuikodenHdSaveEditor.App"
+test -x "$LINUX_PUBLISH_DIRECTORY/$APP_EXECUTABLE"
 export XDG_CONFIG_HOME="$REPOSITORY_ROOT/.tools/smoke-config"
 export LIBGL_ALWAYS_SOFTWARE=1
 mkdir -p "$XDG_CONFIG_HOME"
@@ -28,4 +28,4 @@ timeout 30s xvfb-run -a -s "-screen 0 1280x800x24 -nolisten tcp" \
         [[ -S "/tmp/.X11-unix/X${display_number}" ]]
         sleep 1
         exec "$1" --smoke-test
-    ' smoke-runner "$LINUX_PUBLISH_DIRECTORY/SuikodenHdSaveEditor.App"
+    ' smoke-runner "$LINUX_PUBLISH_DIRECTORY/$APP_EXECUTABLE"

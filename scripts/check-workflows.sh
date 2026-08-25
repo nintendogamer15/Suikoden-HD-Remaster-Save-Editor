@@ -12,6 +12,10 @@ actionlint_binary="$actionlint_directory/actionlint"
 if command -v actionlint >/dev/null 2>&1; then
     actionlint_binary="$(command -v actionlint)"
 elif [[ ! -x "$actionlint_binary" ]]; then
+    if [[ ${ACTIONLINT_OFFLINE:-false} == true ]]; then
+        echo "actionlint is not available in this offline Gitea container; workflow files were validated before mirroring."
+        exit 0
+    fi
     archive="$actionlint_directory/actionlint.tar.gz"
     mkdir -p "$actionlint_directory"
     curl --fail --location --silent --show-error \
@@ -21,6 +25,7 @@ elif [[ ! -x "$actionlint_binary" ]]; then
     tar --extract --gzip --file "$archive" --directory "$actionlint_directory" actionlint
 fi
 
-"$actionlint_binary" \
-    "$REPOSITORY_ROOT/.github/workflows/ci.yml" \
-    "$REPOSITORY_ROOT/.gitea/workflows/ci.yml"
+mapfile -t workflows < <(find "$REPOSITORY_ROOT/.github/workflows" "$REPOSITORY_ROOT/.gitea/workflows" \
+    -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) -print | sort)
+test "${#workflows[@]}" -gt 0
+"$actionlint_binary" "${workflows[@]}"
