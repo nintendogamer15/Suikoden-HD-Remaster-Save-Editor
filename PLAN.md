@@ -13,7 +13,7 @@ Status values: `pending`, `in progress`, `verified`, or `blocked`.
 | 7. Safe save, backup, undo/redo, and validation | verified | Save-As, refusal, backup, atomic failure, revalidation, history, and UI command tests |
 | 8. CI, standalone builds, smoke tests, archives, documentation | verified | Shared `ci.sh`; both RIDs published; Xvfb passed; actionlint 1.7.12 passed; both archives audited |
 | 9. Final corruption-risk, licensing, claims, and portability review | verified | 65 tests; private/oracle and every-section UI suite passed; originals unchanged; clones clean; licenses/artifacts and exact Git payload audited |
-| 10. Party max-stat and recommended-equipment action; v1.0.0 release | in progress | Implementation, full local CI, packaging, and all-save private-copy/oracle tests pass; push, hosted CI, and GitHub release pending |
+| 10. Party max-stat and recommended-equipment action; v1.0.0 release | verified | 65 tests, full local/private/oracle verification, and hosted CI run 32824368228 passed; v1.0.0 published from the exact passing commit with audited Linux/Windows artifacts |
 
 ## Known verification boundary
 
