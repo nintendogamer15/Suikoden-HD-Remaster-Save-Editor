@@ -1,0 +1,33 @@
+# Private, irreplaceable save inputs (exact inventory from 2026-08-25).
+/saves/gsd1/Data0
+/saves/gsd1/Data1
+/saves/gsd1/Data2
+/saves/gsd1/Data16
+/saves/gsd2/Data0
+/saves/gsd2/Data1
+/saves/gsd2/Data2
+/saves/gsd2/Data3
+/saves/gsd2/Data4
+/saves/gsd2/Data5
+/saves/gsd2/Data16
+/saves/share/_sharetmpsave0
+
+# Research-only upstream clones; never distribute or commit.
+/reference/
+
+# Build, test, IDE, and local-only output.
+**/bin/
+**/obj/
+/artifacts/
+/.dotnet/
+/.tools/
+/TestResults/
+/.vs/
+/.vscode/
+/.idea/
+*.user
+*.suo
+*.log
+*.tmp
+*.bak
+*.userprefs
