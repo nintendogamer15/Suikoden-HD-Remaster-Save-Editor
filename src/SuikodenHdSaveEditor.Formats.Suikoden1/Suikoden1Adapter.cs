@@ -51,6 +51,13 @@ public sealed class Suikoden1Adapter
         document.MarkChanged();
     }
 
+    public void SetHeadquartersLevel(int value)
+    {
+        Guard.Valid(value is >= 0 and <= 4, "Headquarters level must be 0 through 4; level 4 is the cap.");
+        Headquarters["level"] = value;
+        document.MarkChanged();
+    }
+
     public void SetNames(string heroName, string headquartersName)
     {
         Guard.Valid(!string.IsNullOrWhiteSpace(heroName), "The hero name cannot be empty.");
@@ -196,6 +203,12 @@ public sealed class Suikoden1Adapter
         if (!partyCodes.Any(node => node?.GetValue<int>() == ProtagonistId))
         {
             issues.Add(new(ValidationSeverity.Error, "party_data.chara_code", "Tir (character 8) is required; removing him is known to cause a black screen."));
+        }
+
+        int headquartersLevel = HeadquartersLevel;
+        if (headquartersLevel is < 0 or > 4)
+        {
+            issues.Add(new(ValidationSeverity.Error, "shiro_data.level", "Headquarters level must be 0 through 4; level 4 is the cap."));
         }
 
         HashSet<int> battleCharacters = Players.Select(node => node!["chara_no"]!.GetValue<int>()).ToHashSet();

@@ -7,6 +7,7 @@
 - **faospark — [Suikoden II HD Remaster Save Editor](https://github.com/faospark/suisaveeditor)**: the MIT-licensed source of Suikoden II mappings, game data, restrictions, and editor feature research.
 - **asilverthorn — [Suikoden reference documentation](https://github.com/asilverthorn/suikoden_ref)**: Suikoden I save research and factual reference documentation. No obvious license file was present when inspected, so this project credits the research, independently verifies mappings, and does not treat it as MIT.
 - Additional factual provenance credited by the projects above: **[Suikosource's Suikoden II item guide](https://suikosource.com/games/gs2/guides/itemdigits.php)**, **[makotech222's suiko2edit](https://github.com/makotech222/suiko2edit)**, and **[nesrak1's UABEA](https://github.com/nesrak1/UABEA)**.
+- **Cyril — [Suikoden Guide and Walkthrough](https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/80674/part-10-to-live-and-die-freely)**: factual corroboration that Suikoden I headquarters level 4 is the final development level; guide copyright remains with its author.
 
 Full terms, exact inspected commits, and material-use details are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [docs/UPSTREAM_SOURCES.md](docs/UPSTREAM_SOURCES.md).
 
@@ -18,7 +19,7 @@ Full terms, exact inspected commits, and material-use details are in [THIRD_PART
 - Detects Suikoden I or II from verified decrypted schema signatures rather than trusting the filename.
 - Preserves unknown JSON properties, arrays, ordering, duplicate items, and unrelated values.
 - Provides game-specific overview, party, character, inventory, recruitment, headquarters/progress, and read-only Advanced Data views.
-- Includes searchable characters and item references, verified item/category editing, undo/redo, reload, recent-file paths, and slot-folder browsing.
+- Includes searchable, name-first dropdowns for inventory and party editing; explained recruitment states; capped headquarters-level choices; per-field Apply and transactional Apply All; undo/redo; reload; recent-file paths; and slot-folder browsing.
 - Defaults to Save As. Explicit overwrite first creates a timestamped backup, then uses validated temporary output and atomic replacement.
 - Works fully offline with no telemetry and never sends save data anywhere.
 
@@ -79,4 +80,3 @@ Build automation and private opt-in integration tests are described in [docs/TES
 Original project code is licensed under the OSI-approved [Zero-Clause BSD license](LICENSE), SPDX `0BSD`. Substantially ported upstream work remains subject to its MIT notices. Avalonia, .NET, and distributed transitive-component notices are included under [LICENSES](LICENSES). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the complete summary.
 
 Technical documentation: [architecture](docs/ARCHITECTURE.md), [save envelope](docs/SAVE_FORMAT.md), [Suikoden I format](docs/SUIKODEN1_FORMAT.md), [Suikoden II format](docs/SUIKODEN2_FORMAT.md), and [testing](docs/TESTING.md).
-

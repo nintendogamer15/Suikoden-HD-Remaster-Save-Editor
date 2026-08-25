@@ -18,7 +18,7 @@ Install the .NET 10 SDK, `xvfb`, and `zip`, then run:
 
 `./scripts/ci.sh` runs that sequence. The tests use only synthetic fixtures in CI. No real or sanitized derivative save is committed.
 
-The suites cover envelope compatibility/error handling, schema detection, lossless unknown nodes, no-edit round trips, character/stat/MP/inventory/recruitment/party edits, count synchronization, restrictions, bulk-safe items, backups, atomic failure behavior, output revalidation, slot browsing, edit history, recent-path privacy, and view-model behavior.
+The suites cover envelope compatibility/error handling, schema detection, lossless unknown nodes, no-edit round trips, character/stat/MP/inventory/recruitment/party edits, count synchronization, restrictions, bulk-safe items, named dropdown contents, transactional Apply All (including party and HP dependencies), backups, atomic failure behavior, output revalidation, slot browsing, edit history, recent-path privacy, and view-model behavior.
 
 ## Opt-in private-save integration
 

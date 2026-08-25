@@ -22,6 +22,8 @@ asilverthorn's [suikoden_ref](https://github.com/asilverthorn/suikoden_ref) had 
 
 faospark also credits the [Suikosource item digits guide](https://suikosource.com/games/gs2/guides/itemdigits.php) and [makotech222/suiko2edit](https://github.com/makotech222/suiko2edit) for Suikoden II research. asilverthorn credits [UABEA](https://github.com/nesrak1/UABEA) as an extraction tool. These sources are credited for provenance; they are not bundled dependencies.
 
+Cyril's [Suikoden Guide and Walkthrough](https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/80674/part-10-to-live-and-die-freely) was used only to corroborate the factual Suikoden I headquarters cap: its level-4 form is described as the final development. No guide prose or other copyrighted material is distributed.
+
 Exact inspected commits and usage details are recorded in `docs/UPSTREAM_SOURCES.md`.
 
 ## Distributed runtime dependencies

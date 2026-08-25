@@ -25,6 +25,9 @@
             <Setter Property="MinHeight" Value="34" />
             <Setter Property="CornerRadius" Value="6" />
         </Style>
+        <Style Selector="AutoCompleteBox">
+            <Setter Property="MinHeight" Value="34" />
+        </Style>
         <Style Selector="Border.card">
             <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />

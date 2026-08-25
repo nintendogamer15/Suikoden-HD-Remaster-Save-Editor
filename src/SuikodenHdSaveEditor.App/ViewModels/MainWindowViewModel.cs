@@ -36,6 +36,10 @@ public sealed class MainWindowViewModel : ObservableObject
 
         Additional factual provenance credited by upstream work: Suikosource's Suikoden II item-digits guide, makotech222/suiko2edit, and nesrak1/UABEA.
 
+        Cyril — Suikoden Guide and Walkthrough
+        https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/80674/part-10-to-live-and-die-freely
+        Credited factual corroboration that Suikoden I headquarters level 4 is its final development. No guide prose is distributed.
+
         LICENSES
 
         Original project code: Zero-Clause BSD (0BSD).
@@ -47,7 +51,6 @@ public sealed class MainWindowViewModel : ObservableObject
 
         This independent fan project is not affiliated with, authorized by, sponsored by, or endorsed by Konami or any upstream author. Suikoden and related names are trademarks of their respective owners. No Konami logos, extracted artwork, music, fonts, or other proprietary game assets are included.
 
-        Privacy: saves are processed locally. The application has no network code, telemetry, or save-content persistence. Recent files store paths only.
         """;
 
     private static readonly string[] SectionNames =
@@ -108,6 +111,7 @@ public sealed class MainWindowViewModel : ObservableObject
         ReloadCommand = new AsyncRelayCommand(ReloadAsync, () => document?.OriginalPath is not null);
         UndoCommand = new RelayCommand(Undo, () => history.CanUndo);
         RedoCommand = new RelayCommand(Redo, () => history.CanRedo);
+        ApplyAllCommand = new RelayCommand(ApplyAll, () => document is not null && IsFieldEditor && Fields.Any(field => !field.IsReadOnly));
         GiveAllSafeItemsCommand = new AsyncRelayCommand(GiveAllSafeItemsAsync, () => document?.Game == GameKind.Suikoden2);
         AboutCommand = new AsyncRelayCommand(() => interaction.ShowAboutAsync(CreditsAndLicenses));
     }
@@ -142,6 +146,8 @@ public sealed class MainWindowViewModel : ObservableObject
 
     public ICommand RedoCommand { get; }
 
+    public ICommand ApplyAllCommand { get; }
+
     public ICommand GiveAllSafeItemsCommand { get; }
 
     public ICommand AboutCommand { get; }
@@ -158,6 +164,11 @@ public sealed class MainWindowViewModel : ObservableObject
                 OnPropertyChanged(nameof(IsAdvancedData));
                 OnPropertyChanged(nameof(IsCredits));
                 OnPropertyChanged(nameof(IsFieldEditor));
+                OnPropertyChanged(nameof(IsCharacters));
+                OnPropertyChanged(nameof(IsInventory));
+                OnPropertyChanged(nameof(IsRecruitment));
+                OnPropertyChanged(nameof(IsSearchVisible));
+                OnPropertyChanged(nameof(IsApplyAllVisible));
                 RefreshCharacterFilter();
                 RebuildFields();
             }
@@ -327,6 +338,16 @@ public sealed class MainWindowViewModel : ObservableObject
 
     public bool IsFieldEditor => !IsAdvancedData && !IsCredits;
 
+    public bool IsCharacters => SelectedSection == "Characters";
+
+    public bool IsInventory => SelectedSection == "Inventory";
+
+    public bool IsRecruitment => SelectedSection == "Recruitment";
+
+    public bool IsSearchVisible => IsCharacters || IsInventory || IsRecruitment;
+
+    public bool IsApplyAllVisible => HasDocument && IsFieldEditor;
+
     public async Task OpenPathAsync(string path)
     {
         if (!await CanDiscardCurrentAsync().ConfigureAwait(true))
@@ -437,7 +458,7 @@ public sealed class MainWindowViewModel : ObservableObject
 
         bool accepted = await interaction.ConfirmAsync(
             "Overwrite with backup",
-            $"This will create a timestamped backup, then atomically replace:\n{document.OriginalPath}\n\nSteam Cloud may restore an older copy. Close the game first.",
+            $"This will create a timestamped backup, then atomically replace:\n{document.OriginalPath}\n\nClose the game before continuing.",
             "Create backup and overwrite").ConfigureAwait(true);
         if (!accepted)
         {
@@ -551,6 +572,83 @@ public sealed class MainWindowViewModel : ObservableObject
         }
     }
 
+    private void ApplyAll()
+    {
+        if (document is null)
+        {
+            return;
+        }
+
+        EditorFieldViewModel[] editable = Fields.Where(field => !field.IsReadOnly).ToArray();
+        if (editable.Length == 0)
+        {
+            StatusMessage = "There are no editable fields in this section.";
+            return;
+        }
+
+        EditorFieldViewModel[] pending = editable.Where(field => field.HasPendingValue).ToArray();
+        if (pending.Length == 0)
+        {
+            StatusMessage = "There are no pending field changes in this section.";
+            return;
+        }
+
+        ApplyEdit($"Applied all {pending.Length} changed fields in {SelectedSection}", () =>
+        {
+            if (SelectedSection == "Party")
+            {
+                int[] party = editable.Select(field => ParseLabeledInteger(field.Value, "character")).ToArray();
+                if (document.Game == GameKind.Suikoden1)
+                {
+                    new Suikoden1Adapter(document).SetParty(party);
+                }
+                else
+                {
+                    new Suikoden2Adapter(document).SetParty(party);
+                }
+
+                return;
+            }
+
+            foreach (EditorFieldViewModel field in OrderDependentFields(pending))
+            {
+                field.ApplyValue();
+            }
+        });
+    }
+
+    private static List<EditorFieldViewModel> OrderDependentFields(IReadOnlyList<EditorFieldViewModel> pending)
+    {
+        List<EditorFieldViewModel> ordered = [.. pending];
+        EditorFieldViewModel? maximumHp = ordered.FirstOrDefault(field => field.Path.EndsWith(".max_hp", StringComparison.Ordinal));
+        EditorFieldViewModel? currentHp = ordered.FirstOrDefault(field =>
+            field.Path.EndsWith(".hp", StringComparison.Ordinal) || field.Path.EndsWith(".now_hp", StringComparison.Ordinal));
+        if (maximumHp is null || currentHp is null)
+        {
+            return ordered;
+        }
+
+        int newMaximum = ParseInteger(maximumHp.Value);
+        int newCurrent = ParseInteger(currentHp.Value);
+        Guard.Valid(newMaximum >= newCurrent, "Maximum HP cannot be below current HP.");
+        int oldMaximum = ParseInteger(maximumHp.OriginalValue);
+        int insertAt = Math.Min(ordered.IndexOf(maximumHp), ordered.IndexOf(currentHp));
+        ordered.Remove(maximumHp);
+        ordered.Remove(currentHp);
+        if (newCurrent > oldMaximum)
+        {
+            ordered.Insert(insertAt, maximumHp);
+            ordered.Insert(insertAt + 1, currentHp);
+        }
+        else
+        {
+            ordered.Insert(insertAt, currentHp);
+            ordered.Insert(insertAt + 1, maximumHp);
+        }
+
+        return ordered;
+    }
+
     private void ApplyEdit(string description, Action edit)
     {
         if (document is null)
@@ -598,6 +696,7 @@ public sealed class MainWindowViewModel : ObservableObject
         RebuildFields();
         OnPropertyChanged(nameof(HasDocument));
         OnPropertyChanged(nameof(IsSuikoden2));
+        OnPropertyChanged(nameof(IsApplyAllVisible));
         RaiseCommandStates();
     }
 
@@ -716,6 +815,8 @@ public sealed class MainWindowViewModel : ObservableObject
         {
             Fields.Add(field);
         }
+
+        ((RelayCommand)ApplyAllCommand).RaiseCanExecuteChanged();
     }
 
     private void BuildSuikoden1Fields(Suikoden1Adapter adapter)
@@ -728,7 +829,7 @@ public sealed class MainWindowViewModel : ObservableObject
                 AddString("Headquarters name", "playerCName", adapter.HeadquartersName, value => adapter.SetNames(adapter.HeroName, value));
                 AddNumber("Potch", "party_data.mochi_kin", adapter.Potch, adapter.SetPotch);
                 AddReadOnly("Play time (raw seconds/ticks)", "playTime", adapter.PlayTime.ToString(CultureInfo.InvariantCulture));
-                AddReadOnly("Headquarters level", "shiro_data.level", adapter.HeadquartersLevel.ToString(CultureInfo.InvariantCulture));
+                AddHeadquartersLevelChoice("Headquarters level", "shiro_data.level", adapter.HeadquartersLevel, adapter.SetHeadquartersLevel);
                 break;
             case "Party":
                 BuildSuikoden1Party(adapter);
@@ -743,8 +844,8 @@ public sealed class MainWindowViewModel : ObservableObject
                 BuildSuikoden1Recruitment(adapter);
                 break;
             case "Headquarters / Progress":
-                AddReadOnly("Headquarters level", "shiro_data.level", adapter.HeadquartersLevel.ToString(CultureInfo.InvariantCulture));
-                AddReadOnly("Unexposed headquarters fields", "shiro_data", "Preserved in Advanced Data", "Only the headquarters level is confidently identified. Other shiro_data fields are intentionally read-only.");
+                AddHeadquartersLevelChoice("Headquarters level", "shiro_data.level", adapter.HeadquartersLevel, adapter.SetHeadquartersLevel);
+                AddReadOnly("Unexposed headquarters fields", "shiro_data", "Preserved in Advanced Data", "Other shiro_data fields are intentionally read-only because their meanings are not sufficiently verified.");
                 AddReadOnly("Story flags", "tmpEventFlagS / storyFlagS", "Preserved in Advanced Data", "Meanings and safe transitions are not sufficiently documented for normal editing.");
                 break;
         }
@@ -752,22 +853,28 @@ public sealed class MainWindowViewModel : ObservableObject
 
     private void BuildSuikoden1Party(Suikoden1Adapter adapter)
     {
+        string[] characterChoices =
+        [
+            FormatCharacterChoice(-1, "Empty"),
+            .. adapter.Characters.OrderBy(character => character.Id).Select(character => FormatCharacterChoice(character.Id, character.Name)),
+        ];
         int[] values = adapter.PartyCharacterIds.ToArray();
         for (int index = 0; index < values.Length; index++)
         {
             int captured = index;
             string name = values[index] == -1 ? "Empty" : Suikoden1Catalog.CharacterName(values[index]);
-            AddNumber(
+            AddChoice(
                 $"Party slot {index + 1} · {name}",
                 $"party_data.chara_code[{index}]",
-                values[index],
+                FormatCharacterChoice(values[index], name),
+                characterChoices,
                 value =>
                 {
                     int[] changed = adapter.PartyCharacterIds.ToArray();
-                    changed[captured] = value;
+                    changed[captured] = ParseLabeledInteger(value, "character");
                     adapter.SetParty(changed);
                 },
-                index == 0 ? "Tir (8) must remain somewhere in the six slots. Use -1 only for an empty slot." : "Use -1 for an empty slot; only IDs with player_base battle records are accepted.");
+                "Tir must remain somewhere in the six slots. Only characters with a battle record in this save are offered.");
         }
     }
 
@@ -799,7 +906,12 @@ public sealed class MainWindowViewModel : ObservableObject
 
         AddNumber("Weapon ID", $"player_base[{id}].buki_data.buki_id", character.WeaponId, value => adapter.SetWeapon(id, value, adapter.Characters.Single(item => item.Id == id).WeaponLevel), "Weapon-name mappings are not verified, so only the numeric ID is shown.");
         AddNumber("Weapon level", $"player_base[{id}].buki_data.level", character.WeaponLevel, value => adapter.SetWeapon(id, adapter.Characters.Single(item => item.Id == id).WeaponId, value));
-        AddNumber("Equipped rune ID", $"player_base[{id}].monsyo_data.monsyo_id", character.RuneId, value => adapter.SetCharacterRune(id, value));
+        AddChoice(
+            "Equipped rune",
+            $"player_base[{id}].monsyo_data.monsyo_id",
+            FormatNamedId(Suikoden1Catalog.Runes.GetValueOrDefault(character.RuneId, $"Rune {character.RuneId}"), "rune", character.RuneId),
+            Suikoden1Catalog.Runes.OrderBy(item => item.Key).Select(item => FormatNamedId(item.Value, "rune", item.Key)),
+            value => adapter.SetCharacterRune(id, ParseLabeledInteger(value, "rune")));
         for (int index = 0; index < character.WeaponRunePieces.Count; index++)
         {
             int captured = index;
@@ -813,20 +925,40 @@ public sealed class MainWindowViewModel : ObservableObject
             int itemId = item["item_id"]!.GetValue<int>();
             int equipment = item["soubi"]!.GetValue<int>();
             int uses = item["data"]!.GetValue<int>();
-            AddNumber($"Carried item {slot + 1} ID · {Suikoden1Catalog.ItemName(itemId)}", $"player_base[{id}].item[{slot}].item_id", itemId, value => SetS1ItemPart(adapter, id, captured, value, null, null));
-            AddNumber($"Carried item {slot + 1} equipment slot", $"player_base[{id}].item[{slot}].soubi", equipment, value => SetS1ItemPart(adapter, id, captured, null, value, null), equipment >= 129 ? "Values 129–133 are verified non-removable equipment states." : null);
+            AddChoice(
+                $"Carried item {slot + 1}",
+                $"player_base[{id}].item[{slot}].item_id",
+                FormatNamedId(Suikoden1Catalog.ItemName(itemId), "item", itemId),
+                Suikoden1Catalog.Items.OrderBy(item => item.Key).Select(item => FormatNamedId(item.Value, "item", item.Key)),
+                value => SetS1ItemPart(adapter, id, captured, ParseLabeledInteger(value, "item"), null, null));
+            AddChoice(
+                $"Carried item {slot + 1} equipment state",
+                $"player_base[{id}].item[{slot}].soubi",
+                FormatNamedId(Suikoden1Catalog.EquipmentSlots.GetValueOrDefault(equipment, $"State {equipment}"), "state", equipment),
+                Suikoden1Catalog.EquipmentSlots.OrderBy(item => item.Key).Select(item => FormatNamedId(item.Value, "state", item.Key)),
+                value => SetS1ItemPart(adapter, id, captured, null, ParseLabeledInteger(value, "state"), null),
+                equipment >= 129 ? "States 129–133 are verified non-removable equipment states." : null);
             AddNumber($"Carried item {slot + 1} remaining uses", $"player_base[{id}].item[{slot}].data", uses, value => SetS1ItemPart(adapter, id, captured, null, null, value));
         }
     }
 
     private void BuildSuikoden1Inventory(Suikoden1Adapter adapter)
     {
+        string[] itemChoices = Suikoden1Catalog.Items
+            .OrderBy(item => item.Key)
+            .Select(item => FormatNamedId(item.Value, "item", item.Key))
+            .ToArray();
         JsonArray items = adapter.Document.Root["party_data"]!["party_item"]!.AsArray();
         for (int index = 0; index < items.Count; index++)
         {
             int captured = index;
             int id = items[index]!.GetValue<int>();
-            AddNumber($"Party item {index + 1} · {Suikoden1Catalog.ItemName(id)}", $"party_data.party_item[{index}]", id, value => adapter.SetPartyItem(captured, value));
+            AddChoice(
+                $"Party item {index + 1}",
+                $"party_data.party_item[{index}]",
+                FormatNamedId(Suikoden1Catalog.ItemName(id), "item", id),
+                itemChoices,
+                value => adapter.SetPartyItem(captured, ParseLabeledInteger(value, "item")));
         }
 
         if (SearchText.Trim().Length > 0)
@@ -847,12 +979,22 @@ public sealed class MainWindowViewModel : ObservableObject
         {
             int captured = id;
             int current = flags[id]!.GetValue<int>();
-            AddString(
+            AddChoice(
                 $"{id}: {Suikoden1Catalog.CharacterName(id)}",
                 $"member_flag[{id}]",
-                current == 9 ? "recruited" : "unrecruited",
-                value => adapter.SetRecruited(captured, ParseRecruitmentBoolean(value)),
-                "Recruitment edits can break story progression or required-party events. Accepted: recruited/unrecruited, true/false, 9/0.");
+                FormatSuikoden1Recruitment(current),
+                new[] { 0, 9, current }.Distinct().Select(FormatSuikoden1Recruitment),
+                value =>
+                {
+                    int selected = ParseLabeledInteger(value, "member flag");
+                    if (selected == current && selected is not (0 or 9))
+                    {
+                        return;
+                    }
+
+                    adapter.SetRecruited(captured, ParseRecruitmentBoolean(value));
+                },
+                "Flag 0 means not recruited; flag 9 means recruited. Recruitment edits can break story progression or required-party events.");
         }
     }
 
@@ -899,9 +1041,10 @@ public sealed class MainWindowViewModel : ObservableObject
 
         AddNumber("Potch", "party_data.gold", adapter.Potch, value => adapter.SetGeneralNumber("gold", value));
         AddNumber("Popularity", "party_data.ninki", adapter.Popularity, value => adapter.SetGeneralNumber("ninki", value));
+        AddHeadquartersLevelChoice("Castle level", "game_data.base_lv", game["base_lv"]!.GetValue<int>(), value => adapter.SetGeneralNumber("base_lv", value));
         foreach ((string path, string label) in new[]
         {
-            ("base_lv", "Castle level"), ("kaji_lv", "Blacksmith level"), ("area_no", "Area"),
+            ("kaji_lv", "Blacksmith level"), ("area_no", "Area"),
             ("town_no", "Town"), ("map_no", "Map"),
         })
         {
@@ -930,12 +1073,19 @@ public sealed class MainWindowViewModel : ObservableObject
             int captured = index;
             string name = Suikoden2Catalog.Character(values[index])?.Name ?? "Empty / NPC";
             string type = index < Suikoden2Adapter.BattlePartySize ? "Battle" : "Convoy";
-            AddNumber($"{type} slot {index + 1} · {name}", $"party_data.party_cha_no[{index}]", values[index], value =>
+            int maximum = index < Suikoden2Adapter.BattlePartySize ? 83 : 124;
+            string[] choices = Enumerable.Range(0, maximum + 1)
+                .Where(id => id == 0 || Suikoden2Catalog.Character(id) is not null)
+                .Select(id => FormatCharacterChoice(id, id == 0 ? "Empty" : Suikoden2Catalog.Character(id)!.Name))
+                .ToArray();
+            AddChoice($"{type} slot {index + 1}", $"party_data.party_cha_no[{index}]", FormatCharacterChoice(values[index], name), choices, value =>
             {
                 int[] changed = adapter.PartyCharacterIds.ToArray();
-                changed[captured] = value;
+                changed[captured] = ParseLabeledInteger(value, "character");
                 adapter.SetParty(changed);
-            });
+            }, index < Suikoden2Adapter.BattlePartySize
+                ? "Battle slots accept the reviewed battle-character range."
+                : "Convoy slots also offer named support characters from the reviewed catalogue.");
         }
     }
 
@@ -959,7 +1109,23 @@ public sealed class MainWindowViewModel : ObservableObject
             ("todome", "Killed enemies", character.KilledEnemies),
         })
         {
-            AddNumber(label, $"chara_data.c_varia_dat[{id}].{field}", value, changed => adapter.SetCharacterScalar(id, field, changed));
+            if (field == "buki_mon")
+            {
+                IEnumerable<Suikoden2ItemDefinition> weaponRunes = Suikoden2Catalog.Items
+                    .Where(item => item.Category == Suikoden2ItemCategory.Rune && (item.Id == 0 || item.Attributes.Contains("Wep")))
+                    .Where(item => !Suikoden2Catalog.Beasts.Contains(id) || item.Id == 0);
+                AddChoice(
+                    "Weapon rune",
+                    $"chara_data.c_varia_dat[{id}].{field}",
+                    FormatS2CatalogChoice(Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Rune && item.Id == value), Suikoden2ItemCategory.Rune, value),
+                    weaponRunes.Select(FormatS2CatalogChoice),
+                    changed => adapter.SetCharacterScalar(id, field, ParseS2Item(changed).Id),
+                    "Only reviewed weapon runes are offered; beasts and monsters can select only None.");
+            }
+            else
+            {
+                AddNumber(label, $"chara_data.c_varia_dat[{id}].{field}", value, changed => adapter.SetCharacterScalar(id, field, changed));
+            }
         }
 
         for (int index = 0; index < character.MagicPoints.Count; index++)
@@ -977,13 +1143,37 @@ public sealed class MainWindowViewModel : ObservableObject
         for (int index = 0; index < character.Runes.Count; index++)
         {
             int captured = index;
-            AddNumber($"Rune slot {index + 1}", $"chara_data.c_varia_dat[{id}].mon_eqp[{index}]", character.Runes[index], value => adapter.SetRune(id, captured, value), "Slot, character-exclusive, and locked-rune restrictions are enforced.");
+            int current = character.Runes[index];
+            AddChoice(
+                $"Rune slot {index + 1}",
+                $"chara_data.c_varia_dat[{id}].mon_eqp[{index}]",
+                FormatS2CatalogChoice(Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Rune && item.Id == current), Suikoden2ItemCategory.Rune, current),
+                Suikoden2Catalog.Items
+                    .Where(item => item.Category == Suikoden2ItemCategory.Rune && Suikoden2Catalog.IsRuneAllowed(id, captured, item.Id))
+                    .Select(FormatS2CatalogChoice),
+                value => adapter.SetRune(id, captured, ParseS2Item(value).Id),
+                "Slot, character-exclusive, and locked-rune restrictions are enforced. A currently locked rune is shown but cannot be changed.");
         }
 
         for (int index = 0; index < character.Equipment.Count; index++)
         {
             int captured = index;
-            AddNumber($"Equipment slot {index + 1}", $"chara_data.c_varia_dat[{id}].bogu_eqp[{index}]", character.Equipment[index], value => adapter.SetEquipment(id, captured, value), "Helmet/armor/shield compatibility and beast restrictions are enforced.");
+            Suikoden2ItemCategory category = index switch
+            {
+                0 => Suikoden2ItemCategory.Helmet,
+                1 => Suikoden2ItemCategory.Armor,
+                _ => Suikoden2ItemCategory.Shield,
+            };
+            int current = character.Equipment[index];
+            AddChoice(
+                $"{category} slot",
+                $"chara_data.c_varia_dat[{id}].bogu_eqp[{index}]",
+                FormatS2CatalogChoice(Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == category && item.Id == current), category, current),
+                Suikoden2Catalog.Items
+                    .Where(item => item.Category == category && Suikoden2Catalog.IsEquipmentAllowed(id, category, item.Id))
+                    .Select(FormatS2CatalogChoice),
+                value => adapter.SetEquipment(id, captured, ParseS2Item(value).Id),
+                "Equipment-type compatibility and beast/monster restrictions are enforced.");
         }
 
         JsonArray accessories = character.Accessories;
@@ -992,7 +1182,11 @@ public sealed class MainWindowViewModel : ObservableObject
             int captured = index;
             JsonObject current = accessories[index]!.AsObject();
             string text = FormatS2Item(current["item_no"]!.GetValue<int>(), current["use_cnt"]!.GetValue<int>());
-            AddString($"Accessory {index + 1}", $"chara_data.c_varia_dat[{id}].item_eqp[{index}]", text, value => adapter.SetAccessory(id, captured, ParseS2Item(value)), "Enter Category:ID, for example Accessory:45 or Regular:1.");
+            IEnumerable<Suikoden2ItemDefinition> accessoryChoices = Suikoden2Catalog.Items
+                .Where(item => item.Category is Suikoden2ItemCategory.Regular or Suikoden2ItemCategory.Accessory or Suikoden2ItemCategory.Food)
+                .Where(item => !item.StoryCritical)
+                .Where(item => !Suikoden2Catalog.Beasts.Contains(id) || item.Id == 0);
+            AddChoice($"Accessory {index + 1}", $"chara_data.c_varia_dat[{id}].item_eqp[{index}]", text, accessoryChoices.Select(FormatS2CatalogChoice), value => adapter.SetAccessory(id, captured, ParseS2Item(value)), "Only reviewed item, accessory, and food entries are offered; beast/monster restrictions are enforced.");
         }
     }
 
@@ -1017,8 +1211,12 @@ public sealed class MainWindowViewModel : ObservableObject
             {
                 int captured = index;
                 JsonObject item = array[index]!.AsObject();
-                string text = FormatS2Item(item["item_no"]!.GetValue<int>(), item["use_cnt"]!.GetValue<int>());
-                AddString($"{inventory} slot {index + 1}", $"{path}[{index}]", text, value => adapter.SetInventorySlot(inventory, captured, ParseS2Item(value)), warning.Length == 0 ? "Enter Category:ID; use_cnt is synchronized from the reviewed catalogue." : warning + " Enter Category:ID.");
+                int itemId = item["item_no"]!.GetValue<int>();
+                int useCount = item["use_cnt"]!.GetValue<int>();
+                string text = FormatS2InventoryItem(inventory, itemId, useCount);
+                IEnumerable<Suikoden2ItemDefinition> choices = InventoryChoices(inventory, captured);
+                string slotKind = inventory == Suikoden2Inventory.Bath ? captured is 2 or 5 ? "painting" : "ornament" : "slot";
+                AddChoice($"{InventoryDisplayName(inventory)} {slotKind} {index + 1}", $"{path}[{index}]", text, choices.Select(FormatS2CatalogChoice), value => adapter.SetInventorySlot(inventory, captured, ParseS2Item(value)), warning.Length == 0 ? "Choose by item name, ID, or category; use_cnt is synchronized automatically." : warning + " Choose by item name, ID, or category; use_cnt is synchronized automatically.");
             }
         }
 
@@ -1026,7 +1224,17 @@ public sealed class MainWindowViewModel : ObservableObject
         for (int index = 0; index < keyItems.Count; index++)
         {
             int captured = index;
-            AddNumber($"Key item slot {index + 1}", $"party_data.event_item[{index}]", keyItems[index]!.GetValue<int>(), value => adapter.SetKeyItem(captured, value), "Story-critical: only reviewed key-item IDs are accepted. Use 0 to clear.");
+            int current = keyItems[index]!.GetValue<int>();
+            Suikoden2ItemDefinition? currentItem = Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Regular && item.Id == current);
+            IEnumerable<Suikoden2ItemDefinition> choices = Suikoden2Catalog.Items
+                .Where(item => item.Category == Suikoden2ItemCategory.Regular && (item.Id == 0 || item.StoryCritical));
+            AddChoice(
+                $"Key item slot {index + 1}",
+                $"party_data.event_item[{index}]",
+                FormatS2CatalogChoice(currentItem, Suikoden2ItemCategory.Regular, current),
+                choices.Select(FormatS2CatalogChoice),
+                value => adapter.SetKeyItem(captured, ParseS2Item(value).Id),
+                "Story-critical: only reviewed key-item entries are offered. Select None to clear.");
         }
 
         if (SearchText.Trim().Length > 0)
@@ -1044,8 +1252,30 @@ public sealed class MainWindowViewModel : ObservableObject
         for (int id = 1; id < flags.Count; id++)
         {
             int captured = id;
-            string name = Suikoden2Catalog.Character(id)?.Name ?? $"Character {id}";
-            AddNumber($"{id}: {name}", $"chara_flag[{id}]", flags[id]!.GetValue<int>(), value => adapter.SetRecruitmentStatus(captured, value), "Reviewed statuses: 0, 1, 70, 71, 86, 212, 213. Story and required-party consequences are not synthesized.");
+            Suikoden2CharacterDefinition? definition = Suikoden2Catalog.Character(id);
+            if (definition is null)
+            {
+                continue;
+            }
+
+            string name = definition.Name;
+            int current = flags[id]!.GetValue<int>();
+            AddChoice(
+                $"{id}: {name}",
+                $"chara_flag[{id}]",
+                FormatSuikoden2RecruitmentStatus(current),
+                Suikoden2Adapter.RecruitmentStatuses.Order().Select(FormatSuikoden2RecruitmentStatus),
+                value =>
+                {
+                    int selected = ParseTrailingInteger(value);
+                    if (selected == current && !Suikoden2Adapter.RecruitmentStatuses.Contains(selected))
+                    {
+                        return;
+                    }
+
+                    adapter.SetRecruitmentStatus(captured, selected);
+                },
+                "Auto Join and Manual Recruit are both recruited states. Other states reflect story availability; changing them can affect required-party and story events.");
         }
 
         foreach (string note in adapter.CompatibilityNotes(BetterLeonaEnabled, KrakenRecruitmentEnabled))
@@ -1057,6 +1287,7 @@ public sealed class MainWindowViewModel : ObservableObject
     private void BuildSuikoden2Progress(Suikoden2Adapter adapter)
     {
         JsonObject game = adapter.Document.Root["game_data"]!.AsObject();
+        AddHeadquartersLevelChoice("Castle level", "game_data.base_lv", game["base_lv"]!.GetValue<int>(), value => adapter.SetGeneralNumber("base_lv", value));
         AddReadOnly("Imported Suikoden I recruit count", "game_data.nakam_1_num", game["nakam_1_num"]!.GetValue<int>().ToString(CultureInfo.InvariantCulture), "Read-only: McDohl/Gremio import semantics are not safe to synthesize.");
         JsonArray aliases = game["kari_name"]!.AsArray();
         for (int index = 0; index < aliases.Count; index++)
@@ -1111,8 +1342,10 @@ public sealed class MainWindowViewModel : ObservableObject
 
     private static Suikoden2ItemDefinition ParseS2Item(string value)
     {
-        string[] parts = value.Split(':', 2, StringSplitOptions.TrimEntries);
-        Guard.Valid(parts.Length == 2, "Enter an item as Category:ID, for example Regular:1 or Accessory:45.");
+        int separator = value.LastIndexOf(" — ", StringComparison.Ordinal);
+        string encoded = separator >= 0 ? value[(separator + 3)..] : value;
+        string[] parts = encoded.Split(':', 2, StringSplitOptions.TrimEntries);
+        Guard.Valid(parts.Length == 2, "Choose an item by name, ID, or category from the reviewed list.");
         Guard.Valid(Enum.TryParse(parts[0], true, out Suikoden2ItemCategory category), "The item category is not recognized.");
         int id = ParseInteger(parts[1]);
         return Suikoden2Catalog.FindItem(category, id);
@@ -1121,7 +1354,94 @@ public sealed class MainWindowViewModel : ObservableObject
     private static string FormatS2Item(int id, int useCount)
     {
         Suikoden2ItemDefinition? item = Suikoden2Catalog.Items.FirstOrDefault(value => value.Id == id && (id == 0 || value.UseCount == useCount));
-        return item is null ? $"Regular:{id}" : $"{item.Category}:{item.Id}";
+        return FormatS2CatalogChoice(item, item?.Category ?? Suikoden2ItemCategory.Regular, id);
+    }
+
+    private static string FormatS2InventoryItem(Suikoden2Inventory inventory, int id, int useCount)
+    {
+        if (inventory == Suikoden2Inventory.Bath)
+        {
+            Suikoden2ItemDefinition? bathItem = Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Trade && item.Id == id);
+            return FormatS2CatalogChoice(bathItem, Suikoden2ItemCategory.Trade, id);
+        }
+
+        return FormatS2Item(id, useCount);
+    }
+
+    private static IEnumerable<Suikoden2ItemDefinition> InventoryChoices(Suikoden2Inventory inventory, int slot)
+    {
+        if (inventory == Suikoden2Inventory.Bath)
+        {
+            bool paintingSlot = slot is 2 or 5;
+            return Suikoden2Catalog.Items.Where(item =>
+            {
+                bool painting = item.Id == 0 || item.Id is >= 18 and <= 22 or >= 42 and <= 44;
+                bool ornament = item.Id == 0 || item.Id is >= 1 and <= 17 or >= 45 and <= 50;
+                return item.Category == Suikoden2ItemCategory.Trade && (paintingSlot ? painting : ornament);
+            });
+        }
+
+        return Suikoden2Catalog.Items
+            .GroupBy(item => (item.Id, UseCount: item.Id == 0 ? 0 : item.UseCount))
+            .Select(group => group.First());
+    }
+
+    private static string FormatS2CatalogChoice(Suikoden2ItemDefinition item) =>
+        FormatS2CatalogChoice(item, item.Category, item.Id);
+
+    private static string FormatS2CatalogChoice(Suikoden2ItemDefinition? item, Suikoden2ItemCategory category, int id) =>
+        $"{(id == 0 ? "None" : item?.Name ?? $"Unknown item {id}")}{(item?.StoryCritical == true ? " [Story-critical]" : string.Empty)} — {category}:{id}";
+
+    private static string FormatNamedId(string name, string kind, int id) => $"{name} — {kind} {id}";
+
+    private static string FormatCharacterChoice(int id, string name) => $"{name} — character {id}";
+
+    private static string FormatSuikoden1Recruitment(int flag) => flag switch
+    {
+        0 => "Not recruited — member flag 0",
+        9 => "Recruited — member flag 9",
+        _ => $"Other state (preserved) — member flag {flag}",
+    };
+
+    private static string FormatSuikoden2RecruitmentStatus(int status) => status switch
+    {
+        0 => "Not recruited — 0",
+        1 => "Spoken to, not yet recruited — 1",
+        70 => "Recruited automatically — 70",
+        71 => "Recruited manually — 71",
+        86 => "Event-locked, unavailable for party — 86",
+        212 => "Deceased — 212",
+        213 => "On leave — 213",
+        _ => $"Unknown state (preserved) — {status}",
+    };
+
+    private static string InventoryDisplayName(Suikoden2Inventory inventory) => inventory switch
+    {
+        Suikoden2Inventory.Party => "Party inventory",
+        Suikoden2Inventory.Warehouse => "Warehouse",
+        Suikoden2Inventory.Bath => "Bath / display item",
+        Suikoden2Inventory.RoomExperimental => "Room item (experimental)",
+        _ => inventory.ToString(),
+    };
+
+    private void AddHeadquartersLevelChoice(string label, string path, int value, Action<int> apply)
+    {
+        string[] choices =
+        [
+            "Level 0 — Pre-headquarters state",
+            "Level 1",
+            "Level 2",
+            "Level 3",
+            "Level 4 — Maximum",
+        ];
+        string selected = choices.SingleOrDefault(choice => ParseHeadquartersLevel(choice) == value) ?? $"Level {value} — Outside reviewed range";
+        AddChoice(
+            label,
+            path,
+            selected,
+            choices,
+            text => apply(ParseHeadquartersLevel(text)),
+            "Reviewed range: 0–4. Level 0 is retained for pre-headquarters saves; playable headquarters levels are 1–4 and level 4 is the cap. Direct changes can desynchronize story-driven facilities.");
     }
 
     private void AddNumber(string label, string path, int value, Action<int> apply, string? warning = null)
@@ -1131,7 +1451,24 @@ public sealed class MainWindowViewModel : ObservableObject
 
     private void AddString(string label, string path, string value, Action<string> apply, string? warning = null)
     {
-        allFields.Add(new(label, path, value, false, warning, text => ApplyEdit($"Changed {label}", () => apply(text))));
+        allFields.Add(new(label, path, value, false, warning, apply, field => ApplyEdit($"Changed {field.Label}", field.ApplyValue)));
+    }
+
+    private void AddChoice(
+        string label,
+        string path,
+        string value,
+        IEnumerable<string> choices,
+        Action<string> apply,
+        string? warning = null)
+    {
+        List<string> materialized = choices.Distinct(StringComparer.Ordinal).ToList();
+        if (!materialized.Contains(value, StringComparer.Ordinal))
+        {
+            materialized.Insert(0, value);
+        }
+
+        allFields.Add(new(label, path, value, false, warning, apply, field => ApplyEdit($"Changed {field.Label}", field.ApplyValue), materialized));
     }
 
     private void AddReadOnly(string label, string path, string value, string? warning = null)
@@ -1153,8 +1490,32 @@ public sealed class MainWindowViewModel : ObservableObject
     {
         "recruited" or "true" or "9" => true,
         "unrecruited" or "false" or "0" => false,
-        _ => throw new SaveEditorException(SaveErrorCode.ValidationFailed, "Enter recruited/unrecruited, true/false, or 9/0."),
+        _ when ParseLabeledInteger(value, "member flag") == 9 => true,
+        _ when ParseLabeledInteger(value, "member flag") == 0 => false,
+        _ => throw new SaveEditorException(SaveErrorCode.ValidationFailed, "Choose Recruited (flag 9) or Not recruited (flag 0)."),
     };
+
+    private static int ParseLabeledInteger(string value, string label)
+    {
+        string marker = $"— {label} ";
+        int markerIndex = value.LastIndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        Guard.Valid(markerIndex >= 0, $"Choose a reviewed {label} value from the list.");
+        return ParseInteger(value[(markerIndex + marker.Length)..]);
+    }
+
+    private static int ParseTrailingInteger(string value)
+    {
+        int separator = value.LastIndexOf(" — ", StringComparison.Ordinal);
+        Guard.Valid(separator >= 0, "Choose a reviewed status from the list.");
+        return ParseInteger(value[(separator + 3)..]);
+    }
+
+    private static int ParseHeadquartersLevel(string value)
+    {
+        Guard.Valid(value.StartsWith("Level ", StringComparison.OrdinalIgnoreCase), "Choose a reviewed headquarters level from the list.");
+        string number = value[6..].Split(' ', 2)[0];
+        return ParseInteger(number);
+    }
 
     private IReadOnlyList<ValidationIssue> ValidateCurrent() => document?.Game switch
     {
@@ -1182,7 +1543,7 @@ public sealed class MainWindowViewModel : ObservableObject
         string message = string.Join(Environment.NewLine, warnings.Take(8).Select(issue => $"• {issue.Message}"));
         return await interaction.ConfirmAsync(
             "Review save warnings",
-            message + "\n\nSteam Cloud may restore an older save. Continue with validated local output?",
+            message + "\n\nContinue with the validated output?",
             "Continue").ConfigureAwait(true);
     }
 
@@ -1215,6 +1576,7 @@ public sealed class MainWindowViewModel : ObservableObject
         ((AsyncRelayCommand)ReloadCommand).RaiseCanExecuteChanged();
         ((RelayCommand)UndoCommand).RaiseCanExecuteChanged();
         ((RelayCommand)RedoCommand).RaiseCanExecuteChanged();
+        ((RelayCommand)ApplyAllCommand).RaiseCanExecuteChanged();
         ((AsyncRelayCommand)GiveAllSafeItemsCommand).RaiseCanExecuteChanged();
     }
 }

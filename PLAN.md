@@ -8,11 +8,11 @@ Status values: `pending`, `in progress`, `verified`, or `blocked`.
 | 2. Encryption/decryption and upstream compatibility oracle | verified | 29 core tests; all private slot copies; upstream oracle checked both directions |
 | 3. Lossless JSON infrastructure and automatic game detection | verified | Schema detection and semantic unknown-field/no-edit round trips pass for both games |
 | 4. Suikoden II adapter and verified editor features | verified | 11 tests; all supplied S2 copies validate; MIT data/restrictions ported with attribution |
-| 5. Suikoden I adapter and verified field research | verified | 8 tests; all supplied S1 copies validate; inactive-item and empty-party semantics verified |
-| 6. Avalonia MVVM UI and editing workflows | verified | Clean Release build; 7 view-model tests; Xvfb source smoke launch |
+| 5. Suikoden I adapter and verified field research | verified | 8 tests; all supplied S1 copies validate; inactive-item, empty-party, and headquarters-cap semantics verified |
+| 6. Avalonia MVVM UI and editing workflows | verified | Clean Release build; 13 view-model tests; searchable named choices and transactional Apply All verified; Xvfb source smoke launch |
 | 7. Safe save, backup, undo/redo, and validation | verified | Save-As, refusal, backup, atomic failure, revalidation, history, and UI command tests |
 | 8. CI, standalone builds, smoke tests, archives, documentation | verified | Shared `ci.sh`; both RIDs published; Xvfb passed; actionlint 1.7.12 passed; both archives audited |
-| 9. Final corruption-risk, licensing, claims, and portability review | verified | 55 tests; private/oracle suite passed; original hashes unchanged; clones clean; no remotes or deferred packaging |
+| 9. Final corruption-risk, licensing, claims, and portability review | verified | 61 tests; private/oracle and every-section UI suite passed; originals unchanged; clones clean; licenses/artifacts and exact Git payload audited |
 
 ## Known verification boundary
 

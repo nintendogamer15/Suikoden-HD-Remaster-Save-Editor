@@ -12,6 +12,9 @@
 /saves/gsd2/Data16
 /saves/share/_sharetmpsave0
 
+# Defense in depth: no additional private save dropped here can be staged.
+/saves/
+
 # Research-only upstream clones; never distribute or commit.
 /reference/
 
@@ -22,11 +25,23 @@
 /.dotnet/
 /.tools/
 /TestResults/
+/coverage/
+/BenchmarkDotNet.Artifacts/
 /.vs/
 /.vscode/
 /.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*~
 *.user
 *.suo
+*.trx
+*.coverage
+*.coveragexml
+coverage.*
+*.nupkg
+*.snupkg
 *.log
 *.tmp
 *.bak

@@ -22,14 +22,17 @@ public sealed class Suikoden1AdapterTests
         Suikoden1Adapter adapter = new(Suikoden1TestFactory.Create());
 
         adapter.SetPotch(4321);
+        adapter.SetHeadquartersLevel(4);
         adapter.SetNames("Hero Test", "HQ Test");
         adapter.SetParty([8, 5, 4, 3, 2, 1]);
         adapter.SetRecruited(1, true);
 
         Assert.Equal(4321, adapter.Potch);
+        Assert.Equal(4, adapter.HeadquartersLevel);
         Assert.Equal("Hero Test", adapter.HeroName);
         Assert.Equal([8, 5, 4, 3, 2, 1], adapter.PartyCharacterIds);
         Assert.Contains(1, adapter.RecruitedCharacterIds);
+        Assert.Throws<SaveEditorException>(() => adapter.SetHeadquartersLevel(5));
     }
 
     [Fact]
@@ -107,4 +110,3 @@ public sealed class Suikoden1AdapterTests
         Assert.DoesNotContain(issues, issue => issue.Severity == ValidationSeverity.Error);
     }
 }
-

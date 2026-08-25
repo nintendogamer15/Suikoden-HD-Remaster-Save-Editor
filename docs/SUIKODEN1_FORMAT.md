@@ -13,17 +13,19 @@ Four supplied encrypted Suikoden I slot files (`Data0`, `Data1`, `Data2`, and `D
 | Character inventory | Nine fixed item records with `item_id`, `soubi`, and `data`; `item_kazu` is the active prefix count | High; stale nonzero records can exist after the active prefix and must not be counted or activated accidentally |
 | Equipment state | Reviewed values `0`–`5` and `129`–`133`; high-bit values represent non-removable slot states in source research and samples | Medium/high; only reviewed values accepted and the danger is shown |
 | Recruitment | `member_flag`, with observed/researched recruited value `9` and normal unrecruited value `0` | High for these two transitions; story consequences remain the user's responsibility |
-| Headquarters | `shiro_data.level` | High for level visibility; other `shiro_data` values are preserved but not named or editable |
+| Headquarters | `shiro_data.level`; all supplied values fall in 0–4, while credited gameplay documentation identifies level 4 as final development | High for a dropdown bounded to raw values 0–4; other `shiro_data` values are preserved but not named or editable |
 
 ## Exposed normal-editor fields
 
-- hero and headquarters names, Potch, play time display, and headquarters level display;
+- hero and headquarters names, Potch, play time display, and headquarters level choice (raw 0 through the documented level-4 cap);
 - party formation and synchronized party count;
 - character level, EXP, current/maximum HP, all six `noryoku` values, and current MP for spell levels 1–4;
 - weapon numeric ID and level, weapon rune-piece array, and equipped rune ID;
 - all character-carried item IDs, equipment-slot values, and remaining-use data;
 - eight party-inventory slots with searchable reviewed item names;
-- recruitment flags with warnings.
+- recruitment flags with explained choices and warnings.
+
+Inventory, rune, equipment-state, recruitment, and party controls show names first while retaining their IDs/flags for verification. Party and inventory choices are searchable. Apply All treats the six party slots as one validated party operation, so moving Tir does not create a transient invalid party.
 
 The catalogue keeps character, item, equipment-state, and rune mappings outside UI code. Weapon-name mappings and maximum-stat/maximum-level synthesis were not verified well enough to expose as named bulk operations. “Max selected” and “max all” are therefore deliberately absent instead of using invented caps.
 

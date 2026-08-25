@@ -10,6 +10,7 @@ All notable changes will be documented here. The project follows [Keep a Changel
 - Upstream-compatible `GR_DATA:` AES encryption/decryption and automatic schema detection.
 - Lossless game-specific adapters, reviewed catalogues/restrictions, validation, and read-only Advanced Data.
 - Save As, explicit overwrite with timestamped backup, verified atomic writes, undo/redo, recent paths, and slot-folder browsing.
+- Searchable, name-first inventory/party/rune/equipment choices, explained recruitment dropdowns, bounded headquarters-level dropdowns, positional bath-item restrictions, and transactional Apply All.
 - Synthetic CI tests plus opt-in private-save and upstream-oracle compatibility tests.
 - Self-contained Linux/Windows publishing, Xvfb smoke testing, archives, checksums, GitHub Actions, and mirror-ready Gitea Actions.
 

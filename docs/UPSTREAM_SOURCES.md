@@ -14,8 +14,8 @@ Inspected on 2026-08-25. Research clones live only in ignored `reference/`; no c
 - [Suikosource Suikoden II item digits guide](https://suikosource.com/games/gs2/guides/itemdigits.php), credited by faospark for item-reference research. Facts are cross-checked against the MIT-licensed editor data and supplied save schemas; site prose is not copied.
 - [makotech222/suiko2edit](https://github.com/makotech222/suiko2edit), credited by faospark for Suikoden II data research. No code was copied directly during this phase.
 - [nesrak1/UABEA](https://github.com/nesrak1/UABEA), named by asilverthorn as the extraction tool used during reference research. It is credited for provenance but is not a dependency and no code is copied.
+- [Cyril's Suikoden Guide and Walkthrough](https://gamefaqs.gamespot.com/ps/198843-suikoden/faqs/80674/part-10-to-live-and-die-freely), used to corroborate that Suikoden I headquarters level 4 is its final development. Only that fact was used; guide prose is not redistributed.
 
 ## Evidence policy
 
 Factual schema signatures and array lengths were checked across every supplied encrypted `gsd1` and `gsd2` save after decrypting temporary copies with the upstream oracle. Player-entered strings and unrelated private values are not recorded. Undocumented fields remain preserved and read-only unless their meaning and edit constraints can be supported by source code or repeatable evidence.
-

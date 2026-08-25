@@ -71,6 +71,8 @@ public sealed class Suikoden2AdapterTests
         Assert.Equal(helmet.Id, adapter.Characters[1].Equipment[0]);
         Assert.Throws<SaveEditorException>(() => adapter.SetEquipment(26, 0, helmet.Id));
         Assert.Throws<SaveEditorException>(() => adapter.SetCharacterScalar(26, "buki_mon", 1));
+        Suikoden2ItemDefinition keyItem = Suikoden2Catalog.Items.First(item => item.StoryCritical);
+        Assert.Throws<SaveEditorException>(() => adapter.SetAccessory(1, 0, keyItem));
     }
 
     [Fact]
@@ -79,12 +81,14 @@ public sealed class Suikoden2AdapterTests
         Suikoden2Adapter adapter = new(Suikoden2TestFactory.Create());
         Suikoden2ItemDefinition medicine = Suikoden2Catalog.FindItem(Suikoden2ItemCategory.Regular, 1);
         Suikoden2ItemDefinition baseItem = Suikoden2Catalog.Items.First(item => item.Category == Suikoden2ItemCategory.Base && item.Id != 0);
-        Suikoden2ItemDefinition tradeItem = Suikoden2Catalog.Items.First(item => item.Category == Suikoden2ItemCategory.Trade && item.Id != 0);
+        Suikoden2ItemDefinition ornament = Suikoden2Catalog.FindItem(Suikoden2ItemCategory.Trade, 1);
+        Suikoden2ItemDefinition painting = Suikoden2Catalog.FindItem(Suikoden2ItemCategory.Trade, 18);
 
         adapter.SetInventorySlot(Suikoden2Inventory.Party, 0, medicine);
         adapter.SetInventorySlot(Suikoden2Inventory.Warehouse, 0, baseItem);
-        adapter.SetInventorySlot(Suikoden2Inventory.Bath, 0, tradeItem);
-        adapter.SetInventorySlot(Suikoden2Inventory.RoomExperimental, 0, tradeItem);
+        adapter.SetInventorySlot(Suikoden2Inventory.Bath, 0, ornament);
+        adapter.SetInventorySlot(Suikoden2Inventory.Bath, 2, painting);
+        adapter.SetInventorySlot(Suikoden2Inventory.RoomExperimental, 0, ornament);
         int added = adapter.GiveAllSafePartyItems();
 
         Assert.True(added > 0);
@@ -95,6 +99,9 @@ public sealed class Suikoden2AdapterTests
             slot => Suikoden2Catalog.Items.Any(item => item.Category == Suikoden2ItemCategory.Regular
                 && item.StoryCritical
                 && item.Id == slot["item_no"]!.GetValue<int>()));
+        Assert.Equal(64, adapter.Document.Root["game_data"]!["furo_item"]![2]!["use_cnt"]!.GetValue<int>());
+        Assert.Throws<SaveEditorException>(() => adapter.SetInventorySlot(Suikoden2Inventory.Bath, 2, ornament));
+        Assert.Throws<SaveEditorException>(() => adapter.SetInventorySlot(Suikoden2Inventory.Bath, 0, medicine));
     }
 
     [Fact]
@@ -104,6 +111,7 @@ public sealed class Suikoden2AdapterTests
         adapter.SetRecruitmentStatus(2, 70);
         adapter.SetName("bozu_name", "Test Riou");
         adapter.SetGeneralNumber("gold", 9999);
+        adapter.SetGeneralNumber("base_lv", 4);
         adapter.SetGeneralNumber("area_no", 3);
         adapter.SetGameDataArrayValue("play_time", 0, 5);
         adapter.SetGameDataArrayValue("food_menu", 0, 1);
@@ -116,10 +124,12 @@ public sealed class Suikoden2AdapterTests
         adapter.SetCookOffStage(12);
 
         Assert.Equal(9999, adapter.Potch);
+        Assert.Equal(4, adapter.Document.Root["game_data"]!["base_lv"]!.GetValue<int>());
         Assert.Equal(70, adapter.Document.Root["chara_flag"]![2]!.GetValue<int>());
         Assert.Equal("Test Riou", adapter.Document.Root["game_data"]!["bozu_name"]!.GetValue<string>());
         Assert.Equal(255, adapter.Document.Root["t_box_flag"]![0]!.GetValue<int>());
         Assert.Equal(47, adapter.Document.Root["event_flag"]![153]!.GetValue<int>());
+        Assert.Throws<SaveEditorException>(() => adapter.SetGeneralNumber("base_lv", 5));
     }
 
     [Fact]

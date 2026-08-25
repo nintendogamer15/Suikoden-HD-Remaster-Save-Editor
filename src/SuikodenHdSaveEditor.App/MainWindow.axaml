@@ -14,7 +14,7 @@
         MinWidth="980"
         MinHeight="640"
         WindowStartupLocation="CenterScreen">
-    <Grid RowDefinitions="Auto,Auto,*,Auto" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
+    <Grid RowDefinitions="Auto,*,Auto" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
         <Border Grid.Row="0" Background="#17233C" Padding="16,12">
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="18">
                 <StackPanel>
@@ -36,12 +36,7 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="1" Background="#FFF5D6" BorderBrush="#E4C769" BorderThickness="0,0,0,1" Padding="14,9">
-            <TextBlock Foreground="#5B4510" TextWrapping="Wrap"
-                       Text="Steam Cloud warning · Close the game before editing. Cloud synchronization can restore an older save even after a successful local write. Save As is the default; overwrite always creates a backup." />
-        </Border>
-
-        <Grid Grid.Row="2" ColumnDefinitions="250,*">
+        <Grid Grid.Row="1" ColumnDefinitions="250,*">
             <Border Grid.Column="0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0" Padding="14">
                 <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="12">
                     <Border Classes="card">
@@ -80,24 +75,30 @@
                 <Grid ColumnDefinitions="*,300" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="8">
                     <StackPanel Spacing="3">
                         <TextBlock Text="{Binding SelectedSection}" FontSize="25" FontWeight="SemiBold" />
-                        <TextBlock Text="All edits stay local. Apply each field after changing it." Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="Review values, then apply one field or all fields in this section." Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
-                    <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search characters, items, IDs, or paths" />
+                    <TextBox Grid.Column="1" IsVisible="{Binding IsSearchVisible}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search characters, items, or IDs" />
                     <ScrollViewer Grid.Row="1" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                         <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                            <TextBlock Text="Character filter" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            <ComboBox Width="160" ItemsSource="{Binding CharacterFilters}" SelectedItem="{Binding SelectedCharacterFilter}" />
-                            <ComboBox Width="260" ItemsSource="{Binding CharacterChoices}" SelectedItem="{Binding SelectedCharacter}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ChoiceViewModel">
-                                        <TextBlock Text="{Binding DisplayName}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsSuikoden2}">
-                                <Button Content="Give all safe party items" Command="{Binding GiveAllSafeItemsCommand}" />
-                                <CheckBox Content="Better Leona installed" IsChecked="{Binding BetterLeonaEnabled}" />
-                                <CheckBox Content="Kraken recruitment installed" IsChecked="{Binding KrakenRecruitmentEnabled}" />
+                            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsCharacters}">
+                                <TextBlock Text="Character filter" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <ComboBox Width="160" ItemsSource="{Binding CharacterFilters}" SelectedItem="{Binding SelectedCharacterFilter}" />
+                                <ComboBox Width="260" ItemsSource="{Binding CharacterChoices}" SelectedItem="{Binding SelectedCharacter}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ChoiceViewModel">
+                                            <TextBlock Text="{Binding DisplayName}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding IsInventory}">
+                                <Button IsVisible="{Binding IsSuikoden2}" Content="Give all safe party items" Command="{Binding GiveAllSafeItemsCommand}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsRecruitment}">
+                                <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsSuikoden2}">
+                                    <CheckBox Content="Better Leona installed" IsChecked="{Binding BetterLeonaEnabled}" />
+                                    <CheckBox Content="Kraken recruitment installed" IsChecked="{Binding KrakenRecruitmentEnabled}" />
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -118,7 +119,15 @@
                                                 <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                                 <TextBlock Text="{Binding Path}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                             </StackPanel>
-                                            <TextBox Grid.Column="1" Text="{Binding Value}" IsReadOnly="{Binding IsReadOnly}" />
+                                            <TextBox Grid.Column="1" Text="{Binding Value}" IsReadOnly="{Binding IsReadOnly}" IsVisible="{Binding UsesTextEntry}" />
+                                            <AutoCompleteBox Grid.Column="1"
+                                                             Text="{Binding Value, Mode=TwoWay}"
+                                                             ItemsSource="{Binding Choices}"
+                                                             IsVisible="{Binding HasChoices}"
+                                                             FilterMode="ContainsOrdinal"
+                                                             MinimumPrefixLength="0"
+                                                             IsTextCompletionEnabled="True"
+                                                             PlaceholderText="Type a name, ID, or category" />
                                             <Button Grid.Column="2" Content="Apply" Command="{Binding ApplyCommand}" MinWidth="76" />
                                             <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" IsVisible="{Binding HasWarning}" Text="{Binding Warning}" Foreground="#B36B16" TextWrapping="Wrap" FontSize="12" />
                                         </Grid>
@@ -148,14 +157,14 @@
             </Grid>
         </Grid>
 
-        <Border Grid.Row="3" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="12,8">
+        <Border Grid.Row="2" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="12,8">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                 <StackPanel Spacing="2">
                     <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding OriginalPath, StringFormat='Current path: {0}'}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding BackupPath, StringFormat='Last backup: {0}'}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
-                <TextBlock Grid.Column="1" Text="Offline · No telemetry · Local processing" VerticalAlignment="Center" Foreground="#4B7F52" FontWeight="SemiBold" />
+                <Button Grid.Column="1" Classes="primary" Content="Apply All" Command="{Binding ApplyAllCommand}" IsVisible="{Binding IsApplyAllVisible}" VerticalAlignment="Center" MinWidth="120" />
             </Grid>
         </Border>
     </Grid>

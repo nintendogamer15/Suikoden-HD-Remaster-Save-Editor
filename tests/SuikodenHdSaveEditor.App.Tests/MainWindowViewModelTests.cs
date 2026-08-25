@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using SuikodenHdSaveEditor.App.Services;
 using SuikodenHdSaveEditor.App.ViewModels;
 using SuikodenHdSaveEditor.Core;
+using SuikodenHdSaveEditor.Formats.Suikoden2;
 
 namespace SuikodenHdSaveEditor.App.Tests;
 
@@ -103,6 +104,136 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task GuidedFieldsShowNamesAndOnlyExposeCharacterControlsOnCharactersTab()
+    {
+        using TestDirectory directory = new();
+        MainWindowViewModel viewModel = CreateViewModel(directory);
+        await viewModel.OpenPathAsync(directory.CreateSave());
+
+        viewModel.SelectedSection = "Inventory";
+        EditorFieldViewModel item = viewModel.Fields.Single(field => field.Path == "party_data.party_item[0]");
+        Assert.True(item.HasChoices);
+        Assert.Contains(item.Choices, choice => choice.Contains("Medicine", StringComparison.Ordinal));
+        Assert.False(viewModel.IsCharacters);
+        Assert.True(viewModel.IsInventory);
+
+        viewModel.SelectedSection = "Advanced Data";
+        Assert.False(viewModel.IsCharacters);
+        Assert.False(viewModel.IsSearchVisible);
+
+        viewModel.SelectedSection = "Characters";
+        Assert.True(viewModel.IsCharacters);
+        Assert.True(viewModel.IsSearchVisible);
+    }
+
+    [Fact]
+    public async Task Suikoden2GuidedChoicesExposeItemCharacterRecruitmentAndCastleMeanings()
+    {
+        using TestDirectory directory = new();
+        MainWindowViewModel viewModel = CreateViewModel(directory);
+        await viewModel.OpenPathAsync(directory.CreateSuikoden2Save());
+
+        viewModel.SelectedSection = "Inventory";
+        EditorFieldViewModel itemField = viewModel.Fields.Single(field => field.Path == "party_data.party_item[0]");
+        Suikoden2ItemDefinition regular34 = Suikoden2Catalog.FindItem(Suikoden2ItemCategory.Regular, 34);
+        string itemChoice = itemField.Choices.Single(choice => choice.EndsWith("Regular:34", StringComparison.Ordinal));
+        Assert.Contains(regular34.Name, itemChoice, StringComparison.Ordinal);
+        EditorFieldViewModel bathPainting = viewModel.Fields.Single(field => field.Path == "game_data.furo_item[2]");
+        Assert.All(bathPainting.Choices, choice => Assert.Contains("Trade:", choice, StringComparison.Ordinal));
+        Assert.Contains(bathPainting.Choices, choice => choice.EndsWith("Trade:18", StringComparison.Ordinal));
+        Assert.DoesNotContain(bathPainting.Choices, choice => choice.EndsWith("Trade:1", StringComparison.Ordinal));
+
+        viewModel.SelectedSection = "Party";
+        Assert.Contains(viewModel.Fields[0].Choices, choice => choice.Contains("Riou", StringComparison.Ordinal));
+
+        viewModel.SelectedSection = "Recruitment";
+        EditorFieldViewModel recruitment = viewModel.Fields.Single(field => field.Path == "chara_flag[1]");
+        Assert.Contains("Recruited manually — 71", recruitment.Choices);
+        Assert.Contains("Deceased — 212", recruitment.Choices);
+
+        viewModel.SelectedSection = "Headquarters / Progress";
+        EditorFieldViewModel castle = viewModel.Fields.Single(field => field.Label == "Castle level");
+        Assert.Contains("Level 4 — Maximum", castle.Choices);
+    }
+
+    [Fact]
+    public async Task ApplyAllCommitsSectionAsOneUndoableTransaction()
+    {
+        using TestDirectory directory = new();
+        MainWindowViewModel viewModel = CreateViewModel(directory);
+        await viewModel.OpenPathAsync(directory.CreateSave());
+        viewModel.Fields.Single(field => field.Label == "Hero name").Value = "Edited Hero";
+        viewModel.Fields.Single(field => field.Label == "Potch").Value = "9000";
+
+        viewModel.ApplyAllCommand.Execute(null);
+
+        JsonNode edited = JsonNode.Parse(viewModel.RawJson)!;
+        Assert.Equal("Edited Hero", edited["playerName"]!.GetValue<string>());
+        Assert.Equal(9000, edited["party_data"]!["mochi_kin"]!.GetValue<int>());
+
+        viewModel.UndoCommand.Execute(null);
+        JsonNode undone = JsonNode.Parse(viewModel.RawJson)!;
+        Assert.Equal("Synthetic Hero", undone["playerName"]!.GetValue<string>());
+        Assert.Equal(100, undone["party_data"]!["mochi_kin"]!.GetValue<int>());
+    }
+
+    [Fact]
+    public async Task ApplyAllChangesS1PartyTogetherSoTirCanMoveSlots()
+    {
+        using TestDirectory directory = new();
+        MainWindowViewModel viewModel = CreateViewModel(directory);
+        await viewModel.OpenPathAsync(directory.CreateSave());
+        viewModel.SelectedSection = "Party";
+        Assert.All(viewModel.Fields, field => Assert.True(field.HasChoices));
+        viewModel.Fields.Single(field => field.Path.EndsWith("[0]", StringComparison.Ordinal)).Value = "Empty — character -1";
+        viewModel.Fields.Single(field => field.Path.EndsWith("[1]", StringComparison.Ordinal)).Value = "Tir McDohl — character 8";
+
+        viewModel.ApplyAllCommand.Execute(null);
+
+        JsonArray party = JsonNode.Parse(viewModel.RawJson)!["party_data"]!["chara_code"]!.AsArray();
+        Assert.Equal(-1, party[0]!.GetValue<int>());
+        Assert.Equal(8, party[1]!.GetValue<int>());
+        Assert.False(viewModel.HasError);
+    }
+
+    [Fact]
+    public async Task ApplyAllOrdersDependentHpChangesAgainstTheFinalValues()
+    {
+        using TestDirectory directory = new();
+        MainWindowViewModel viewModel = CreateViewModel(directory);
+        await viewModel.OpenPathAsync(directory.CreateSave());
+        viewModel.SelectedSection = "Characters";
+        viewModel.Fields.Single(field => field.Label == "Current HP").Value = "120";
+        viewModel.Fields.Single(field => field.Label == "Maximum HP").Value = "130";
+
+        viewModel.ApplyAllCommand.Execute(null);
+
+        JsonObject character = JsonNode.Parse(viewModel.RawJson)!["player_base"]![0]!.AsObject();
+        Assert.Equal(120, character["hp"]!.GetValue<int>());
+        Assert.Equal(130, character["max_hp"]!.GetValue<int>());
+        Assert.False(viewModel.HasError);
+    }
+
+    [Fact]
+    public async Task HeadquartersLevelIsCappedChoiceAndInvalidApplyAllIsAtomic()
+    {
+        using TestDirectory directory = new();
+        MainWindowViewModel viewModel = CreateViewModel(directory);
+        await viewModel.OpenPathAsync(directory.CreateSave());
+        EditorFieldViewModel level = viewModel.Fields.Single(field => field.Label == "Headquarters level");
+        Assert.Equal(5, level.Choices.Count);
+        Assert.Contains("Level 4 — Maximum", level.Choices);
+        string before = viewModel.RawJson;
+        viewModel.Fields.Single(field => field.Label == "Potch").Value = "9000";
+        level.Value = "Level 5 — Invalid";
+
+        viewModel.ApplyAllCommand.Execute(null);
+
+        Assert.True(viewModel.HasError);
+        Assert.Equal(JsonNode.Parse(before)!.ToJsonString(), JsonNode.Parse(viewModel.RawJson)!.ToJsonString());
+    }
+
+    [Fact]
     public async Task PrivateOptInCopiesAndOpensEverySaveInViewModel()
     {
         string? saveRoot = Environment.GetEnvironmentVariable("SUIKODEN_PRIVATE_SAVE_ROOT");
@@ -128,6 +259,14 @@ public sealed class MainWindowViewModelTests
             Assert.True(viewModel.HasDocument);
             Assert.False(viewModel.HasError);
             Assert.NotEmpty(viewModel.Fields);
+            foreach (string section in viewModel.Sections)
+            {
+                viewModel.SelectedSection = section;
+                if (viewModel.IsFieldEditor)
+                {
+                    Assert.NotEmpty(viewModel.Fields);
+                }
+            }
         }
     }
 
@@ -181,6 +320,95 @@ public sealed class MainWindowViewModelTests
             File.WriteAllText(path, SaveCrypto.EncryptJson(json));
             return path;
         }
+
+        internal string CreateSuikoden2Save()
+        {
+            JsonObject root = new()
+            {
+                ["version"] = 100,
+                ["game_data"] = new JsonObject
+                {
+                    ["bozu_name"] = "Synthetic Hero",
+                    ["bozu_name2"] = "Synthetic Real Hero",
+                    ["kari_name"] = StringArray(6),
+                    ["macd_name"] = string.Empty,
+                    ["base_name"] = "Synthetic Castle",
+                    ["m_base_name"] = "Synthetic S1 HQ",
+                    ["team_name"] = "Synthetic Army",
+                    ["base_lv"] = 1,
+                    ["kaji_lv"] = 1,
+                    ["nakam_1_num"] = 0,
+                    ["play_time"] = IntArray(1, 2, 3),
+                    ["base_item"] = ItemArray(60),
+                    ["furo_item"] = ItemArray(8, 64),
+                    ["room_item"] = ItemArray(8, 64),
+                    ["furo_info"] = IntArray(2),
+                    ["food_menu"] = IntArray(7),
+                    ["food_resipi"] = IntArray(5),
+                    ["food_num"] = IntArray(12),
+                    ["tantei_lv"] = IntArray(65),
+                    ["hon_flag"] = IntArray(50),
+                    ["area_no"] = 0,
+                    ["s_area_no"] = 0,
+                    ["town_no"] = 0,
+                    ["s_town_no"] = 0,
+                    ["area_no2"] = 0,
+                    ["town_no2"] = 0,
+                    ["map_no"] = 0,
+                    ["s_map_no"] = 0,
+                },
+                ["chara_data"] = new JsonObject
+                {
+                    ["c_varia_dat"] = new JsonArray(Enumerable.Range(0, 85).Select(id => (JsonNode?)CreateSuikoden2Character(id)).ToArray()),
+                    ["c_kotei_dat"] = new JsonArray(Enumerable.Range(0, 85).Select(_ => (JsonNode?)new JsonObject()).ToArray()),
+                },
+                ["party_data"] = new JsonObject
+                {
+                    ["party_cha_no"] = IntArray(1, 2, 3, 4, 5, 6, 0, 0),
+                    ["party_item"] = ItemArray(30),
+                    ["event_item"] = IntArray(10),
+                    ["ninki"] = 5,
+                    ["gold"] = 1000,
+                },
+                ["chara_flag"] = IntArray(128),
+                ["event_flag"] = IntArray(256),
+                ["t_box_flag"] = IntArray(32),
+                ["px"] = 0,
+                ["py"] = 0,
+            };
+            root["chara_flag"]![1] = 71;
+            string path = System.IO.Path.Combine(Path, "Data2");
+            File.WriteAllText(path, SaveCrypto.EncryptJson(root.ToJsonString()));
+            return path;
+        }
+
+        private static JsonObject CreateSuikoden2Character(int id) => new()
+        {
+            ["level"] = 10,
+            ["exp"] = 20,
+            ["now_hp"] = 90,
+            ["max_hp"] = 100,
+            ["mp"] = IntArray(0, 17, 34, 51),
+            ["para"] = IntArray(10, 11, 12, 13, 14, 15, 16),
+            ["buki_lv"] = 5,
+            ["buki_mon"] = 0,
+            ["mon_eqp"] = IntArray(3),
+            ["bogu_eqp"] = IntArray(3),
+            ["item_eqp"] = ItemArray(3),
+            ["todome"] = id,
+        };
+
+        private static JsonArray ItemArray(int count, int emptyUseCount = 0) => new(Enumerable.Range(0, count).Select(_ => (JsonNode?)new JsonObject
+        {
+            ["item_no"] = 0,
+            ["use_cnt"] = emptyUseCount,
+        }).ToArray());
+
+        private static JsonArray IntArray(params int[] values) => new(values.Select(value => (JsonNode?)JsonValue.Create(value)).ToArray());
+
+        private static JsonArray IntArray(int count) => new(Enumerable.Repeat(0, count).Select(value => (JsonNode?)JsonValue.Create(value)).ToArray());
+
+        private static JsonArray StringArray(int count) => new(Enumerable.Range(0, count).Select(index => (JsonNode?)JsonValue.Create($"Alias {index}")).ToArray());
 
         public void Dispose()
         {

@@ -169,6 +169,7 @@ public sealed class Suikoden2Adapter
         ArgumentNullException.ThrowIfNull(item);
         Guard.Valid(!Suikoden2Catalog.Beasts.Contains(characterId) || item.Id == 0, "Beasts and monsters cannot equip accessories.");
         Guard.Valid(item.Category is Suikoden2ItemCategory.Regular or Suikoden2ItemCategory.Accessory or Suikoden2ItemCategory.Food, "Only reviewed items, accessories, and food can be placed in accessory slots.");
+        Guard.Valid(!item.StoryCritical, "Story-critical key items cannot be placed in accessory slots.");
         JsonArray accessories = FindCharacter(characterId)["item_eqp"]!.AsArray();
         Guard.Index(slot, accessories.Count, "Accessory slot");
         JsonObject target = accessories[slot]!.AsObject();
@@ -182,9 +183,20 @@ public sealed class Suikoden2Adapter
         ArgumentNullException.ThrowIfNull(item);
         JsonArray container = GetInventory(inventory);
         Guard.Index(slot, container.Count, $"{inventory} inventory slot");
+        if (inventory == Suikoden2Inventory.Bath)
+        {
+            Guard.Valid(item.Category == Suikoden2ItemCategory.Trade, "Bath displays accept only reviewed Trade-category paintings and ornaments.");
+            bool isPaintingSlot = slot is 2 or 5;
+            bool isPainting = item.Id == 0 || item.Id is >= 18 and <= 22 or >= 42 and <= 44;
+            bool isOrnament = item.Id == 0 || item.Id is >= 1 and <= 17 or >= 45 and <= 50;
+            Guard.Valid(isPaintingSlot ? isPainting : isOrnament, isPaintingSlot
+                ? "This bath slot accepts only reviewed paintings (Trade IDs 18–22 and 42–44)."
+                : "This bath slot accepts only reviewed ornaments (Trade IDs 1–17 and 45–50).");
+        }
+
         JsonObject target = container[slot]!.AsObject();
         target["item_no"] = item.Id;
-        target["use_cnt"] = item.Id == 0 ? 0 : item.UseCount;
+        target["use_cnt"] = inventory == Suikoden2Inventory.Bath ? 64 : item.Id == 0 ? 0 : item.UseCount;
         document.MarkChanged();
     }
 
@@ -269,7 +281,11 @@ public sealed class Suikoden2Adapter
             HashSet<string> allowed = ["base_lv", "kaji_lv", "area_no", "s_area_no", "town_no", "s_town_no", "area_no2", "town_no2", "map_no", "s_map_no", "nakam_1_num"];
             Guard.Valid(allowed.Contains(field), $"General numeric field {field} is not reviewed.");
             Guard.Valid(field != "nakam_1_num", "Imported Suikoden I recruit count is read-only because its compatibility semantics are not safe to synthesize.");
-            if (field is "base_lv" or "kaji_lv")
+            if (field == "base_lv")
+            {
+                Guard.Valid(value is >= 0 and <= 4, "Castle level must be 0 through 4; level 4 is the cap.");
+            }
+            else if (field == "kaji_lv")
             {
                 Guard.Valid(value >= 0, $"{field} cannot be negative.");
             }
@@ -374,6 +390,11 @@ public sealed class Suikoden2Adapter
         CheckLength(issues, GameData["furo_item"]!.AsArray(), 8, "game_data.furo_item");
         CheckLength(issues, GameData["room_item"]!.AsArray(), 8, "game_data.room_item");
         CheckLength(issues, CharacterData, 85, "chara_data.c_varia_dat");
+        int castleLevel = GameData["base_lv"]!.GetValue<int>();
+        if (castleLevel is < 0 or > 4)
+        {
+            issues.Add(new(ValidationSeverity.Error, "game_data.base_lv", "Castle level must be 0 through 4; level 4 is the cap."));
+        }
 
         for (int index = 0; index < CharacterData.Count; index++)
         {
