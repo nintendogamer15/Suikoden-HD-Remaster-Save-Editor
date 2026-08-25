@@ -4,6 +4,8 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 1.0.1 - 2026-08-25
+
 ### Added
 
 - Native Arch Linux and Fedora RPM packaging for the self-contained Linux application.
