@@ -4,6 +4,14 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 1.0.7 - 2026-08-25
+
+### Fixed
+
+- Linux package staging now applies explicit `0755` directory and `0644` file modes instead of umask-dependent ones, so `rpmlint` no longer rejects the packaged `/usr/lib/suikoden-hd-remaster-save-editor/LICENSES` directory as a non-standard `775` directory.
+- The Arch package job clears the container image's `NoExtract` rules before installing, so the README and third-party notices the package installs under `/usr/share/doc` are actually present for installed-package validation instead of being silently discarded.
+- Installed-package validation now names every assertion and reports the underlying diagnostic, so a failing package job identifies each broken expectation instead of ending on a bare exit code.
+
 ## 1.0.6 - 2026-08-25
 
 ### Changed
