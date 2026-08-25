@@ -59,21 +59,25 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const sha = context.sha;
-            // Find the most recent successful CI run for this commit on main (not tag)
-            const runs = await github.rest.actions.listWorkflowRunsForRepo({
-              owner,
-              repo,
-              head_sha: sha,
-              status: 'success',
-              per_page: 10
-            });
-            const run = runs.data.workflow_runs.find(r =>
-              r.name === 'CI' &&
-              r.head_branch === 'main' &&
-              r.event === 'push'
-            );
+            let run = null;
+            // Retry up to 10 times (wait for main build to finish if pushed at same time)
+            for (let i = 0; i < 10; i++) {
+              const runs = await github.rest.actions.listWorkflowRunsForRepo({
+                owner,
+                repo,
+                head_sha: sha,
+                per_page: 10
+              });
+              run = runs.data.workflow_runs.find(r =>
+                r.name === 'CI' &&
+                r.head_branch === 'main' &&
+                (r.status === 'completed' && r.conclusion === 'success')
+              );
+              if (run) break;
+              await new Promise(r => setTimeout(r, 30000)); // wait 30s
+            }
             if (!run) {
-              throw new Error(`No successful main CI run found for commit ${sha}`);
+              throw new Error(`No successful main CI run found for commit ${sha} after retries. Consider pushing tag after main CI completes.`);
             }
             core.setOutput('run_id', run.id);
             const artifacts = await github.rest.actions.listArtifactsForRepo({
