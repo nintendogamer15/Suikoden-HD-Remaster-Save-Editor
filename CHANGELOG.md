@@ -4,6 +4,21 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 1.0.2 - 2026-08-25
+
+### Added
+
+- Quantity dropdowns for verified stackable Suikoden II regular items, bounded to each item's reviewed maximum.
+
+### Changed
+
+- Inventory and key-item choices now show user-facing names without numeric item/category codes. Duplicate internal entries remain preserved when untouched.
+
+### Fixed
+
+- Suikoden II hero/save-list renaming now updates the paired `bozu_name` and `bozu_name2` fields together instead of leaving one stale.
+- Partially used Suikoden II regular-item stacks now resolve to the correct item name instead of requiring an exact maximum-count match.
+
 ## 1.0.1 - 2026-08-25
 
 ### Added

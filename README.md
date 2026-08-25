@@ -25,7 +25,7 @@ Full terms, exact inspected commits, and material-use details are in [THIRD_PART
 - Detects Suikoden I or II from verified decrypted schema signatures rather than trusting the filename.
 - Preserves unknown JSON properties, arrays, ordering, duplicate items, and unrelated values.
 - Provides game-specific overview, party, character, inventory, recruitment, headquarters/progress, and read-only Advanced Data views.
-- Includes searchable, name-first dropdowns for inventory and party editing; explained recruitment states; capped headquarters-level choices; per-field Apply and centered transactional Apply All; undo/redo; reload; recent-file paths; and slot-folder browsing.
+- Includes searchable, name-only inventory dropdowns, verified Suikoden II stack quantities, named party editing, synchronized Suikoden II hero/save-list naming, explained recruitment states, capped headquarters-level choices, per-field Apply and centered transactional Apply All, undo/redo, reload, recent-file paths, and slot-folder browsing.
 - Provides a confirmation-gated **Max stats + best party gear** action for the six active battle characters. It uses documented caps, keeps fixed weapon identities and runes, preserves known locked gear, and applies researched/class-compatible end-game equipment recommendations as one undoable change.
 - Defaults to Save As. Explicit overwrite first creates a timestamped backup, then uses validated temporary output and atomic replacement.
 - Works fully offline with no telemetry and never sends save data anywhere.

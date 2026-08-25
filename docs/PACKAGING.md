@@ -55,7 +55,7 @@ The public pull mirror at `Robert/Suikoden-HD-Remaster-Save-Editor` was verified
 
 ## Safe release procedure
 
-The already-published `v1.0.0` tag must not be moved or reused. After the packaging commit is approved, choose a new unused version (for example `1.0.1`) and:
+Published tags must never be moved or reused. For another release, choose a new unused version and:
 
 1. Pull `main` with `git pull --ff-only` and confirm `git status --short` is empty.
 2. Update `Directory.Build.props` and `CHANGELOG.md` to the chosen `X.Y.Z`, commit, push `main`, and wait for GitHub CI plus mirrored Gitea CI to pass. The RPM changelog obtains the version from the build and does not need a duplicated manual edit.

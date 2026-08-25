@@ -25,7 +25,7 @@ Four supplied encrypted Suikoden I slot files (`Data0`, `Data1`, `Data2`, and `D
 - eight party-inventory slots with searchable reviewed item names;
 - recruitment flags with explained choices and warnings.
 
-Inventory, rune, equipment-state, recruitment, and party controls show names first while retaining their IDs/flags for verification. Party and inventory choices are searchable. Apply All treats the six party slots as one validated party operation, so moving Tir does not create a transient invalid party.
+Normal inventory choices show names only; their numeric IDs remain internal and visible in Advanced Data when needed for technical inspection. Rune, equipment-state, recruitment, and party controls retain reviewed identifiers where those values explain restrictions or state transitions. Party and inventory choices are searchable. Apply All treats the six party slots as one validated party operation, so moving Tir does not create a transient invalid party.
 
 The catalogue keeps character, item, equipment-state, and rune mappings outside UI code. Weapon-name mappings remain unverified, so the bulk optimizer preserves each character's fixed weapon ID and changes only its reviewed sharpening level.
 

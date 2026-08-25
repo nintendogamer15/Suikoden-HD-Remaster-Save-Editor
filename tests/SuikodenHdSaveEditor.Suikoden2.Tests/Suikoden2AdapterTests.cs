@@ -142,6 +142,7 @@ public sealed class Suikoden2AdapterTests
         Suikoden2ItemDefinition painting = Suikoden2Catalog.FindItem(Suikoden2ItemCategory.Trade, 18);
 
         adapter.SetInventorySlot(Suikoden2Inventory.Party, 0, medicine);
+        adapter.SetInventoryQuantity(Suikoden2Inventory.Party, 0, 4);
         adapter.SetInventorySlot(Suikoden2Inventory.Warehouse, 0, baseItem);
         adapter.SetInventorySlot(Suikoden2Inventory.Bath, 0, ornament);
         adapter.SetInventorySlot(Suikoden2Inventory.Bath, 2, painting);
@@ -151,12 +152,18 @@ public sealed class Suikoden2AdapterTests
         Assert.True(added > 0);
         JsonArray party = adapter.Document.Root["party_data"]!["party_item"]!.AsArray();
         Assert.Equal(30, party.Count);
+        Assert.Equal(medicine.Id, party[0]!["item_no"]!.GetValue<int>());
+        Assert.Equal(4, party[0]!["use_cnt"]!.GetValue<int>());
+        Assert.Equal(medicine, Suikoden2Catalog.StoredItem(medicine.Id, 4));
         Assert.DoesNotContain(
             party.Select(node => node!.AsObject()),
             slot => Suikoden2Catalog.Items.Any(item => item.Category == Suikoden2ItemCategory.Regular
                 && item.StoryCritical
                 && item.Id == slot["item_no"]!.GetValue<int>()));
         Assert.Equal(64, adapter.Document.Root["game_data"]!["furo_item"]![2]!["use_cnt"]!.GetValue<int>());
+        Assert.Throws<SaveEditorException>(() => adapter.SetInventoryQuantity(Suikoden2Inventory.Party, 0, 10));
+        Assert.Throws<SaveEditorException>(() => adapter.SetInventoryQuantity(Suikoden2Inventory.Warehouse, 0, 1));
+        Assert.Throws<SaveEditorException>(() => adapter.SetInventoryQuantity(Suikoden2Inventory.Bath, 0, 1));
         Assert.Throws<SaveEditorException>(() => adapter.SetInventorySlot(Suikoden2Inventory.Bath, 2, ornament));
         Assert.Throws<SaveEditorException>(() => adapter.SetInventorySlot(Suikoden2Inventory.Bath, 0, medicine));
     }
@@ -184,6 +191,7 @@ public sealed class Suikoden2AdapterTests
         Assert.Equal(4, adapter.Document.Root["game_data"]!["base_lv"]!.GetValue<int>());
         Assert.Equal(70, adapter.Document.Root["chara_flag"]![2]!.GetValue<int>());
         Assert.Equal("Test Riou", adapter.Document.Root["game_data"]!["bozu_name"]!.GetValue<string>());
+        Assert.Equal("Test Riou", adapter.Document.Root["game_data"]!["bozu_name2"]!.GetValue<string>());
         Assert.Equal(255, adapter.Document.Root["t_box_flag"]![0]!.GetValue<int>());
         Assert.Equal(47, adapter.Document.Root["event_flag"]![153]!.GetValue<int>());
         Assert.Throws<SaveEditorException>(() => adapter.SetGeneralNumber("base_lv", 5));

@@ -114,6 +114,11 @@ public sealed class MainWindowViewModelTests
         EditorFieldViewModel item = viewModel.Fields.Single(field => field.Path == "party_data.party_item[0]");
         Assert.True(item.HasChoices);
         Assert.Contains(item.Choices, choice => choice.Contains("Medicine", StringComparison.Ordinal));
+        Assert.DoesNotContain(item.Choices, choice => choice.Contains("— item ", StringComparison.Ordinal));
+        int medicineId = SuikodenHdSaveEditor.Formats.Suikoden1.Suikoden1Catalog.Items.Single(entry => entry.Value == "Medicine").Key;
+        item.Value = "Medicine";
+        item.ApplyCommand.Execute(null);
+        Assert.Equal(medicineId, JsonNode.Parse(viewModel.RawJson)!["party_data"]!["party_item"]![0]!.GetValue<int>());
         Assert.False(viewModel.IsCharacters);
         Assert.True(viewModel.IsInventory);
 
@@ -136,12 +141,28 @@ public sealed class MainWindowViewModelTests
         viewModel.SelectedSection = "Inventory";
         EditorFieldViewModel itemField = viewModel.Fields.Single(field => field.Path == "party_data.party_item[0]");
         Suikoden2ItemDefinition regular34 = Suikoden2Catalog.FindItem(Suikoden2ItemCategory.Regular, 34);
-        string itemChoice = itemField.Choices.Single(choice => choice.EndsWith("Regular:34", StringComparison.Ordinal));
-        Assert.Contains(regular34.Name, itemChoice, StringComparison.Ordinal);
+        Assert.Equal("Medicine", itemField.Value);
+        Assert.Contains(regular34.Name, itemField.Choices);
+        Assert.DoesNotContain(itemField.Choices, choice => choice.Contains("Regular:", StringComparison.Ordinal));
+        Assert.DoesNotContain(itemField.Choices, choice => choice.Contains("Trade:", StringComparison.Ordinal));
+        EditorFieldViewModel quantity = viewModel.Fields.Single(field => field.Path == "party_data.party_item[0].use_cnt");
+        Assert.Equal("3", quantity.Value);
+        Assert.Equal(9, quantity.Choices.Count);
+        quantity.Value = "5";
+        quantity.ApplyCommand.Execute(null);
+        Assert.Equal(5, JsonNode.Parse(viewModel.RawJson)!["party_data"]!["party_item"]![0]!["use_cnt"]!.GetValue<int>());
+        itemField = viewModel.Fields.Single(field => field.Path == "party_data.party_item[0]");
+        itemField.Value = regular34.Name;
+        itemField.ApplyCommand.Execute(null);
+        JsonNode changedItem = JsonNode.Parse(viewModel.RawJson)!;
+        Assert.Equal(regular34.Id, changedItem["party_data"]!["party_item"]![0]!["item_no"]!.GetValue<int>());
+        Assert.Equal(regular34.UseCount, changedItem["party_data"]!["party_item"]![0]!["use_cnt"]!.GetValue<int>());
+        Assert.DoesNotContain(viewModel.Fields, field => field.Path == "party_data.party_item[0].use_cnt");
+
         EditorFieldViewModel bathPainting = viewModel.Fields.Single(field => field.Path == "game_data.furo_item[2]");
-        Assert.All(bathPainting.Choices, choice => Assert.Contains("Trade:", choice, StringComparison.Ordinal));
-        Assert.Contains(bathPainting.Choices, choice => choice.EndsWith("Trade:18", StringComparison.Ordinal));
-        Assert.DoesNotContain(bathPainting.Choices, choice => choice.EndsWith("Trade:1", StringComparison.Ordinal));
+        Assert.Contains(Suikoden2Catalog.FindItem(Suikoden2ItemCategory.Trade, 18).Name, bathPainting.Choices);
+        Assert.DoesNotContain(Suikoden2Catalog.FindItem(Suikoden2ItemCategory.Trade, 1).Name, bathPainting.Choices);
+        Assert.DoesNotContain(bathPainting.Choices, choice => choice.Contains("Trade:", StringComparison.Ordinal));
 
         viewModel.SelectedSection = "Party";
         Assert.Contains(viewModel.Fields[0].Choices, choice => choice.Contains("Riou", StringComparison.Ordinal));
@@ -154,6 +175,23 @@ public sealed class MainWindowViewModelTests
         viewModel.SelectedSection = "Headquarters / Progress";
         EditorFieldViewModel castle = viewModel.Fields.Single(field => field.Label == "Castle level");
         Assert.Contains("Level 4 — Maximum", castle.Choices);
+    }
+
+    [Fact]
+    public async Task Suikoden2HeroNameUpdatesBothPairedSaveFields()
+    {
+        using TestDirectory directory = new();
+        MainWindowViewModel viewModel = CreateViewModel(directory);
+        await viewModel.OpenPathAsync(directory.CreateSuikoden2Save());
+        EditorFieldViewModel hero = viewModel.Fields.Single(field => field.Label == "Hero / save-list name");
+        Assert.DoesNotContain(viewModel.Fields, field => field.Label == "Hero real name");
+
+        hero.Value = "Edited Hero";
+        hero.ApplyCommand.Execute(null);
+
+        JsonNode edited = JsonNode.Parse(viewModel.RawJson)!;
+        Assert.Equal("Edited Hero", edited["game_data"]!["bozu_name"]!.GetValue<string>());
+        Assert.Equal("Edited Hero", edited["game_data"]!["bozu_name2"]!.GetValue<string>());
     }
 
     [Fact]
@@ -398,6 +436,8 @@ public sealed class MainWindowViewModelTests
                 ["py"] = 0,
             };
             root["chara_flag"]![1] = 71;
+            root["party_data"]!["party_item"]![0]!["item_no"] = 1;
+            root["party_data"]!["party_item"]![0]!["use_cnt"] = 3;
             string path = System.IO.Path.Combine(Path, "Data2");
             File.WriteAllText(path, SaveCrypto.EncryptJson(root.ToJsonString()));
             return path;

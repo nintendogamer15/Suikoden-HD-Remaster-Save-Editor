@@ -69,6 +69,29 @@ public static class Suikoden2Catalog
         return result ?? throw new KeyNotFoundException($"No reviewed {category} item has ID {id}.");
     }
 
+    public static Suikoden2ItemDefinition? StoredItem(int id, int useCount)
+    {
+        if (id == 0)
+        {
+            return Items.First(item => item.Category == Suikoden2ItemCategory.Regular && item.Id == 0);
+        }
+
+        Suikoden2ItemCategory[] categories = useCount switch
+        {
+            >= 0 and <= 9 => [Suikoden2ItemCategory.Regular],
+            16 => [Suikoden2ItemCategory.Helmet, Suikoden2ItemCategory.Armor, Suikoden2ItemCategory.Shield, Suikoden2ItemCategory.Accessory],
+            32 => [Suikoden2ItemCategory.Rune],
+            48 => [Suikoden2ItemCategory.Farming],
+            64 => [Suikoden2ItemCategory.Trade],
+            80 => [Suikoden2ItemCategory.Base],
+            >= 99 => [Suikoden2ItemCategory.Food],
+            _ => [],
+        };
+        return categories
+            .Select(category => Items.FirstOrDefault(item => item.Category == category && item.Id == id))
+            .FirstOrDefault(item => item is not null);
+    }
+
     public static bool IsRuneAllowed(int characterId, int slot, int runeId)
     {
         if (runeId == 0)
@@ -217,4 +240,3 @@ public static class Suikoden2Catalog
         IReadOnlyList<Suikoden2ItemDefinition> Items,
         IReadOnlySet<int> Beasts);
 }
-

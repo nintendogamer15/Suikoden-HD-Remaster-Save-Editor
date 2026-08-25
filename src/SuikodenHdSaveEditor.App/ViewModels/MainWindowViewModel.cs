@@ -995,10 +995,12 @@ public sealed class MainWindowViewModel : ObservableObject
 
     private void BuildSuikoden1Inventory(Suikoden1Adapter adapter)
     {
-        string[] itemChoices = Suikoden1Catalog.Items
-            .OrderBy(item => item.Key)
-            .Select(item => FormatNamedId(item.Value, "item", item.Key))
-            .ToArray();
+        Dictionary<string, int> itemChoices = new(StringComparer.Ordinal);
+        foreach ((int id, string name) in Suikoden1Catalog.Items.OrderBy(item => item.Key))
+        {
+            itemChoices.TryAdd(name, id);
+        }
+
         JsonArray items = adapter.Document.Root["party_data"]!["party_item"]!.AsArray();
         for (int index = 0; index < items.Count; index++)
         {
@@ -1007,17 +1009,17 @@ public sealed class MainWindowViewModel : ObservableObject
             AddChoice(
                 $"Party item {index + 1}",
                 $"party_data.party_item[{index}]",
-                FormatNamedId(Suikoden1Catalog.ItemName(id), "item", id),
-                itemChoices,
-                value => adapter.SetPartyItem(captured, ParseLabeledInteger(value, "item")));
+                Suikoden1Catalog.ItemName(id),
+                itemChoices.Keys.Order(StringComparer.OrdinalIgnoreCase),
+                value => adapter.SetPartyItem(captured, ParseNamedChoice(value, itemChoices, "item")));
         }
 
         if (SearchText.Trim().Length > 0)
         {
             string query = SearchText.Trim();
-            foreach ((int id, string name) in Suikoden1Catalog.Items.Where(item => item.Value.Contains(query, StringComparison.OrdinalIgnoreCase) || item.Key.ToString(CultureInfo.InvariantCulture).Contains(query, StringComparison.OrdinalIgnoreCase)).Take(200))
+            foreach ((int _, string name) in Suikoden1Catalog.Items.Where(item => item.Value.Contains(query, StringComparison.OrdinalIgnoreCase)).Take(200))
             {
-                AddReadOnly($"Catalogue · {id}: {name}", "item reference", id.ToString(CultureInfo.InvariantCulture));
+                AddReadOnly($"Catalogue · {name}", "item reference", name);
             }
         }
     }
@@ -1078,9 +1080,19 @@ public sealed class MainWindowViewModel : ObservableObject
     {
         JsonObject game = adapter.Document.Root["game_data"]!.AsObject();
         AddReadOnly("Detected game", "schema", "Suikoden II");
+        if (game["bozu_name"] is JsonValue heroName)
+        {
+            AddString(
+                "Hero / save-list name",
+                "game_data.bozu_name + game_data.bozu_name2",
+                heroName.GetValue<string>(),
+                text => adapter.SetName("bozu_name", text),
+                "Both paired hero-name fields are updated together. Every supplied Suikoden II save keeps these fields equal; changing only one can leave menus or the save list showing the old name.");
+        }
+
         foreach ((string path, string label) in new[]
         {
-            ("bozu_name", "Hero name"), ("bozu_name2", "Hero real name"), ("macd_name", "Imported Suikoden I hero"),
+            ("macd_name", "Imported Suikoden I hero"),
             ("base_name", "Castle name"), ("m_base_name", "Imported Suikoden I HQ"), ("team_name", "Army name"),
         })
         {
@@ -1266,8 +1278,35 @@ public sealed class MainWindowViewModel : ObservableObject
                 int useCount = item["use_cnt"]!.GetValue<int>();
                 string text = FormatS2InventoryItem(inventory, itemId, useCount);
                 IEnumerable<Suikoden2ItemDefinition> choices = InventoryChoices(inventory, captured);
+                Dictionary<string, Suikoden2ItemDefinition> namedChoices = BuildS2ItemNameChoices(choices);
                 string slotKind = inventory == Suikoden2Inventory.Bath ? captured is 2 or 5 ? "painting" : "ornament" : "slot";
-                AddChoice($"{InventoryDisplayName(inventory)} {slotKind} {index + 1}", $"{path}[{index}]", text, choices.Select(FormatS2CatalogChoice), value => adapter.SetInventorySlot(inventory, captured, ParseS2Item(value)), warning.Length == 0 ? "Choose by item name, ID, or category; use_cnt is synchronized automatically." : warning + " Choose by item name, ID, or category; use_cnt is synchronized automatically.");
+                AddChoice(
+                    $"{InventoryDisplayName(inventory)} {slotKind} {index + 1}",
+                    $"{path}[{index}]",
+                    text,
+                    namedChoices.Keys.Order(StringComparer.OrdinalIgnoreCase),
+                    value => adapter.SetInventorySlot(inventory, captured, ParseNamedChoice(value, namedChoices, "item")),
+                    warning.Length == 0
+                        ? "Choose by item name. Stackable consumables start at their reviewed maximum quantity; use the quantity field to lower it."
+                        : warning + " Choose by item name.");
+
+                Suikoden2ItemDefinition? currentItem = Suikoden2Catalog.StoredItem(itemId, useCount);
+                if (currentItem is { Category: Suikoden2ItemCategory.Regular, UseCount: > 1 })
+                {
+                    string quantityWarning = $"Verified quantity range for {currentItem.Name}: 1–{currentItem.UseCount}. Select None in the item field to remove the stack.";
+                    if (warning.Length > 0)
+                    {
+                        quantityWarning = warning + " " + quantityWarning;
+                    }
+
+                    AddChoice(
+                        $"{InventoryDisplayName(inventory)} {slotKind} {index + 1} quantity",
+                        $"{path}[{index}].use_cnt",
+                        useCount.ToString(CultureInfo.InvariantCulture),
+                        Enumerable.Range(1, currentItem.UseCount).Select(value => value.ToString(CultureInfo.InvariantCulture)),
+                        value => adapter.SetInventoryQuantity(inventory, captured, ParseInteger(value)),
+                        quantityWarning);
+                }
             }
         }
 
@@ -1279,12 +1318,13 @@ public sealed class MainWindowViewModel : ObservableObject
             Suikoden2ItemDefinition? currentItem = Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Regular && item.Id == current);
             IEnumerable<Suikoden2ItemDefinition> choices = Suikoden2Catalog.Items
                 .Where(item => item.Category == Suikoden2ItemCategory.Regular && (item.Id == 0 || item.StoryCritical));
+            Dictionary<string, Suikoden2ItemDefinition> namedChoices = BuildS2ItemNameChoices(choices);
             AddChoice(
                 $"Key item slot {index + 1}",
                 $"party_data.event_item[{index}]",
-                FormatS2CatalogChoice(currentItem, Suikoden2ItemCategory.Regular, current),
-                choices.Select(FormatS2CatalogChoice),
-                value => adapter.SetKeyItem(captured, ParseS2Item(value).Id),
+                S2ItemDisplayName(currentItem),
+                namedChoices.Keys.Order(StringComparer.OrdinalIgnoreCase),
+                value => adapter.SetKeyItem(captured, ParseNamedChoice(value, namedChoices, "key item").Id),
                 "Story-critical: only reviewed key-item entries are offered. Select None to clear.");
         }
 
@@ -1292,7 +1332,13 @@ public sealed class MainWindowViewModel : ObservableObject
         {
             foreach (Suikoden2ItemDefinition item in Suikoden2Catalog.SearchItems(SearchText).Take(200))
             {
-                AddReadOnly($"Catalogue · {item.Category}:{item.Id} · {item.Name}", "item reference", $"use_cnt {item.UseCount}", item.StoryCritical ? "Story-critical/key item; excluded from safe bulk operations." : null);
+                string detail = FriendlyItemCategory(item.Category);
+                if (item is { Category: Suikoden2ItemCategory.Regular, UseCount: > 1 })
+                {
+                    detail += $" · Maximum quantity {item.UseCount}";
+                }
+
+                AddReadOnly($"Catalogue · {item.Name}", "item reference", detail, item.StoryCritical ? "Story-critical/key item; excluded from safe bulk operations." : null);
             }
         }
     }
@@ -1413,11 +1459,57 @@ public sealed class MainWindowViewModel : ObservableObject
         if (inventory == Suikoden2Inventory.Bath)
         {
             Suikoden2ItemDefinition? bathItem = Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Trade && item.Id == id);
-            return FormatS2CatalogChoice(bathItem, Suikoden2ItemCategory.Trade, id);
+            return S2ItemDisplayName(bathItem);
         }
 
-        return FormatS2Item(id, useCount);
+        return S2ItemDisplayName(Suikoden2Catalog.StoredItem(id, useCount));
     }
+
+    private static Dictionary<string, Suikoden2ItemDefinition> BuildS2ItemNameChoices(IEnumerable<Suikoden2ItemDefinition> choices)
+    {
+        Dictionary<string, Suikoden2ItemDefinition> result = new(StringComparer.Ordinal);
+        foreach (IGrouping<string, Suikoden2ItemDefinition> nameGroup in choices
+            .GroupBy(S2ItemDisplayName, StringComparer.Ordinal)
+            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            Suikoden2ItemCategory[] categories = nameGroup.Select(item => item.Category).Distinct().ToArray();
+            if (categories.Length == 1)
+            {
+                result.TryAdd(nameGroup.Key, nameGroup.First());
+                continue;
+            }
+
+            foreach (IGrouping<Suikoden2ItemCategory, Suikoden2ItemDefinition> categoryGroup in nameGroup.GroupBy(item => item.Category))
+            {
+                result.TryAdd($"{nameGroup.Key} ({FriendlyItemCategory(categoryGroup.Key)})", categoryGroup.First());
+            }
+        }
+
+        return result;
+    }
+
+    private static string S2ItemDisplayName(Suikoden2ItemDefinition? item) => item switch
+    {
+        null => "Unknown item (preserved)",
+        { Id: 0 } => "None",
+        { StoryCritical: true } => $"{item.Name} [Story-critical]",
+        _ => item.Name,
+    };
+
+    private static string FriendlyItemCategory(Suikoden2ItemCategory category) => category switch
+    {
+        Suikoden2ItemCategory.Regular => "Regular item",
+        Suikoden2ItemCategory.Farming => "Farming item",
+        Suikoden2ItemCategory.Trade => "Trade item",
+        Suikoden2ItemCategory.Base => "Headquarters item",
+        Suikoden2ItemCategory.Food => "Food",
+        Suikoden2ItemCategory.Rune => "Rune",
+        Suikoden2ItemCategory.Helmet => "Helmet",
+        Suikoden2ItemCategory.Armor => "Armor",
+        Suikoden2ItemCategory.Shield => "Shield",
+        Suikoden2ItemCategory.Accessory => "Accessory",
+        _ => category.ToString(),
+    };
 
     private static IEnumerable<Suikoden2ItemDefinition> InventoryChoices(Suikoden2Inventory inventory, int slot)
     {
@@ -1535,6 +1627,12 @@ public sealed class MainWindowViewModel : ObservableObject
         }
 
         return result;
+    }
+
+    private static T ParseNamedChoice<T>(string value, IReadOnlyDictionary<string, T> choices, string label)
+    {
+        Guard.Valid(choices.TryGetValue(value, out T? result), $"Choose a reviewed {label} by name from the list.");
+        return result!;
     }
 
     private static bool ParseRecruitmentBoolean(string value) => value.Trim().ToLowerInvariant() switch

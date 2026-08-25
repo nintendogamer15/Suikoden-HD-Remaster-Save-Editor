@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: 0BSD
 using System.Security.Cryptography;
+using System.Text.Json.Nodes;
 using SuikodenHdSaveEditor.Core;
 using SuikodenHdSaveEditor.Formats.Suikoden2;
 
@@ -33,6 +34,53 @@ public sealed class PrivateSaveIntegrationTests
                 string output = copy + ".roundtrip";
                 new SaveFileService().SaveAs(document.DeepClone(), output);
                 Assert.True(SaveDocument.SemanticallyEquals(document.Root, SaveDocument.OpenEncrypted(output).Root));
+
+                SaveDocument renamed = document.DeepClone();
+                new Suikoden2Adapter(renamed).SetName("bozu_name", "Private Test Hero");
+                string renamedOutput = copy + ".renamed";
+                new SaveFileService().SaveAs(renamed, renamedOutput);
+                SaveDocument reopenedRename = SaveDocument.OpenEncrypted(renamedOutput);
+                Assert.Equal("Private Test Hero", reopenedRename.Root["game_data"]!["bozu_name"]!.GetValue<string>());
+                Assert.Equal("Private Test Hero", reopenedRename.Root["game_data"]!["bozu_name2"]!.GetValue<string>());
+
+                SaveDocument quantityEdit = document.DeepClone();
+                Suikoden2Adapter quantityAdapter = new(quantityEdit);
+                (Suikoden2Inventory Inventory, JsonArray Items)[] quantityContainers =
+                [
+                    (Suikoden2Inventory.Party, quantityEdit.Root["party_data"]!["party_item"]!.AsArray()),
+                    (Suikoden2Inventory.Warehouse, quantityEdit.Root["game_data"]!["base_item"]!.AsArray()),
+                    (Suikoden2Inventory.RoomExperimental, quantityEdit.Root["game_data"]!["room_item"]!.AsArray()),
+                ];
+                bool quantityChanged = false;
+                foreach ((Suikoden2Inventory inventory, JsonArray items) in quantityContainers)
+                {
+                    int stack = items.Select(node => node!.AsObject()).ToList().FindIndex(item =>
+                    {
+                        Suikoden2ItemDefinition? definition = Suikoden2Catalog.StoredItem(
+                            item["item_no"]!.GetValue<int>(),
+                            item["use_cnt"]!.GetValue<int>());
+                        return definition is { Category: Suikoden2ItemCategory.Regular, UseCount: > 1 };
+                    });
+                    if (stack < 0)
+                    {
+                        continue;
+                    }
+
+                    quantityAdapter.SetInventoryQuantity(inventory, stack, 1);
+                    string quantityOutput = copy + ".quantity";
+                    new SaveFileService().SaveAs(quantityEdit, quantityOutput);
+                    JsonArray reopenedItems = inventory switch
+                    {
+                        Suikoden2Inventory.Party => SaveDocument.OpenEncrypted(quantityOutput).Root["party_data"]!["party_item"]!.AsArray(),
+                        Suikoden2Inventory.Warehouse => SaveDocument.OpenEncrypted(quantityOutput).Root["game_data"]!["base_item"]!.AsArray(),
+                        _ => SaveDocument.OpenEncrypted(quantityOutput).Root["game_data"]!["room_item"]!.AsArray(),
+                    };
+                    Assert.Equal(1, reopenedItems[stack]!["use_cnt"]!.GetValue<int>());
+                    quantityChanged = true;
+                    break;
+                }
+
+                Assert.True(quantityChanged);
 
                 SaveDocument optimized = document.DeepClone();
                 PartyOptimizationResult result = new Suikoden2Adapter(optimized).MaximizeAndEquipParty();

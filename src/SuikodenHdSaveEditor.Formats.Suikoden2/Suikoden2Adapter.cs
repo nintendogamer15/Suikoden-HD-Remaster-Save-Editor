@@ -205,6 +205,22 @@ public sealed class Suikoden2Adapter
         document.MarkChanged();
     }
 
+    public void SetInventoryQuantity(Suikoden2Inventory inventory, int slot, int quantity)
+    {
+        Guard.Valid(inventory != Suikoden2Inventory.Bath, "Bath displays do not have editable quantities.");
+        JsonArray container = GetInventory(inventory);
+        Guard.Index(slot, container.Count, $"{inventory} inventory slot");
+        JsonObject target = container[slot]!.AsObject();
+        int itemId = target["item_no"]!.GetValue<int>();
+        int currentUseCount = target["use_cnt"]!.GetValue<int>();
+        Suikoden2ItemDefinition? item = Suikoden2Catalog.StoredItem(itemId, currentUseCount);
+        Guard.Valid(item is { Category: Suikoden2ItemCategory.Regular, UseCount: > 1 }, "Only reviewed stackable regular items have an editable quantity.");
+        Suikoden2ItemDefinition stackable = item!;
+        Guard.Valid(quantity >= 1 && quantity <= stackable.UseCount, $"{stackable.Name} quantity must be between 1 and {stackable.UseCount}.");
+        target["use_cnt"] = quantity;
+        document.MarkChanged();
+    }
+
     public int GiveAllSafePartyItems()
     {
         JsonArray inventory = GetInventory(Suikoden2Inventory.Party);
@@ -347,7 +363,17 @@ public sealed class Suikoden2Adapter
         HashSet<string> allowed = ["bozu_name", "bozu_name2", "macd_name", "base_name", "m_base_name", "team_name"];
         Guard.Valid(allowed.Contains(field), $"Name field {field} is not reviewed.");
         Guard.Valid(!string.IsNullOrWhiteSpace(value), "A name cannot be empty.");
-        GameData[field] = value;
+        if (field is "bozu_name" or "bozu_name2")
+        {
+            Guard.Valid(GameData["bozu_name"] is JsonValue && GameData["bozu_name2"] is JsonValue, "This save does not contain both reviewed Suikoden II hero-name fields.");
+            GameData["bozu_name"] = value;
+            GameData["bozu_name2"] = value;
+        }
+        else
+        {
+            GameData[field] = value;
+        }
+
         document.MarkChanged();
     }
 

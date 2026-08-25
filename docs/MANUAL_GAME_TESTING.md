@@ -33,10 +33,11 @@ Automated tests prove encryption and structural intent, not game acceptance. Nev
 
 ## Suikoden II
 
+- [ ] Change **Hero / save-list name**, save to a copy, and confirm the new name appears consistently in dialogue/status displays and the game's load menu.
 - [ ] Six battle and two convoy positions display and enter battle correctly.
 - [ ] Character-specific/locked/exclusive runes and beast equipment remain valid.
 - [ ] Party, warehouse, key, bath, painting/ornament, and experimental room items appear in the intended container.
-- [ ] `use_cnt` decrements correctly for a consumable.
+- [ ] Set a stackable consumable below its reviewed maximum, confirm the chosen quantity appears in game, and verify it decrements correctly when used.
 - [ ] Greenhill aliases, food/recipes, cook-off, detective clues, castle/farm values, and chest flags are checked independently.
 - [ ] Optional-mod cases are tested only with their declared mod actually installed: McDohl/Gremio, Better Leona, Valeria/Kasumi, and Abizboah/Rulodia/Kraken states.
 
