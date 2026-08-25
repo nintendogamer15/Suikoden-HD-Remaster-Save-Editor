@@ -45,8 +45,9 @@ public sealed class Suikoden2CharacterView
 
     public IReadOnlyList<int> Equipment => Array("bogu_eqp");
 
+    public JsonArray Accessories => Data["item_eqp"]!.AsArray();
+
     private int Value(string name) => Data[name]!.GetValue<int>();
 
     private int[] Array(string name) => Data[name]!.AsArray().Select(node => node!.GetValue<int>()).ToArray();
 }
-

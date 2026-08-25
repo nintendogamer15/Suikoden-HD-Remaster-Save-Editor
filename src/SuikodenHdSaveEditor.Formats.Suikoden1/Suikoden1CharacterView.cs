@@ -34,6 +34,8 @@ public sealed class Suikoden1CharacterView
 
     public int RuneId => Data["monsyo_data"]!["monsyo_id"]!.GetValue<int>();
 
+    public IReadOnlyList<int> WeaponRunePieces => RequiredIntArrayFrom(Data["buki_data"]!.AsObject(), "monsyo");
+
     public int ItemCount => RequiredInt("item_kazu");
 
     public JsonArray Items => Data["item"]!.AsArray();
@@ -41,4 +43,6 @@ public sealed class Suikoden1CharacterView
     private int RequiredInt(string name) => Data[name]!.GetValue<int>();
 
     private int[] RequiredIntArray(string name) => Data[name]!.AsArray().Select(node => node!.GetValue<int>()).ToArray();
+
+    private static int[] RequiredIntArrayFrom(JsonObject owner, string name) => owner[name]!.AsArray().Select(node => node!.GetValue<int>()).ToArray();
 }
