@@ -16,7 +16,9 @@ test -s "$bundle/README.md"
 test -s "$bundle/THIRD_PARTY_NOTICES.md"
 test -s "$bundle/LICENSES/Avalonia-MIT.txt"
 test -s "$bundle/LICENSES/dotnet-THIRD-PARTY-NOTICES.txt"
+test -s "$bundle/libSkiaSharp.so"
 file "$bundle/SuikodenHdSaveEditor.App" | grep -q 'ELF 64-bit.*x86-64'
+file "$bundle/libSkiaSharp.so" | grep -q 'ELF 64-bit.*x86-64'
 
 forbidden_path="$(find "$bundle" -mindepth 1 -printf '%P\n' | grep -E '(^|/)(saves|reference|tests|TestResults|\.git|\.github|\.gitea|packaging)(/|$)|(^|/)(Data([0-9]|1[0-6])|_sharetmpsave0)$|\.(bak|pdb|pkg\.tar\.zst|rpm|snupkg|nupkg|trx)$' | head -1 || true)"
 if [[ -n $forbidden_path ]]; then

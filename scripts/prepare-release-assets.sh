@@ -28,9 +28,5 @@ linux_asset="$output_directory/SuikodenHdSaveEditor-$label-linux-x64.tar.gz"
 windows_asset="$output_directory/SuikodenHdSaveEditor-$label-windows-x64.zip"
 install -m 0644 "$linux_source" "$linux_asset"
 install -m 0644 "$windows_source" "$windows_asset"
-(
-    cd "$output_directory"
-    sha256sum "$(basename "$linux_asset")" "$(basename "$windows_asset")" > SHA256SUMS.txt
-)
 
-printf '%s\n' "$linux_asset" "$windows_asset" "$output_directory/SHA256SUMS.txt"
+printf '%s\n' "$linux_asset" "$windows_asset"

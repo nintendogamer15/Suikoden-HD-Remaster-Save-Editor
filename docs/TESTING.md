@@ -52,4 +52,4 @@ Both paths reject private saves, references, tests, fixtures, debug symbols, pac
 
 ## Release artifact audit
 
-`package.sh` requires the complete legal-file set in both publish directories, rejects private-save filenames, creates the `.tar.gz` and `.zip`, confirms license entries in each archive, and generates `SHA256SUMS.txt`. Manual game acceptance remains separate; see [MANUAL_GAME_TESTING.md](MANUAL_GAME_TESTING.md).
+`check-linux-native-dependencies.sh` runs `ldd` against both the Linux apphost and `libSkiaSharp.so`, which catches dynamically loaded Skia dependencies that apphost-only inspection misses. `package.sh` requires the complete legal-file set in both publish directories, rejects private-save filenames, creates the `.tar.gz` and `.zip`, and confirms license entries in each archive. Manual game acceptance remains separate; see [MANUAL_GAME_TESTING.md](MANUAL_GAME_TESTING.md).

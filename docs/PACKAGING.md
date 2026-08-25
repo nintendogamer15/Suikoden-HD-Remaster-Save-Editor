@@ -8,17 +8,16 @@ For a valid `vX.Y.Z` tag, the Gitea workflow produces:
 
 - `SuikodenHdSaveEditor-vX.Y.Z-linux-x64.tar.gz`
 - `SuikodenHdSaveEditor-vX.Y.Z-windows-x64.zip`
-- `SHA256SUMS.txt`
 - `suikoden-hd-remaster-save-editor-X.Y.Z-1-x86_64.pkg.tar.zst`
-- `suikoden-hd-remaster-save-editor-X.Y.Z-1-x86_64.pkg.tar.zst.sha256`
 - `suikoden-hd-remaster-save-editor-X.Y.Z-1.x86_64.rpm`
-- `suikoden-hd-remaster-save-editor-X.Y.Z-1.x86_64.rpm.sha256`
+
+Standalone checksum text files are not public release assets. Package-manager integrity metadata and the private SHA-256 comparisons used to enforce immutable package versions remain in place.
 
 The Arch and RPM packages also install the desktop entry, scalable icon, root license, complete third-party license directory, notices, and README in normal system locations. Neither package depends on a system .NET runtime.
 
 ## Native dependency evidence
 
-The `linux-x64` publish was inspected with `file`, `readelf`, and `ldd`, including its bundled .NET, SkiaSharp, and HarfBuzz native libraries. Its direct ELF requirements cover glibc, libgcc/libstdc++, fontconfig and its image/font stack, while .NET and Avalonia dynamically load ICU, OpenSSL, Kerberos, X11, ICE/SM, timezone, and zlib facilities. The dependency names were then compared with the working FFIX and FFIV Avalonia packages and are verified by installing and launching each package in a clean distro job. Although `Avalonia.Fonts.Inter` is bundled, clean-system startup still needs a discoverable default system font; the packages therefore install DejaVu Sans. They do not add a system .NET dependency.
+The `linux-x64` publish is inspected with `file`, `readelf`, and `ldd`, including its bundled .NET, SkiaSharp, and HarfBuzz native libraries. `libSkiaSharp.so` directly requires Fontconfig even though .NET itself is self-contained, so Debian-based CI installs `libfontconfig1` before the unpackaged GUI smoke test and fails early if `ldd` reports an unresolved library. Its other ELF/runtime requirements cover glibc, libgcc/libstdc++, the image/font stack, ICU, OpenSSL, Kerberos, X11, ICE/SM, timezone, and zlib facilities. The dependency names were compared with the working FFIX and FFIV Avalonia packages and are verified by installing and launching each package in a clean distro job. Although `Avalonia.Fonts.Inter` is bundled, clean-system startup still needs a discoverable default system font; the packages therefore install DejaVu Sans. They do not add a system .NET dependency.
 
 The self-contained .NET publish also carries the optional diagnostics-only `libcoreclrtraceptprovider.so`, which still declares the retired `liblttng-ust.so.0` ABI. Current Fedora provides `liblttng-ust.so.1`, and the editor does not load the diagnostics provider during normal execution. The RPM therefore excludes only that obsolete automatic requirement; all application startup dependencies remain enforced and are tested by DNF installation plus the Xvfb smoke launch.
 
@@ -27,7 +26,8 @@ The self-contained .NET publish also carries the optional diagnostics-only `libc
 - `build-arch-package.sh` stages the existing Linux publish into a real `makepkg` build.
 - `build-rpm-package.sh` builds the same publish through `rpmbuild` and the checked-in spec.
 - `validate-package-input.sh` rejects private saves, references, tests, build products, package files, debug symbols, and package infrastructure strings.
-- `validate-installed-package.sh` checks the installed command target, application bundle, licenses, desktop file, icon, architecture, ELF resolution, and forbidden content.
+- `check-linux-native-dependencies.sh` checks both the managed apphost and dynamically loaded `libSkiaSharp.so`, reporting unresolved libraries before startup.
+- `validate-installed-package.sh` checks the installed command target, application bundle, licenses, desktop file, icon, architecture, apphost/Skia ELF resolution, and forbidden content.
 - `gitea-release-assets.sh` creates a native Gitea release and treats existing release assets as immutable.
 - `gitea-publish-package.sh` authenticates package operations as `Robert`, safely skips byte-identical existing packages, rejects different bytes for an existing version, and treats optional repository linking failures as warnings.
 
@@ -37,7 +37,7 @@ The self-contained .NET publish also carries the optional diagnostics-only `libc
 
 `.gitea/workflows/ci.yml` runs normal CI on `main`, pull requests when available, and manual dispatches. `.gitea/workflows/release.yml` runs three isolated jobs on the `ubuntu-latest` runner label:
 
-1. the .NET 10 container tests, cross-publishes Windows/Linux, smoke-tests Linux, audits payloads, and creates release assets;
+1. the .NET 10 container installs the native Avalonia/Skia runtime libraries, tests, cross-publishes Windows/Linux, checks the apphost and Skia dependencies, smoke-tests Linux, audits payloads, and creates release assets;
 2. a clean Arch `base-devel` container builds, installs, validates, and smoke-tests the Arch package;
 3. a clean current Fedora container builds, installs, validates, and smoke-tests the RPM.
 

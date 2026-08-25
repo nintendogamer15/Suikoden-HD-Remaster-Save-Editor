@@ -3,6 +3,8 @@
 
 set -euo pipefail
 
+script_directory="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
 package_name="suikoden-hd-remaster-save-editor"
 application_directory="/usr/lib/$package_name"
 command_path="/usr/bin/$package_name"
@@ -28,10 +30,7 @@ cmp "$application_directory/README.md" "/usr/share/doc/$package_name/README.md"
 desktop-file-validate "$desktop_file"
 xmllint --noout "$icon_file"
 file "$application_directory/SuikodenHdSaveEditor.App" | grep -q 'ELF 64-bit.*x86-64'
-if ldd "$application_directory/SuikodenHdSaveEditor.App" | grep -q 'not found'; then
-    echo "The installed application has an unresolved ELF dependency." >&2
-    exit 1
-fi
+"$script_directory/check-linux-native-dependencies.sh" "$application_directory"
 
 forbidden_path="$(find "$application_directory" -mindepth 1 -printf '%P\n' | grep -E '(^|/)(saves|reference|tests|TestResults|\.git)(/|$)|(^|/)(Data([0-9]|1[0-6])|_sharetmpsave0)$|\.(bak|pdb|pkg\.tar\.zst|rpm|snupkg|nupkg|trx)$' | head -1 || true)"
 if [[ -n $forbidden_path ]]; then

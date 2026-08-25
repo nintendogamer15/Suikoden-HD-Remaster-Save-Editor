@@ -39,6 +39,6 @@ Structural and adapter validation prevents known corruption risks: invalid envel
 
 ## Build architecture
 
-Both action providers invoke `scripts/ci.sh`. That entry point restores locked dependencies, checks formatting/analyzers, builds and tests, cross-publishes self-contained Linux and Windows bundles on Linux, smoke-launches the Linux GUI under Xvfb, audits licenses, archives outputs, and writes checksums.
+Both action providers invoke `scripts/ci.sh`. That entry point restores locked dependencies, checks formatting/analyzers, builds and tests, cross-publishes self-contained Linux and Windows bundles on Linux, checks the apphost and dynamically loaded Skia native dependencies, smoke-launches the Linux GUI under Xvfb, audits licenses, and archives outputs.
 
 Gitea tag builds add a packaging layer without changing the application projects. The full Linux publish directory is installed as a private application bundle under `/usr/lib/suikoden-hd-remaster-save-editor`; a stable `/usr/bin` symlink and desktop/icon metadata expose it to users. Arch and Fedora adapters remain separate native package definitions but consume the same validated publish output. Release and registry helpers compare SHA-256 before any repeat operation and never replace existing different bytes.

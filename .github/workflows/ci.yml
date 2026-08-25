@@ -83,7 +83,7 @@ jobs:
               throw new Error(`No successful main CI run found for commit ${sha} after retries. Consider pushing tag after main CI completes.`);
             }
             core.setOutput('run_id', run.id);
-            const artifacts = await github.rest.actions.listArtifactsForRepo({
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner,
               repo,
               run_id: run.id

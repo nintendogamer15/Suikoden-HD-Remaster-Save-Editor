@@ -43,7 +43,7 @@ Download the standalone archive for your platform from a GitHub or Gitea release
 - **Windows x64:** extract `SuikodenHdSaveEditor-vX.Y.Z-windows-x64.zip`, then run `SuikodenHdSaveEditor.App.exe`.
 - **Linux x64:** extract `SuikodenHdSaveEditor-vX.Y.Z-linux-x64.tar.gz`, make `SuikodenHdSaveEditor.App` executable if needed, and run it from a desktop session.
 
-Compare the archive against `SHA256SUMS.txt`. Keep the application and its included `LICENSE`, `LICENSES/`, and `THIRD_PARTY_NOTICES.md` together.
+Keep the application and its included `LICENSE`, `LICENSES/`, and `THIRD_PARTY_NOTICES.md` together. Linux still needs normal system graphics/font libraries such as Fontconfig; the distro packages install these automatically.
 
 ### Arch Linux repository
 

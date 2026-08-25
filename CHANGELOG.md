@@ -4,6 +4,14 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 1.0.6 - 2026-08-25
+
+### Fixed
+
+- GitHub tag releases now reuse the exact successful `main` build artifact through the run-scoped API instead of searching all repository artifacts or rebuilding the application.
+- Linux CI validates the dynamically loaded `libSkiaSharp.so` dependency chain before its Avalonia smoke launch; the Gitea Debian container installs Fontconfig, X11, Xvfb, and `xauth` first.
+- Future GitHub and Gitea releases attach only the standalone archives and native packages, without standalone checksum text assets.
+
 ## 1.0.5 - 2026-08-25
 
 ### Fixed
