@@ -27,7 +27,8 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-            git curl jq ca-certificates file xvfb zip desktop-file-utils libxml2-utils shellcheck
+            git curl jq ca-certificates file zip desktop-file-utils libxml2-utils shellcheck \
+            xvfb xauth libfontconfig1 libx11-6 libice6 libsm6 fonts-dejavu-core
 
       - name: Check out from this Gitea repository
         run: |
@@ -42,6 +43,11 @@ jobs:
         run: |
           if [ "${IS_RELEASE_TAG}" = "true" ]; then
             version="$(./scripts/project-version.sh "${REF_NAME}")"
+            project_version="$(./scripts/project-version.sh)"
+            if [ "${version}" != "${project_version}" ]; then
+              echo "Release tag version ${version} does not match project version ${project_version}." >&2
+              exit 1
+            fi
             label="${REF_NAME}"
           else
             version="$(./scripts/project-version.sh)"
@@ -49,12 +55,13 @@ jobs:
           fi
           APP_VERSION="${version}" ./scripts/ci.sh
           ./scripts/prepare-release-assets.sh "${label}" "${GITHUB_WORKSPACE}/release"
-          cd "${GITHUB_WORKSPACE}/release"
-          sha256sum --check SHA256SUMS.txt
 
       - name: Create or verify native Gitea release assets
         if: startsWith(github.ref, 'refs/tags/v')
-        run: source/scripts/gitea-release-assets.sh "${REF_NAME}" "${GITHUB_WORKSPACE}"/release/*
+        run: |
+          source/scripts/gitea-release-assets.sh "${REF_NAME}" \
+            "${GITHUB_WORKSPACE}/release/SuikodenHdSaveEditor-${REF_NAME}-linux-x64.tar.gz" \
+            "${GITHUB_WORKSPACE}/release/SuikodenHdSaveEditor-${REF_NAME}-windows-x64.zip"
 
   arch-package:
     needs: build
@@ -114,8 +121,8 @@ jobs:
           source/scripts/validate-package-input.sh "${bundle}"
           printf '%s\n' "${version}" > "${GITHUB_WORKSPACE}/package-version"
           printf '%s\n' "${bundle}" > "${GITHUB_WORKSPACE}/linux-bundle-path"
-          file "${bundle}/SuikodenHdSaveEditor.App"
-          ldd "${bundle}/SuikodenHdSaveEditor.App"
+          pacman -S --noconfirm --needed fontconfig
+          source/scripts/check-linux-native-dependencies.sh "${bundle}"
 
       - name: Build, install, and validate Arch package
         run: |
@@ -142,7 +149,10 @@ jobs:
       - name: Smoke-test installed Arch package under Xvfb
         run: |
           pacman -S --noconfirm --needed xorg-server-xvfb xorg-xauth
-          xvfb-run -a -s "-screen 0 1280x800x24 -nolisten tcp" \
+          export LIBGL_ALWAYS_SOFTWARE=1
+          export XDG_CONFIG_HOME="${GITHUB_WORKSPACE}/.tools/smoke-config"
+          mkdir -p "$XDG_CONFIG_HOME"
+          timeout 30s xvfb-run -a -s "-screen 0 1280x800x24 -nolisten tcp" \
             suikoden-hd-remaster-save-editor --smoke-test
 
       - name: Publish immutable Arch package and release assets
@@ -152,7 +162,7 @@ jobs:
           package="${GITHUB_WORKSPACE}/packages/suikoden-hd-remaster-save-editor-${version}-1-x86_64.pkg.tar.zst"
           source/scripts/gitea-publish-package.sh \
             arch Robert robert suikoden-hd-remaster-save-editor "${version}" "${package}"
-          source/scripts/gitea-release-assets.sh "${REF_NAME}" "${package}" "${package}.sha256"
+          source/scripts/gitea-release-assets.sh "${REF_NAME}" "${package}"
 
   rpm-package:
     needs: build
@@ -213,8 +223,8 @@ jobs:
           source/scripts/validate-package-input.sh "${bundle}"
           printf '%s\n' "${version}" > "${GITHUB_WORKSPACE}/package-version"
           printf '%s\n' "${bundle}" > "${GITHUB_WORKSPACE}/linux-bundle-path"
-          file "${bundle}/SuikodenHdSaveEditor.App"
-          ldd "${bundle}/SuikodenHdSaveEditor.App"
+          dnf install -y fontconfig
+          source/scripts/check-linux-native-dependencies.sh "${bundle}"
 
       - name: Build, install, and validate RPM package
         run: |
@@ -241,13 +251,16 @@ jobs:
 
       - name: Smoke-test installed RPM package under Xvfb
         run: |
-          dnf install -y xorg-x11-server-Xvfb
+          dnf install -y xorg-x11-server-Xvfb xorg-x11-xauth
+          export LIBGL_ALWAYS_SOFTWARE=1
+          export XDG_CONFIG_HOME="${GITHUB_WORKSPACE}/.tools/smoke-config"
+          mkdir -p "$XDG_CONFIG_HOME"
           Xvfb :99 -screen 0 1280x800x24 -nolisten tcp \
             >"${GITHUB_WORKSPACE}/xvfb.log" 2>&1 &
           xvfb_pid=$!
           trap 'kill "${xvfb_pid}" 2>/dev/null || true' EXIT
-          sleep 1
-          DISPLAY=:99 suikoden-hd-remaster-save-editor --smoke-test
+          sleep 2
+          DISPLAY=:99 timeout 30s suikoden-hd-remaster-save-editor --smoke-test
 
       - name: Publish immutable RPM package and release assets
         if: startsWith(github.ref, 'refs/tags/v')
@@ -256,4 +269,4 @@ jobs:
           package="${GITHUB_WORKSPACE}/packages/suikoden-hd-remaster-save-editor-${version}-1.x86_64.rpm"
           source/scripts/gitea-publish-package.sh \
             rpm Robert root suikoden-hd-remaster-save-editor "${version}" "${package}"
-          source/scripts/gitea-release-assets.sh "${REF_NAME}" "${package}" "${package}.sha256"
+          source/scripts/gitea-release-assets.sh "${REF_NAME}" "${package}"
