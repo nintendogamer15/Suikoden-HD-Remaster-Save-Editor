@@ -144,6 +144,11 @@ jobs:
           namcap source/packaging/arch/PKGBUILD "${package}"
           pacman -Qip "${package}"
           pacman -Qlp "${package}"
+          # The archlinux container image ships NoExtract rules that skip
+          # usr/share/doc, so the packaged notices and README would never reach
+          # the filesystem. Clear them so the documentation this package
+          # installs is actually installation-tested.
+          sed -i '/^[[:space:]]*NoExtract[[:space:]]*=/d' /etc/pacman.conf
           pacman -U --noconfirm "${package}"
           source/scripts/validate-installed-package.sh
           cmp "${bundle}/SuikodenHdSaveEditor.App" \
