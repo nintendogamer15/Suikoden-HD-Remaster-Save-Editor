@@ -21,6 +21,23 @@ Full terms, exact inspected commits, and material-use details are in [THIRD_PART
 
 ## Features
 
+<p align="center">
+  <a href="https://github.com/user-attachments/assets/f8c0c73d-6369-44f5-8f01-a8df8d0f4613">
+    <img src="https://github.com/user-attachments/assets/f8c0c73d-6369-44f5-8f01-a8df8d0f4613" width="32%" alt="Screenshot 1" />
+  </a>
+  <a href="https://github.com/user-attachments/assets/694df456-5c0e-4d4d-ad44-5b6e5f9662cb">
+    <img src="https://github.com/user-attachments/assets/694df456-5c0e-4d4d-ad44-5b6e5f9662cb" width="32%" alt="Screenshot 2" />
+  </a>
+  <a href="https://github.com/user-attachments/assets/9feb8fbf-f197-43a4-8d1b-49f0a8664884">
+    <img src="https://github.com/user-attachments/assets/9feb8fbf-f197-43a4-8d1b-49f0a8664884" width="32%" alt="Screenshot 3" />
+  </a>
+</p>
+
+
+
+
+
+
 - Opens encrypted `Data1` through `Data16` files directly; no mod or separate decryptor is required.
 - Detects Suikoden I or II from verified decrypted schema signatures rather than trusting the filename.
 - Preserves unknown JSON properties, arrays, ordering, duplicate items, and unrelated values.
