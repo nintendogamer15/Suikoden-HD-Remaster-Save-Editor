@@ -1,9 +1,11 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:theming="clr-namespace:SaveEditor.Ui.Theming;assembly=SaveEditor.Ui"
              x:Class="SuikodenHdSaveEditor.App.App"
              RequestedThemeVariant="Default">
     <Application.Styles>
         <FluentTheme />
+        <theming:SaveEditorTheme />
         <Style Selector="Button">
             <Setter Property="MinHeight" Value="34" />
             <Setter Property="Padding" Value="14,7" />

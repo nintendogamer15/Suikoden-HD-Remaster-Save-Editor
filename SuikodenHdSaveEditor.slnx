@@ -5,6 +5,9 @@
     <Project Path="src/SuikodenHdSaveEditor.Formats.Suikoden1/SuikodenHdSaveEditor.Formats.Suikoden1.csproj" />
     <Project Path="src/SuikodenHdSaveEditor.Formats.Suikoden2/SuikodenHdSaveEditor.Formats.Suikoden2.csproj" />
   </Folder>
+  <Folder Name="/external/">
+    <Project Path="external/save-editor-gui-framework/src/SaveEditor.Ui/SaveEditor.Ui.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SuikodenHdSaveEditor.App.Tests/SuikodenHdSaveEditor.App.Tests.csproj" />
     <Project Path="tests/SuikodenHdSaveEditor.Core.Tests/SuikodenHdSaveEditor.Core.Tests.csproj" />

@@ -11,6 +11,8 @@ This inventory reflects the locked `net10.0` standalone application graph inspec
 | MicroCom.Runtime | 0.11.6 | Native interop | `MicroCom-MIT.txt` |
 | SkiaSharp and native assets | 3.119.4 | Graphics | `SkiaSharp-MIT.txt` |
 | Tmds.DBus.Protocol | 0.94.1 | Linux desktop integration | `Tmds.DBus-MIT.txt` |
+| SaveEditor.Ui (submodule, 8f1f7b5) | 1.0.0-alpha.3 | Shared save-editor shell, theming, field editing, and safe-write workflow | `SaveEditor.Ui-0BSD.txt` |
+| CommunityToolkit.Mvvm | 8.4.2 | MVVM primitives used by SaveEditor.Ui | `CommunityToolkit.Mvvm-MIT.txt` |
 | .NET self-contained runtime | .NET 10 runtime selected by SDK 10.0.400 | Managed runtime and base class libraries | `dotnet-MIT.txt`, `dotnet-THIRD-PARTY-NOTICES.txt` |
 | Microsoft.NET.ILLink.Tasks | 10.0.11 | Single-file publish infrastructure; trimming is disabled | `dotnet-MIT.txt`, `dotnet-THIRD-PARTY-NOTICES.txt` |
 
