@@ -23,6 +23,7 @@
 **/obj/
 /artifacts/
 /packages/
+/release/
 /.dotnet/
 /.tools/
 /TestResults/

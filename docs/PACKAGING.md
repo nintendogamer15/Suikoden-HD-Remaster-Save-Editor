@@ -55,7 +55,13 @@ The public pull mirror at `Robert/Suikoden-HD-Remaster-Save-Editor` was verified
 
 ## Safe release procedure
 
-Published tags must never be moved or reused. For another release, choose a new unused version and:
+Published tags must never be moved or reused.
+
+The normal path is the `Release` workflow in `.github/workflows/release.yml`, run from `main` with **Actions → Release → Run workflow**. Record what the release publishes under `## Unreleased` in `CHANGELOG.md` first; the workflow stamps that section with the new version and refuses to publish an empty one. Leave `version` blank to bump the chosen `bump` part of the project version, or set an explicit `X.Y.Z`. The workflow resolves the version, stamps `CHANGELOG.md`, confirms the tag is unused, runs the complete CI and package validation, builds and verifies both executables, commits `release: prepare vX.Y.Z` to `main`, pushes one annotated tag, and creates the non-draft GitHub release with the two assets. `dry_run` performs every check and build without pushing or publishing anything.
+
+The workflow token cannot start another workflow run, so the tag it pushes does not re-trigger the `create-release` job in `ci.yml`; the release job publishes from the executables it just validated instead. Gitea builds and publishes the Arch and RPM packages after it mirrors the tag, which stays external administration.
+
+Releasing by hand remains supported and is the fallback if the workflow is unavailable. Choose a new unused version and:
 
 1. Pull `main` with `git pull --ff-only` and confirm `git status --short` is empty.
 2. Update `Directory.Build.props` and `CHANGELOG.md` to the chosen `X.Y.Z`, run the complete local CI/package validation, commit, and push `main`. The RPM changelog obtains the version from the build and does not need a duplicated manual edit.
