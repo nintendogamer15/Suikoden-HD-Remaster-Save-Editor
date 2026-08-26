@@ -1,0 +1,148 @@
+# SPDX-License-Identifier: 0BSD
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version X.Y.Z. Leave blank to bump the project version.'
+        required: false
+        default: ''
+        type: string
+      bump:
+        description: 'Which part to bump when version is blank'
+        required: false
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      dry_run:
+        description: 'Validate and build everything without pushing main, the tag, or the release'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "Releases must run from main, got ${GITHUB_REF}." >&2
+          exit 1
+
+      - name: Check out main
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      # Version, changelog, and tag problems are settled before the expensive
+      # build so a mistyped release fails in seconds rather than minutes.
+      - name: Resolve version and stamp the changelog
+        id: prepare
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_BUMP: ${{ inputs.bump }}
+        run: |
+          version="$(./scripts/prepare-release.sh "${RELEASE_VERSION:-${RELEASE_BUMP}}")"
+          {
+            echo "version=${version}"
+            echo "tag=v${version}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Confirm the release tag is unused
+        env:
+          TAG: ${{ steps.prepare.outputs.tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} already exists; published tags are never moved or reused." >&2
+            exit 1
+          fi
+
+      - name: Install .NET 10 SDK
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install Linux smoke and validation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            xvfb xauth \
+            libfontconfig1 libfreetype6 libharfbuzz0b \
+            libx11-6 libxext6 libxrender1 libxcb1 libxi6 \
+            libice6 libsm6 fonts-dejavu-core \
+            file desktop-file-utils libxml2-utils shellcheck
+
+      - name: Build, test, publish, smoke test, and validate
+        run: ./scripts/ci.sh
+
+      - name: Prepare release executables
+        env:
+          TAG: ${{ steps.prepare.outputs.tag }}
+        run: ./scripts/prepare-release-assets.sh "${TAG}" release
+
+      - name: Commit and push the release preparation
+        if: ${{ !inputs.dry_run }}
+        env:
+          TAG: ${{ steps.prepare.outputs.tag }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Directory.Build.props CHANGELOG.md
+          git commit --message "release: prepare ${TAG}"
+          git push origin HEAD:main
+
+      - name: Create and push the annotated tag
+        if: ${{ !inputs.dry_run }}
+        env:
+          TAG: ${{ steps.prepare.outputs.tag }}
+        run: |
+          git tag --annotate "${TAG}" \
+            --message "Suikoden I & II HD Remaster Save Editor ${TAG}"
+          git push origin "${TAG}"
+
+      # A tag pushed with the workflow token does not start another workflow
+      # run, so this job creates the release from the executables it just built
+      # and validated instead of waiting for the tag workflow in ci.yml.
+      - name: Create the GitHub release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.prepare.outputs.tag }}
+        run: |
+          gh release create "${TAG}" \
+            --verify-tag \
+            --title "Suikoden I & II HD Remaster Save Editor ${TAG}" \
+            --generate-notes \
+            "release/SuikodenHdSaveEditor-${TAG}-linux-x64" \
+            "release/SuikodenHdSaveEditor-${TAG}-windows-x64.exe"
+
+      - name: Summarize the run
+        if: always()
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+          TAG: ${{ steps.prepare.outputs.tag }}
+        run: |
+          {
+            if [ -z "${TAG}" ]; then
+              echo "The release version was never resolved; see the failing step above."
+            elif [ "${DRY_RUN}" = "true" ]; then
+              echo "Dry run for ${TAG}: validated and built, nothing pushed or published."
+            else
+              echo "Published ${TAG}: ${REPOSITORY_URL}/releases/tag/${TAG}"
+              echo ""
+              echo "Gitea builds and publishes the Arch and RPM packages once it mirrors this tag."
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
