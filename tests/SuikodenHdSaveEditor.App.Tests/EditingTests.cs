@@ -82,7 +82,7 @@ public class EditingTests
         builder.AddNumber(
             "Rejecting field",
             "party_data.mochi_kin",
-            0,
+            () => document.Root["party_data"]!["mochi_kin"]!.GetValue<int>(),
             _ =>
             {
                 document.Root["party_data"]!["mochi_kin"] = 4321;
@@ -119,12 +119,12 @@ public class EditingTests
         builder.AddString(
             "Accepting field",
             "playerName",
-            "Synthetic Hero",
+            () => document.Root["playerName"]!.GetValue<string>(),
             value => document.Root["playerName"] = value);
         builder.AddNumber(
             "Rejecting field",
             "party_data.mochi_kin",
-            0,
+            () => document.Root["party_data"]!["mochi_kin"]!.GetValue<int>(),
             _ =>
             {
                 document.Root["party_data"]!["mochi_kin"] = 4321;
@@ -158,8 +158,8 @@ public class EditingTests
         history.Bind(document.Root);
 
         SectionBuilder builder = new(document.Root, history);
-        builder.AddString("First", "playerName", "Synthetic Hero", value => document.Root["playerName"] = value);
-        builder.AddString("Second", "playerCName", "Synthetic HQ", value => document.Root["playerCName"] = value);
+        builder.AddString("First", "playerName", () => document.Root["playerName"]!.GetValue<string>(), value => document.Root["playerName"] = value);
+        builder.AddString("Second", "playerCName", () => document.Root["playerCName"]!.GetValue<string>(), value => document.Root["playerCName"] = value);
 
         SectionEditor section = builder.Build("test", "Test");
         history.Restored += (_, _) => GuardedEdit.RefreshPreservingRejections(section);
@@ -196,6 +196,54 @@ public class EditingTests
         Assert.False(history.CanUndo);
         Assert.False(history.CanRedo);
         Assert.False(history.IsDirty);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ApplyingAFieldClearsItsPendingStateInEverySection(bool suikoden2)
+    {
+        // The regression this exists for: FieldViewModel.Committed calls the descriptor's reader
+        // every time it is asked, so a reader closing over a value captured while the section was
+        // built reports the pre-edit value forever. The document was written correctly, but every
+        // field stayed pending, its Apply button never settled, and the exit guard believed there
+        // was unapplied work in a save that had none. Asserting on the document alone missed it,
+        // which is why this asserts on the field.
+        using TestSaves saves = new();
+        SaveDocument document = SaveDocument.OpenEncrypted(
+            suikoden2 ? saves.CreateSuikoden2Save() : saves.CreateSave());
+        SnapshotEditHistory history = new();
+        history.Bind(document.Root);
+
+        int? character = SuikodenSectionFactory.Characters(document) is [{ } first, ..] ? first.Id : null;
+        SectionContext context = new(character);
+
+        foreach (SectionKind kind in Enum.GetValues<SectionKind>())
+        {
+            if (SuikodenSectionFactory.Create(kind, document, history, context) is not { } section)
+            {
+                continue;
+            }
+
+            foreach (FieldViewModel field in section.Fields)
+            {
+                // Nothing has been typed, so nothing may report itself as pending. A stale
+                // reader shows up here even before anything is applied.
+                Assert.False(field.HasPendingEdit, $"{kind}/{field.Label} was pending before any edit");
+            }
+
+            if (section.Fields.OfType<TextFieldViewModel>().FirstOrDefault(f => !f.IsReadOnly) is { } text)
+            {
+                text.Draft = "Edited";
+                if (text.TryApply())
+                {
+                    Assert.Equal("Edited", text.Committed);
+                    Assert.False(text.HasPendingEdit);
+                }
+            }
+
+            Assert.False(section.HasPendingEdits, $"{kind} still reported pending edits after applying");
+        }
     }
 
     private static SectionEditor BuildSection(SaveDocument document, SnapshotEditHistory history) =>

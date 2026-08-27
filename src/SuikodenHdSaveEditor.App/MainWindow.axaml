@@ -27,23 +27,6 @@
                     AutomationProperties.Name="Restore from backup" />
         </shell:EditorShell.HeaderActions>
 
-        <!-- Folder slots stay app-owned: the framework can open a folder, but picking one of
-             the Data0-Data16 slots it finds is this game's convention, not a general one. -->
-        <shell:EditorShell.SidebarExtension>
-            <StackPanel Spacing="6">
-                <TextBlock Text="Folder slots"
-                           Foreground="{DynamicResource SubtleForeground}"
-                           FontSize="11" />
-                <ComboBox x:Name="SlotPicker"
-                          HorizontalAlignment="Stretch"
-                          AutomationProperties.Name="Detected save slots" />
-                <Button x:Name="OpenSlotButton"
-                        Content="Open selected slot"
-                        HorizontalAlignment="Stretch"
-                        AutomationProperties.Name="Open selected slot" />
-            </StackPanel>
-        </shell:EditorShell.SidebarExtension>
-
     </shell:EditorShell>
 
 </Window>

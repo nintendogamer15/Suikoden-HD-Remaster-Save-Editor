@@ -4,6 +4,24 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+### Fixed
+
+- Apply did nothing visible. Field readers captured the value the section was built with, and
+  the framework re-reads that delegate every time it reports the committed value, so the write
+  landed in the document but the field stayed pending, its Apply button never settled, and the
+  exit guard believed a saved file still had unapplied work. Readers now query the adapter.
+- The Characters section was empty, because it is built for one character and nothing chose
+  one. It now has a character picker.
+- Advanced Data was empty. It shows the decrypted document again, read-only and scrollable.
+
+### Removed
+
+- The duplicate Credits section in the sidebar. Help → About and credits already shows the
+  embedded licence and notice texts.
+- The folder-slot picker in the sidebar.
+
+## Unreleased
+
 ## 2.0.0 - 2026-08-27
 
 ### Changed

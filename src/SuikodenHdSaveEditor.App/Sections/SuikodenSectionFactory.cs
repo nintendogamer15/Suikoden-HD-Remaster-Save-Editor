@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: 0BSD
+using System.Globalization;
 using SaveEditor.Ui.Editing;
 using SuikodenHdSaveEditor.App.Editing;
 using SuikodenHdSaveEditor.Core;
+using SuikodenHdSaveEditor.Formats.Suikoden1;
+using SuikodenHdSaveEditor.Formats.Suikoden2;
 
 namespace SuikodenHdSaveEditor.App.Sections;
 
@@ -33,9 +36,6 @@ public enum SectionKind
 
     /// <summary>The whole decrypted document, read-only.</summary>
     AdvancedData,
-
-    /// <summary>Licences and attribution.</summary>
-    Credits,
 }
 
 /// <summary>
@@ -65,13 +65,12 @@ public static class SuikodenSectionFactory
         (SectionKind.Recruitment, "Recruitment", "Who has joined."),
         (SectionKind.Progress, "Headquarters / Progress", "Headquarters level and story state."),
         (SectionKind.AdvancedData, "Advanced Data", "The whole decrypted save, read-only."),
-        (SectionKind.Credits, "Credits / Licenses", "Attribution and licence texts."),
     ];
 
     /// <summary>Builds one section's fields for the open document.</summary>
     /// <remarks>
-    /// Returns <see langword="null"/> for sections that are not field lists — Advanced Data and
-    /// Credits render their own body — and for a section a given game has nothing to offer in.
+    /// Returns <see langword="null"/> for Advanced Data, which renders its own body, and for a
+    /// section a given game has nothing to offer in.
     /// </remarks>
     public static SectionEditor? Create(
         SectionKind kind,
@@ -83,7 +82,7 @@ public static class SuikodenSectionFactory
         ArgumentNullException.ThrowIfNull(history);
         ArgumentNullException.ThrowIfNull(context);
 
-        if (kind is SectionKind.AdvancedData or SectionKind.Credits)
+        if (kind is SectionKind.AdvancedData)
         {
             return null;
         }
@@ -107,4 +106,110 @@ public static class SuikodenSectionFactory
 
         return builder.Build(kind.ToString(), descriptor.Title);
     }
+
+    /// <summary>How the Characters picker narrows the cast.</summary>
+    /// <remarks>
+    /// Carried over from the pre-migration editor. A save can hold well over a hundred
+    /// characters, so picking one out of an unfiltered list is impractical — which is the whole
+    /// reason this existed.
+    /// </remarks>
+    public enum CharacterFilter
+    {
+        /// <summary>Everyone the save knows about.</summary>
+        All,
+
+        /// <summary>Characters who have joined.</summary>
+        Recruited,
+
+        /// <summary>Characters who have not joined.</summary>
+        Unrecruited,
+
+        /// <summary>The active battle party.</summary>
+        CurrentParty,
+    }
+
+    /// <summary>The characters the Characters section can show, in display order.</summary>
+    /// <remarks>
+    /// Suikoden II is filtered to catalogued characters with a positive id, matching what the
+    /// editor offered before: the raw array carries entries that are not selectable people.
+    /// </remarks>
+    public static IReadOnlyList<CharacterChoice> Characters(
+        SaveDocument document,
+        CharacterFilter filter = CharacterFilter.All,
+        string? search = null)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        IEnumerable<CharacterChoice> choices = All(document).Where(choice => Matches(document, choice, filter));
+
+        string query = search?.Trim() ?? string.Empty;
+        if (query.Length > 0)
+        {
+            choices = choices.Where(choice =>
+                choice.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+                || choice.Id.ToString(CultureInfo.InvariantCulture).Contains(query, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return [.. choices];
+    }
+
+    private static bool Matches(SaveDocument document, CharacterChoice choice, CharacterFilter filter)
+    {
+        if (filter == CharacterFilter.All)
+        {
+            return true;
+        }
+
+        bool inParty;
+        bool recruited;
+        if (document.Game == GameKind.Suikoden1)
+        {
+            Suikoden1Adapter adapter = new(document);
+            inParty = adapter.PartyCharacterIds.Contains(choice.Id);
+            recruited = adapter.RecruitedCharacterIds.Contains(choice.Id);
+        }
+        else
+        {
+            Suikoden2CharacterView character = new Suikoden2Adapter(document).Characters[choice.Id];
+            inParty = character.IsInParty;
+
+            // 70 and 71 are the reviewed joined states; anything else is not recruited.
+            recruited = character.RecruitmentStatus is 70 or 71;
+        }
+
+        return filter switch
+        {
+            CharacterFilter.Recruited => recruited,
+            CharacterFilter.Unrecruited => !recruited,
+            CharacterFilter.CurrentParty => inParty,
+            _ => true,
+        };
+    }
+
+    private static IReadOnlyList<CharacterChoice> All(SaveDocument document)
+    {
+        return document.Game switch
+        {
+            GameKind.Suikoden1 =>
+            [
+                .. new Suikoden1Adapter(document).Characters
+                    .OrderBy(character => character.Id)
+                    .Select(character => new CharacterChoice(character.Id, character.Name)),
+            ],
+            GameKind.Suikoden2 =>
+            [
+                .. new Suikoden2Adapter(document).Characters
+                    .Where(character => character.Id > 0 && Suikoden2Catalog.Character(character.Id) is not null)
+                    .Select(character => new CharacterChoice(character.Id, character.Name)),
+            ],
+            _ => [],
+        };
+    }
+}
+
+/// <summary>A character the Characters section can be pointed at.</summary>
+public sealed record CharacterChoice(int Id, string Name)
+{
+    /// <summary>What the picker shows.</summary>
+    public override string ToString() => $"{Id}: {Name}";
 }

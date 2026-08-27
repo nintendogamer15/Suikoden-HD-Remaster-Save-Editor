@@ -21,6 +21,13 @@ namespace SuikodenHdSaveEditor.App.Sections;
 /// Every write goes through <see cref="GuardedEdit.Wrap"/>, so an adapter that rejects an edit
 /// after it has already touched the tree still leaves the document as it was.
 /// </para>
+/// <para>
+/// Readers are delegates rather than values on purpose. <c>FieldViewModel.Committed</c> calls
+/// the reader every time it is asked, so a reader that closes over a value captured while the
+/// section was built reports the pre-edit value forever: the write lands, but the field stays
+/// pending, its Apply button stays enabled, and the exit guard believes there is unapplied work.
+/// A reader must therefore query the adapter, not a view object read from it earlier.
+/// </para>
 /// </remarks>
 public sealed class SectionBuilder(JsonObject root, SnapshotEditHistory history)
 {
@@ -31,7 +38,7 @@ public sealed class SectionBuilder(JsonObject root, SnapshotEditHistory history)
     public IReadOnlyList<FieldViewModel> Fields => fields;
 
     /// <summary>Adds a free-text field.</summary>
-    public void AddString(string label, string path, string value, Action<string> apply, string? warning = null) =>
+    public void AddString(string label, string path, Func<string> read, Action<string> apply, string? warning = null) =>
         fields.Add(new TextFieldViewModel(
             new TextFieldDescriptor
             {
@@ -39,7 +46,7 @@ public sealed class SectionBuilder(JsonObject root, SnapshotEditHistory history)
                 Label = label,
                 Path = path,
                 WarningText = warning,
-                Read = () => value,
+                Read = read,
                 Write = GuardedEdit.Wrap(root, history, apply),
             },
             history));
@@ -54,7 +61,7 @@ public sealed class SectionBuilder(JsonObject root, SnapshotEditHistory history)
     public void AddNumber(
         string label,
         string path,
-        int value,
+        Func<int> read,
         Action<int> apply,
         string? warning = null,
         int minimum = int.MinValue,
@@ -69,7 +76,7 @@ public sealed class SectionBuilder(JsonObject root, SnapshotEditHistory history)
                 Minimum = minimum,
                 Maximum = maximum,
                 ShowSpinner = true,
-                Read = () => value,
+                Read = () => read(),
                 Write = GuardedEdit.Wrap<long>(root, history, written => apply(checked((int)written))),
             },
             history));
@@ -83,15 +90,16 @@ public sealed class SectionBuilder(JsonObject root, SnapshotEditHistory history)
     public void AddChoice(
         string label,
         string path,
-        string value,
+        Func<string> read,
         IEnumerable<string> choices,
         Action<string> apply,
         string? warning = null)
     {
         List<string> materialized = [.. choices.Distinct(StringComparer.Ordinal)];
-        if (!materialized.Contains(value, StringComparer.Ordinal))
+        string current = read();
+        if (!materialized.Contains(current, StringComparer.Ordinal))
         {
-            materialized.Insert(0, value);
+            materialized.Insert(0, current);
         }
 
         fields.Add(new ChoiceFieldViewModel(
@@ -101,7 +109,7 @@ public sealed class SectionBuilder(JsonObject root, SnapshotEditHistory history)
                 Label = label,
                 Path = path,
                 WarningText = warning,
-                Read = () => value,
+                Read = read,
                 Write = GuardedEdit.Wrap(root, history, apply),
                 Options = new NamedChoiceProvider(materialized),
             },
@@ -110,6 +118,10 @@ public sealed class SectionBuilder(JsonObject root, SnapshotEditHistory history)
 
     /// <summary>Adds a value this editor shows but will not let anyone change.</summary>
     public void AddReadOnly(string label, string path, string value, string? warning = null) =>
+        AddReadOnly(label, path, () => value, warning);
+
+    /// <summary>Adds a value this editor shows but will not let anyone change.</summary>
+    public void AddReadOnly(string label, string path, Func<string> read, string? warning = null) =>
         fields.Add(new ReadOnlyFieldViewModel(
             new ReadOnlyFieldDescriptor
             {
@@ -118,7 +130,7 @@ public sealed class SectionBuilder(JsonObject root, SnapshotEditHistory history)
                 Path = path,
                 WarningText = warning,
                 IsReadOnly = true,
-                Read = () => value,
+                Read = read,
             },
             history));
 

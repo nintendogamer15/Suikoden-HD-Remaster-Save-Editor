@@ -34,6 +34,9 @@ public partial class MainWindow : Window, IDisposable
     private readonly SuikodenDocumentSession session;
     private readonly EditorShellViewModel viewModel;
     private readonly Dictionary<SectionKind, SectionHost> hosts = [];
+    private int? selectedCharacterId;
+    private SuikodenSectionFactory.CharacterFilter characterFilter;
+    private string characterSearch = string.Empty;
     private readonly ThemedUserInteraction interaction;
 
     /// <summary>Creates the window and wires the editor together.</summary>
@@ -98,7 +101,6 @@ public partial class MainWindow : Window, IDisposable
         shell.DataContext = viewModel;
         DragDropAdapter.Attach(shell, viewModel);
 
-        WireFolderSlots();
         WireRestoreFromBackup();
 
         Closed += (_, _) => Dispose();
@@ -148,16 +150,79 @@ public partial class MainWindow : Window, IDisposable
         viewModel.RegisterSections(descriptors);
     }
 
+    private SectionContext Context() => new(selectedCharacterId);
+
     private void RebuildSections()
     {
         SaveDocument? document = session.Document;
+
+        // The Characters section is built for one character, so a document without the
+        // previously selected one has to fall back rather than render an empty section.
+        IReadOnlyList<CharacterChoice> characters = document is null
+            ? []
+            : SuikodenSectionFactory.Characters(document, characterFilter, characterSearch);
+        if (selectedCharacterId is null || characters.All(character => character.Id != selectedCharacterId))
+        {
+            selectedCharacterId = characters.Count > 0 ? characters[0].Id : null;
+        }
+
+        hosts[SectionKind.Characters].SetCharacters(characters, selectedCharacterId, new CharacterControls(
+            id =>
+            {
+                selectedCharacterId = id;
+                RebuildCharacters();
+            },
+            filter =>
+            {
+                characterFilter = filter;
+
+                // Narrowing the list can exclude whoever was selected, so the picker is
+                // re-resolved rather than only the section body.
+                RefreshCharacterPicker();
+            },
+            search =>
+            {
+                characterSearch = search;
+                RefreshCharacterPicker();
+            }));
 
         // Rebinding clears the history: undo steps describe a tree that is no longer open.
         history.Bind(document?.Root);
 
         foreach (SectionHost host in hosts.Values)
         {
-            host.Rebuild(document, history, BuildBulkActionsFor(host.Kind, document));
+            host.Rebuild(document, history, BuildBulkActionsFor(host.Kind, document), Context());
+        }
+    }
+
+    private void RefreshCharacterPicker()
+    {
+        if (session.Document is not { } document)
+        {
+            return;
+        }
+
+        IReadOnlyList<CharacterChoice> characters =
+            SuikodenSectionFactory.Characters(document, characterFilter, characterSearch);
+
+        if (selectedCharacterId is null || characters.All(character => character.Id != selectedCharacterId))
+        {
+            selectedCharacterId = characters.Count > 0 ? characters[0].Id : null;
+        }
+
+        hosts[SectionKind.Characters].UpdateCharacters(characters, selectedCharacterId);
+        RebuildCharacters();
+    }
+
+    private void RebuildCharacters()
+    {
+        if (session.Document is { } document)
+        {
+            hosts[SectionKind.Characters].Rebuild(
+                document,
+                history,
+                BuildBulkActionsFor(SectionKind.Characters, document),
+                Context());
         }
     }
 
@@ -170,40 +235,6 @@ public partial class MainWindow : Window, IDisposable
                 GuardedEdit.RefreshPreservingRejections(editor);
             }
         }
-    }
-
-    private void WireFolderSlots()
-    {
-        ComboBox picker = this.FindControl<ComboBox>("SlotPicker")!;
-        Button open = this.FindControl<Button>("OpenSlotButton")!;
-
-        open.Click += async (_, _) =>
-        {
-            if (picker.SelectedItem is SaveSlotEntry entry)
-            {
-                await viewModel.OpenPathAsync(entry.Path).ConfigureAwait(true);
-            }
-        };
-
-        session.Opened += (_, path) =>
-        {
-            string? directory = Path.GetDirectoryName(path);
-            if (directory is null)
-            {
-                return;
-            }
-
-            try
-            {
-                picker.ItemsSource = SaveSlotBrowser.Discover(directory);
-            }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or DirectoryNotFoundException)
-            {
-                // Slot discovery is a convenience. A folder that cannot be listed must not stop
-                // the file that just opened from being edited.
-                picker.ItemsSource = null;
-            }
-        };
     }
 
     private void WireRestoreFromBackup()
@@ -276,26 +307,100 @@ public partial class MainWindow : Window, IDisposable
         return button;
     }
 
+    /// <summary>What the Characters picker calls back into.</summary>
+    private sealed record CharacterControls(
+        Action<int?> SelectionChanged,
+        Action<SuikodenSectionFactory.CharacterFilter> FilterChanged,
+        Action<string> SearchChanged);
+
     /// <summary>Holds one section's controls so they survive a document being swapped.</summary>
     private sealed class SectionHost(SectionKind kind)
     {
         private readonly FieldList fields = new();
         private readonly SectionToolbar toolbar = new();
+        private readonly ComboBox characterPicker = new()
+        {
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            Margin = new Thickness(0, 0, 0, 8),
+        };
+
+        private readonly TextBox rawJson = new()
+        {
+            IsReadOnly = true,
+            AcceptsReturn = true,
+            TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
+            FontFamily = new Avalonia.Media.FontFamily("Cascadia Mono,Consolas,DejaVu Sans Mono,monospace"),
+        };
+
+        private readonly ComboBox characterFilter = new()
+        {
+            ItemsSource = Enum.GetValues<SuikodenSectionFactory.CharacterFilter>(),
+            SelectedIndex = 0,
+            Margin = new Thickness(0, 0, 8, 8),
+            MinWidth = 160,
+        };
+
+        private readonly TextBox characterSearch = new()
+        {
+            PlaceholderText = "Search characters by name or id",
+            Margin = new Thickness(0, 0, 0, 8),
+        };
+
+        private CharacterControls? characterControls;
+        private bool suppressPickerEvent;
+
+        public SectionKind Kind => kind;
 
         public SectionEditor? Editor { get; private set; }
 
         public Control Body { get; } = new DockPanel();
 
-        public SectionKind Kind => kind;
+        /// <summary>Points the Characters picker at the open document's cast.</summary>
+        public void SetCharacters(
+            IReadOnlyList<CharacterChoice> characters,
+            int? selected,
+            CharacterControls controls)
+        {
+            characterControls = controls;
+            UpdateCharacters(characters, selected);
+        }
 
-        public void Rebuild(SaveDocument? document, SnapshotEditHistory history, Control? bulkActions)
+        /// <summary>Repoints the picker without rebinding the callbacks.</summary>
+        public void UpdateCharacters(IReadOnlyList<CharacterChoice> characters, int? selected)
+        {
+            // Repopulating raises SelectionChanged, which would rebuild the section underneath
+            // the rebuild that is already running.
+            suppressPickerEvent = true;
+            characterPicker.ItemsSource = characters;
+            characterPicker.SelectedItem = characters.FirstOrDefault(character => character.Id == selected);
+            suppressPickerEvent = false;
+
+            characterPicker.PlaceholderText = characters.Count == 0
+                ? "No character matches this filter"
+                : null;
+        }
+
+        public void Rebuild(
+            SaveDocument? document,
+            SnapshotEditHistory history,
+            Control? bulkActions,
+            SectionContext context)
         {
             EnsureLayout();
+
+            if (kind == SectionKind.AdvancedData)
+            {
+                // Read-only by design: these are the fields whose meanings are not verified
+                // well enough to edit, so they are shown rather than exposed.
+                rawJson.Text = document?.ToJson(indented: true) ?? string.Empty;
+                return;
+            }
+
             toolbar.BulkActions = bulkActions;
 
             Editor = document is null
                 ? null
-                : SuikodenSectionFactory.Create(kind, document, history, new SectionContext());
+                : SuikodenSectionFactory.Create(kind, document, history, context);
 
             toolbar.Editor = Editor;
             fields.Fields = Editor?.VisibleFields;
@@ -306,6 +411,62 @@ public partial class MainWindow : Window, IDisposable
             if (Body is not DockPanel panel || panel.Children.Count > 0)
             {
                 return;
+            }
+
+            if (kind == SectionKind.AdvancedData)
+            {
+                // The shell does not wrap a custom body, so anything that does not virtualise
+                // has to bring its own scrolling.
+                panel.Children.Add(new ScrollViewer
+                {
+                    HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+                    VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+                    Content = rawJson,
+                });
+                return;
+            }
+
+            if (kind == SectionKind.Characters)
+            {
+                characterPicker.SelectionChanged += (_, _) =>
+                {
+                    if (!suppressPickerEvent && characterPicker.SelectedItem is CharacterChoice choice)
+                    {
+                        characterControls?.SelectionChanged(choice.Id);
+                    }
+                };
+
+                characterFilter.SelectionChanged += (_, _) =>
+                {
+                    if (!suppressPickerEvent
+                        && characterFilter.SelectedItem is SuikodenSectionFactory.CharacterFilter filter)
+                    {
+                        characterControls?.FilterChanged(filter);
+                    }
+                };
+
+                characterSearch.TextChanged += (_, _) =>
+                {
+                    if (!suppressPickerEvent)
+                    {
+                        characterControls?.SearchChanged(characterSearch.Text ?? string.Empty);
+                    }
+                };
+
+                AutomationProperties.SetName(characterPicker, "Character");
+                AutomationProperties.SetName(characterFilter, "Character filter");
+                AutomationProperties.SetName(characterSearch, "Search characters");
+
+                Grid narrowing = new() { ColumnDefinitions = new ColumnDefinitions("Auto,*") };
+                Grid.SetColumn(characterFilter, 0);
+                Grid.SetColumn(characterSearch, 1);
+                narrowing.Children.Add(characterFilter);
+                narrowing.Children.Add(characterSearch);
+
+                DockPanel.SetDock(narrowing, Dock.Top);
+                DockPanel.SetDock(characterPicker, Dock.Top);
+                panel.Children.Add(narrowing);
+                panel.Children.Add(characterPicker);
             }
 
             DockPanel.SetDock(toolbar, Dock.Top);

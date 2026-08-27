@@ -18,11 +18,10 @@ internal static class Suikoden1InventorySection
         for (int index = 0; index < items.Count; index++)
         {
             int captured = index;
-            int id = items[index]!.GetValue<int>();
             builder.AddChoice(
                 $"Party item {index + 1}",
                 $"party_data.party_item[{index}]",
-                Suikoden1Catalog.ItemName(id),
+                () => Suikoden1Catalog.ItemName(adapter.Document.Root["party_data"]!["party_item"]!.AsArray()[captured]!.GetValue<int>()),
                 itemChoices.Keys.Order(StringComparer.OrdinalIgnoreCase),
                 value => adapter.SetPartyItem(captured, SectionText.ParseNamedChoice(value, itemChoices, "item")));
         }

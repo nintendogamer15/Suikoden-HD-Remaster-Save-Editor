@@ -15,7 +15,7 @@ The two game adapters intentionally do not share a character or inventory serial
 
 1. `SaveCrypto` validates and decrypts the `GR_DATA:` envelope.
 2. `SaveDocument` parses a mutable `JsonObject` and `GameDetector` requires one unambiguous verified schema signature.
-3. The applicable adapter reads typed values directly from that tree. Unknown properties and array elements stay in the same tree.
+3. The applicable adapter reads typed values directly from that tree. Unknown properties and array elements stay in the same tree. Fields read through the adapter on every query rather than through a value captured when the section was built, so what a field reports always matches the document.
 4. Each UI operation snapshots the full tree for undo/redo, invokes one validated adapter mutation, and refreshes read-only JSON from the result.
 5. A failed operation restores its snapshot. It cannot partially change the current document. This holds for a single field, for Apply All over a whole section, and for the bulk actions: the framework rejects a write that raises, and the editor wraps every write so an adapter that mutated the tree before raising is still rolled back. Apply All runs as one transaction that aborts as a unit.
 
