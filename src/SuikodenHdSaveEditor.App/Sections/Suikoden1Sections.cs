@@ -45,15 +45,15 @@ internal static class Suikoden1Sections
     private static void BuildOverview(Suikoden1Adapter adapter, SectionBuilder builder)
     {
         builder.AddReadOnly("Detected game", "schema", "Suikoden I");
-        builder.AddString("Hero name", "playerName", adapter.HeroName,
+        builder.AddString("Hero name", "playerName", () => adapter.HeroName,
             value => adapter.SetNames(value, adapter.HeadquartersName));
-        builder.AddString("Headquarters name", "playerCName", adapter.HeadquartersName,
+        builder.AddString("Headquarters name", "playerCName", () => adapter.HeadquartersName,
             value => adapter.SetNames(adapter.HeroName, value));
-        builder.AddNumber("Potch", "party_data.mochi_kin", adapter.Potch, adapter.SetPotch, minimum: 0);
+        builder.AddNumber("Potch", "party_data.mochi_kin", () => adapter.Potch, adapter.SetPotch, minimum: 0);
         builder.AddReadOnly(
             "Play time (raw seconds/ticks)",
             "playTime",
-            adapter.PlayTime.ToString(CultureInfo.InvariantCulture));
+            () => adapter.PlayTime.ToString(CultureInfo.InvariantCulture));
         AddHeadquartersLevel(adapter, builder);
     }
 
@@ -75,7 +75,12 @@ internal static class Suikoden1Sections
             builder.AddChoice(
                 $"Party slot {index + 1} · {name}",
                 $"party_data.chara_code[{index}]",
-                SectionText.FormatCharacterChoice(values[index], name),
+                () =>
+                {
+                    int liveId = adapter.PartyCharacterIds[captured];
+                    string liveName = liveId == -1 ? "Empty" : Suikoden1Catalog.CharacterName(liveId);
+                    return SectionText.FormatCharacterChoice(liveId, liveName);
+                },
                 characterChoices,
                 value =>
                 {
@@ -98,14 +103,15 @@ internal static class Suikoden1Sections
             "Level 4 — Maximum",
         ];
 
-        int value = adapter.HeadquartersLevel;
-        string selected = choices.SingleOrDefault(choice => SectionText.ParseHeadquartersLevel(choice) == value)
-            ?? $"Level {value} — Outside reviewed range";
-
         builder.AddChoice(
             "Headquarters level",
             "shiro_data.level",
-            selected,
+            () =>
+            {
+                int value = adapter.HeadquartersLevel;
+                return choices.SingleOrDefault(choice => SectionText.ParseHeadquartersLevel(choice) == value)
+                    ?? $"Level {value} — Outside reviewed range";
+            },
             choices,
             text => adapter.SetHeadquartersLevel(SectionText.ParseHeadquartersLevel(text)),
             "Reviewed range: 0–4. Level 0 is retained for pre-headquarters saves; playable headquarters levels are 1–4 and level 4 is the cap. Direct changes can desynchronize story-driven facilities.");

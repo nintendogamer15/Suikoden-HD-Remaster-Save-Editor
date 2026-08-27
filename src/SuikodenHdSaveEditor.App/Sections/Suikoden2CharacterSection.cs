@@ -18,14 +18,27 @@ internal static class Suikoden2CharacterSection
         }
 
         Suikoden2CharacterView character = adapter.Characters[id];
-        builder.AddReadOnly("Recruitment status", $"chara_flag[{id}]", character.RecruitmentStatus.ToString(CultureInfo.InvariantCulture));
-        builder.AddReadOnly("Current party", "party_data.party_cha_no", character.IsInParty ? "Yes" : "No");
-        foreach ((string field, string label, int value) in new[]
+        builder.AddReadOnly("Recruitment status", $"chara_flag[{id}]", () => adapter.Characters[id].RecruitmentStatus.ToString(CultureInfo.InvariantCulture));
+        builder.AddReadOnly("Current party", "party_data.party_cha_no", () => adapter.Characters[id].IsInParty ? "Yes" : "No");
+
+        int ReadScalar(string field) => field switch
         {
-            ("level", "Level", character.Level), ("exp", "EXP", character.Experience),
-            ("now_hp", "Current HP", character.CurrentHp), ("max_hp", "Maximum HP", character.MaximumHp),
-            ("buki_lv", "Weapon level", character.WeaponLevel), ("buki_mon", "Weapon rune ID", character.WeaponRune),
-            ("todome", "Killed enemies", character.KilledEnemies),
+            "level" => adapter.Characters[id].Level,
+            "exp" => adapter.Characters[id].Experience,
+            "now_hp" => adapter.Characters[id].CurrentHp,
+            "max_hp" => adapter.Characters[id].MaximumHp,
+            "buki_lv" => adapter.Characters[id].WeaponLevel,
+            "buki_mon" => adapter.Characters[id].WeaponRune,
+            "todome" => adapter.Characters[id].KilledEnemies,
+            _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Unknown character scalar field."),
+        };
+
+        foreach ((string field, string label) in new[]
+        {
+            ("level", "Level"), ("exp", "EXP"),
+            ("now_hp", "Current HP"), ("max_hp", "Maximum HP"),
+            ("buki_lv", "Weapon level"), ("buki_mon", "Weapon rune ID"),
+            ("todome", "Killed enemies"),
         })
         {
             if (field == "buki_mon")
@@ -36,37 +49,44 @@ internal static class Suikoden2CharacterSection
                 builder.AddChoice(
                     "Weapon rune",
                     $"chara_data.c_varia_dat[{id}].{field}",
-                    SectionText.FormatS2CatalogChoice(Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Rune && item.Id == value), Suikoden2ItemCategory.Rune, value),
+                    () =>
+                    {
+                        int current = ReadScalar(field);
+                        return SectionText.FormatS2CatalogChoice(Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Rune && item.Id == current), Suikoden2ItemCategory.Rune, current);
+                    },
                     weaponRunes.Select(SectionText.FormatS2CatalogChoice),
                     changed => adapter.SetCharacterScalar(id, field, SectionText.ParseS2Item(changed).Id),
                     "Only reviewed weapon runes are offered; beasts and monsters can select only None.");
             }
             else
             {
-                builder.AddNumber(label, $"chara_data.c_varia_dat[{id}].{field}", value, changed => adapter.SetCharacterScalar(id, field, changed));
+                builder.AddNumber(label, $"chara_data.c_varia_dat[{id}].{field}", () => ReadScalar(field), changed => adapter.SetCharacterScalar(id, field, changed));
             }
         }
 
         for (int index = 0; index < character.MagicPoints.Count; index++)
         {
             int captured = index;
-            builder.AddNumber($"Packed MP · level {index + 1}", $"chara_data.c_varia_dat[{id}].mp[{index}]", character.MagicPoints[index], value => adapter.SetMagicPoint(id, captured, value), "Verified packed range: 0–153; 17 points represent one visible MP square.");
+            builder.AddNumber($"Packed MP · level {index + 1}", $"chara_data.c_varia_dat[{id}].mp[{index}]", () => adapter.Characters[id].MagicPoints[captured], value => adapter.SetMagicPoint(id, captured, value), "Verified packed range: 0–153; 17 points represent one visible MP square.");
         }
 
         for (int index = 0; index < character.Stats.Count; index++)
         {
             int captured = index;
-            builder.AddNumber(Suikoden2Adapter.StatNames[index], $"chara_data.c_varia_dat[{id}].para[{index}]", character.Stats[index], value => adapter.SetStat(id, captured, value));
+            builder.AddNumber(Suikoden2Adapter.StatNames[index], $"chara_data.c_varia_dat[{id}].para[{index}]", () => adapter.Characters[id].Stats[captured], value => adapter.SetStat(id, captured, value));
         }
 
         for (int index = 0; index < character.Runes.Count; index++)
         {
             int captured = index;
-            int current = character.Runes[index];
             builder.AddChoice(
                 $"Rune slot {index + 1}",
                 $"chara_data.c_varia_dat[{id}].mon_eqp[{index}]",
-                SectionText.FormatS2CatalogChoice(Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Rune && item.Id == current), Suikoden2ItemCategory.Rune, current),
+                () =>
+                {
+                    int current = adapter.Characters[id].Runes[captured];
+                    return SectionText.FormatS2CatalogChoice(Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == Suikoden2ItemCategory.Rune && item.Id == current), Suikoden2ItemCategory.Rune, current);
+                },
                 Suikoden2Catalog.Items
                     .Where(item => item.Category == Suikoden2ItemCategory.Rune && Suikoden2Catalog.IsRuneAllowed(id, captured, item.Id))
                     .Select(SectionText.FormatS2CatalogChoice),
@@ -83,11 +103,14 @@ internal static class Suikoden2CharacterSection
                 1 => Suikoden2ItemCategory.Armor,
                 _ => Suikoden2ItemCategory.Shield,
             };
-            int current = character.Equipment[index];
             builder.AddChoice(
                 $"{category} slot",
                 $"chara_data.c_varia_dat[{id}].bogu_eqp[{index}]",
-                SectionText.FormatS2CatalogChoice(Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == category && item.Id == current), category, current),
+                () =>
+                {
+                    int current = adapter.Characters[id].Equipment[captured];
+                    return SectionText.FormatS2CatalogChoice(Suikoden2Catalog.Items.FirstOrDefault(item => item.Category == category && item.Id == current), category, current);
+                },
                 Suikoden2Catalog.Items
                     .Where(item => item.Category == category && Suikoden2Catalog.IsEquipmentAllowed(id, category, item.Id))
                     .Select(SectionText.FormatS2CatalogChoice),
@@ -99,13 +122,15 @@ internal static class Suikoden2CharacterSection
         for (int index = 0; index < accessories.Count; index++)
         {
             int captured = index;
-            JsonObject current = accessories[index]!.AsObject();
-            string text = SectionText.FormatS2Item(current["item_no"]!.GetValue<int>(), current["use_cnt"]!.GetValue<int>());
             IEnumerable<Suikoden2ItemDefinition> accessoryChoices = Suikoden2Catalog.Items
                 .Where(item => item.Category is Suikoden2ItemCategory.Regular or Suikoden2ItemCategory.Accessory or Suikoden2ItemCategory.Food)
                 .Where(item => !item.StoryCritical)
                 .Where(item => !Suikoden2Catalog.Beasts.Contains(id) || item.Id == 0);
-            builder.AddChoice($"Accessory {index + 1}", $"chara_data.c_varia_dat[{id}].item_eqp[{index}]", text, accessoryChoices.Select(SectionText.FormatS2CatalogChoice), value => adapter.SetAccessory(id, captured, SectionText.ParseS2Item(value)), "Only reviewed item, accessory, and food entries are offered; beast/monster restrictions are enforced.");
+            builder.AddChoice($"Accessory {index + 1}", $"chara_data.c_varia_dat[{id}].item_eqp[{index}]", () =>
+            {
+                JsonObject current = adapter.Characters[id].Accessories[captured]!.AsObject();
+                return SectionText.FormatS2Item(current["item_no"]!.GetValue<int>(), current["use_cnt"]!.GetValue<int>());
+            }, accessoryChoices.Select(SectionText.FormatS2CatalogChoice), value => adapter.SetAccessory(id, captured, SectionText.ParseS2Item(value)), "Only reviewed item, accessory, and food entries are offered; beast/monster restrictions are enforced.");
         }
     }
 }

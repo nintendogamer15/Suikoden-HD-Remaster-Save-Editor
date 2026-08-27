@@ -17,12 +17,13 @@ internal static class Suikoden1RecruitmentSection
             builder.AddChoice(
                 $"{id}: {Suikoden1Catalog.CharacterName(id)}",
                 $"member_flag[{id}]",
-                SectionText.FormatSuikoden1Recruitment(current),
+                () => SectionText.FormatSuikoden1Recruitment(flags[captured]!.GetValue<int>()),
                 new[] { 0, 9, current }.Distinct().Select(SectionText.FormatSuikoden1Recruitment),
                 value =>
                 {
                     int selected = SectionText.ParseLabeledInteger(value, "member flag");
-                    if (selected == current && selected is not (0 or 9))
+                    int liveCurrent = flags[captured]!.GetValue<int>();
+                    if (selected == liveCurrent && selected is not (0 or 9))
                     {
                         return;
                     }

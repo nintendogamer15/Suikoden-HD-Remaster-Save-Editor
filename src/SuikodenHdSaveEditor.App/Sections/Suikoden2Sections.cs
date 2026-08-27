@@ -46,12 +46,12 @@ internal static class Suikoden2Sections
     {
         JsonObject game = adapter.Document.Root["game_data"]!.AsObject();
         builder.AddReadOnly("Detected game", "schema", "Suikoden II");
-        if (game["bozu_name"] is JsonValue heroName)
+        if (game["bozu_name"] is JsonValue)
         {
             builder.AddString(
                 "Hero / save-list name",
                 "game_data.bozu_name + game_data.bozu_name2",
-                heroName.GetValue<string>(),
+                () => game["bozu_name"]!.GetValue<string>(),
                 text => adapter.SetName("bozu_name", text),
                 "Both paired hero-name fields are updated together. Every supplied Suikoden II save keeps these fields equal; changing only one can leave menus or the save list showing the old name.");
         }
@@ -62,26 +62,26 @@ internal static class Suikoden2Sections
             ("base_name", "Castle name"), ("m_base_name", "Imported Suikoden I HQ"), ("team_name", "Army name"),
         })
         {
-            if (game[path] is JsonValue value)
+            if (game[path] is JsonValue)
             {
-                builder.AddString(label, $"game_data.{path}", value.GetValue<string>(), text => adapter.SetName(path, text));
+                builder.AddString(label, $"game_data.{path}", () => game[path]!.GetValue<string>(), text => adapter.SetName(path, text));
             }
         }
 
-        builder.AddNumber("Potch", "party_data.gold", adapter.Potch, value => adapter.SetGeneralNumber("gold", value));
-        builder.AddNumber("Popularity", "party_data.ninki", adapter.Popularity, value => adapter.SetGeneralNumber("ninki", value));
-        AddHeadquartersLevelChoice(builder, "Castle level", "game_data.base_lv", game["base_lv"]!.GetValue<int>(), value => adapter.SetGeneralNumber("base_lv", value));
+        builder.AddNumber("Potch", "party_data.gold", () => adapter.Potch, value => adapter.SetGeneralNumber("gold", value));
+        builder.AddNumber("Popularity", "party_data.ninki", () => adapter.Popularity, value => adapter.SetGeneralNumber("ninki", value));
+        AddHeadquartersLevelChoice(builder, "Castle level", "game_data.base_lv", () => game["base_lv"]!.GetValue<int>(), value => adapter.SetGeneralNumber("base_lv", value));
         foreach ((string path, string label) in new[]
         {
             ("kaji_lv", "Blacksmith level"), ("area_no", "Area"),
             ("town_no", "Town"), ("map_no", "Map"),
         })
         {
-            builder.AddNumber(label, $"game_data.{path}", game[path]!.GetValue<int>(), value => adapter.SetGeneralNumber(path, value));
+            builder.AddNumber(label, $"game_data.{path}", () => game[path]!.GetValue<int>(), value => adapter.SetGeneralNumber(path, value));
         }
 
-        builder.AddNumber("Player X", "px", adapter.Document.Root["px"]!.GetValue<int>(), value => adapter.SetGeneralNumber("px", value));
-        builder.AddNumber("Player Y", "py", adapter.Document.Root["py"]!.GetValue<int>(), value => adapter.SetGeneralNumber("py", value));
+        builder.AddNumber("Player X", "px", () => adapter.Document.Root["px"]!.GetValue<int>(), value => adapter.SetGeneralNumber("px", value));
+        builder.AddNumber("Player Y", "py", () => adapter.Document.Root["py"]!.GetValue<int>(), value => adapter.SetGeneralNumber("py", value));
         AddGameArrayFields(adapter, builder, "play_time", "Play time", null, "Hours", "Minutes", "Seconds");
         AddGameArrayFields(adapter, builder, "furo_info", "Bath information", null, "Bath level", "Bath value 2");
         foreach (string metadata in new[] { "save_slot", "save_num", "save_poi", "load_count", "date_time_now" })
@@ -89,24 +89,28 @@ internal static class Suikoden2Sections
             JsonNode? node = metadata == "date_time_now" ? adapter.Document.Root[metadata] : game[metadata];
             if (node is not null)
             {
-                builder.AddReadOnly($"Visible metadata · {metadata}", metadata, node.ToJsonString());
+                builder.AddReadOnly($"Visible metadata · {metadata}", metadata, () => (metadata == "date_time_now" ? adapter.Document.Root[metadata] : game[metadata])!.ToJsonString());
             }
         }
     }
 
     private static void BuildParty(Suikoden2Adapter adapter, SectionBuilder builder)
     {
-        int[] values = [.. adapter.PartyCharacterIds];
-        for (int index = 0; index < values.Length; index++)
+        int partySize = adapter.PartyCharacterIds.Count;
+        for (int index = 0; index < partySize; index++)
         {
             int captured = index;
-            string name = Suikoden2Catalog.Character(values[index])?.Name ?? "Empty / NPC";
             string type = index < Suikoden2Adapter.BattlePartySize ? "Battle" : "Convoy";
             int maximum = index < Suikoden2Adapter.BattlePartySize ? 83 : 124;
             string[] choices = [.. Enumerable.Range(0, maximum + 1)
                 .Where(id => id == 0 || Suikoden2Catalog.Character(id) is not null)
                 .Select(id => SectionText.FormatCharacterChoice(id, id == 0 ? "Empty" : Suikoden2Catalog.Character(id)!.Name))];
-            builder.AddChoice($"{type} slot {index + 1}", $"party_data.party_cha_no[{index}]", SectionText.FormatCharacterChoice(values[index], name), choices, value =>
+            builder.AddChoice($"{type} slot {index + 1}", $"party_data.party_cha_no[{index}]", () =>
+            {
+                int currentId = adapter.PartyCharacterIds[captured];
+                string currentName = Suikoden2Catalog.Character(currentId)?.Name ?? "Empty / NPC";
+                return SectionText.FormatCharacterChoice(currentId, currentName);
+            }, choices, value =>
             {
                 int[] changed = [.. adapter.PartyCharacterIds];
                 changed[captured] = SectionText.ParseLabeledInteger(value, "character");
@@ -120,13 +124,13 @@ internal static class Suikoden2Sections
     private static void BuildProgress(Suikoden2Adapter adapter, SectionBuilder builder)
     {
         JsonObject game = adapter.Document.Root["game_data"]!.AsObject();
-        AddHeadquartersLevelChoice(builder, "Castle level", "game_data.base_lv", game["base_lv"]!.GetValue<int>(), value => adapter.SetGeneralNumber("base_lv", value));
-        builder.AddReadOnly("Imported Suikoden I recruit count", "game_data.nakam_1_num", game["nakam_1_num"]!.GetValue<int>().ToString(CultureInfo.InvariantCulture), "Read-only: McDohl/Gremio import semantics are not safe to synthesize.");
+        AddHeadquartersLevelChoice(builder, "Castle level", "game_data.base_lv", () => game["base_lv"]!.GetValue<int>(), value => adapter.SetGeneralNumber("base_lv", value));
+        builder.AddReadOnly("Imported Suikoden I recruit count", "game_data.nakam_1_num", () => game["nakam_1_num"]!.GetValue<int>().ToString(CultureInfo.InvariantCulture), "Read-only: McDohl/Gremio import semantics are not safe to synthesize.");
         JsonArray aliases = game["kari_name"]!.AsArray();
         for (int index = 0; index < aliases.Count; index++)
         {
             int captured = index;
-            builder.AddString($"Greenhill alias {index + 1}", $"game_data.kari_name[{index}]", aliases[index]!.GetValue<string>(), value => adapter.SetGreenhillAlias(captured, value));
+            builder.AddString($"Greenhill alias {index + 1}", $"game_data.kari_name[{index}]", () => aliases[captured]!.GetValue<string>(), value => adapter.SetGreenhillAlias(captured, value));
         }
 
         AddGameArrayFields(adapter, builder, "food_menu", "Castle food menu", null);
@@ -134,10 +138,10 @@ internal static class Suikoden2Sections
         AddGameArrayFields(adapter, builder, "food_num", "Food / recipe values", null);
 
         JsonArray events = adapter.Document.Root["event_flag"]!.AsArray();
-        CookOffStage? current = events.Count > 153
+        CookOffStage? CurrentCookOffStage() => events.Count > 153
             ? Suikoden2Adapter.CookOffStages.FirstOrDefault(stage => stage.EventByte152 == events[152]!.GetValue<int>() && stage.EventByte153 == events[153]!.GetValue<int>())
             : null;
-        builder.AddNumber("Cook-off battles won", "event_flag[152..153]", current?.BattlesWon ?? 0, adapter.SetCookOffStage, "Dangerous story progress edit. Only the 13 reviewed stages are accepted.");
+        builder.AddNumber("Cook-off battles won", "event_flag[152..153]", () => CurrentCookOffStage()?.BattlesWon ?? 0, adapter.SetCookOffStage, "Dangerous story progress edit. Only the 13 reviewed stages are accepted.");
         AddGameArrayFields(adapter, builder, "tantei_lv", "Richmond detective clue byte", "Experimental progress flags: each value is a byte (0–255).");
         AddGameArrayFields(adapter, builder, "hon_flag", "Castle / farm flag byte", "Experimental castle and farm flags; indices 30–32 are upstream-researched but can affect progression.");
 
@@ -145,7 +149,7 @@ internal static class Suikoden2Sections
         for (int index = 0; index < treasure.Count; index++)
         {
             int captured = index;
-            builder.AddNumber($"Treasure-chest flag byte {index}", $"t_box_flag[{index}]", treasure[index]!.GetValue<int>(), value => adapter.SetTreasureFlagByte(captured, value), "Experimental: each byte controls eight chest flags.");
+            builder.AddNumber($"Treasure-chest flag byte {index}", $"t_box_flag[{index}]", () => treasure[captured]!.GetValue<int>(), value => adapter.SetTreasureFlagByte(captured, value), "Experimental: each byte controls eight chest flags.");
         }
     }
 
@@ -156,11 +160,11 @@ internal static class Suikoden2Sections
         {
             int captured = index;
             string itemLabel = index < labels.Length ? labels[index] : $"{label} {index}";
-            builder.AddNumber(itemLabel, $"game_data.{field}[{index}]", array[index]!.GetValue<int>(), value => adapter.SetGameDataArrayValue(field, captured, value), warning);
+            builder.AddNumber(itemLabel, $"game_data.{field}[{index}]", () => array[captured]!.GetValue<int>(), value => adapter.SetGameDataArrayValue(field, captured, value), warning);
         }
     }
 
-    internal static void AddHeadquartersLevelChoice(SectionBuilder builder, string label, string path, int value, Action<int> apply)
+    internal static void AddHeadquartersLevelChoice(SectionBuilder builder, string label, string path, Func<int> read, Action<int> apply)
     {
         string[] choices =
         [
@@ -170,11 +174,16 @@ internal static class Suikoden2Sections
             "Level 3",
             "Level 4 — Maximum",
         ];
-        string selected = choices.SingleOrDefault(choice => SectionText.ParseHeadquartersLevel(choice) == value) ?? $"Level {value} — Outside reviewed range";
+        string ReadSelected()
+        {
+            int value = read();
+            return choices.SingleOrDefault(choice => SectionText.ParseHeadquartersLevel(choice) == value) ?? $"Level {value} — Outside reviewed range";
+        }
+
         builder.AddChoice(
             label,
             path,
-            selected,
+            ReadSelected,
             choices,
             text => apply(SectionText.ParseHeadquartersLevel(text)),
             "Reviewed range: 0–4. Level 0 is retained for pre-headquarters saves; playable headquarters levels are 1–4 and level 4 is the cap. Direct changes can desynchronize story-driven facilities.");

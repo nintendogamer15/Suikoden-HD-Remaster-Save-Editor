@@ -21,15 +21,15 @@ internal static class Suikoden2RecruitmentSection
             }
 
             string name = definition.Name;
-            int current = flags[id]!.GetValue<int>();
             builder.AddChoice(
                 $"{id}: {name}",
                 $"chara_flag[{id}]",
-                SectionText.FormatSuikoden2RecruitmentStatus(current),
+                () => SectionText.FormatSuikoden2RecruitmentStatus(flags[captured]!.GetValue<int>()),
                 Suikoden2Adapter.RecruitmentStatuses.Order().Select(SectionText.FormatSuikoden2RecruitmentStatus),
                 value =>
                 {
                     int selected = SectionText.ParseTrailingInteger(value);
+                    int current = flags[captured]!.GetValue<int>();
                     if (selected == current && !Suikoden2Adapter.RecruitmentStatuses.Contains(selected))
                     {
                         return;
@@ -40,9 +40,11 @@ internal static class Suikoden2RecruitmentSection
                 "Auto Join and Manual Recruit are both recruited states. Other states reflect story availability; changing them can affect required-party and story events.");
         }
 
-        foreach (string note in adapter.CompatibilityNotes(context.BetterLeonaEnabled, context.KrakenRecruitmentEnabled))
+        IReadOnlyList<string> notes = adapter.CompatibilityNotes(context.BetterLeonaEnabled, context.KrakenRecruitmentEnabled);
+        for (int index = 0; index < notes.Count; index++)
         {
-            builder.AddReadOnly("Optional-mod compatibility note", "compatibility", note);
+            int captured = index;
+            builder.AddReadOnly("Optional-mod compatibility note", "compatibility", () => adapter.CompatibilityNotes(context.BetterLeonaEnabled, context.KrakenRecruitmentEnabled)[captured]);
         }
     }
 }
