@@ -4,6 +4,20 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 2.1.0 - 2026-08-27
+
+### Fixed
+
+- Recent, Themes, and Accent menu items now work when populated from data.
+- Clicking past a textbox's glyphs now places the caret at the clicked position.
+- About and document dialogs now scroll on small screens.
+- Destructive buttons remain red while hovered or pressed.
+- FieldList cards no longer receive accent selection paint.
+
+### Removed
+
+- Unsupported File → Open Folder and the blank menu item after Help.
+
 ## 2.0.1 - 2026-08-27
 
 ### Fixed
@@ -24,8 +38,6 @@ All notable changes will be documented here. The project follows [Keep a Changel
 - The duplicate Credits section in the sidebar. Help → About and credits already shows the
   embedded licence and notice texts.
 - The folder-slot picker in the sidebar.
-
-## Unreleased
 
 ## 2.0.0 - 2026-08-27
 
@@ -53,8 +65,6 @@ All notable changes will be documented here. The project follows [Keep a Changel
 - The read-only "Catalogue · <name>" rows that the Inventory sections appended while searching.
   The item choice control now filters the full catalogue directly, which is what those rows
   were standing in for.
-
-## Unreleased
 
 ## 1.0.7 - 2026-08-25
 
