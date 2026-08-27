@@ -18,6 +18,11 @@ on:
           - patch
           - minor
           - major
+      republish_tag:
+        description: 'Finish a release whose assets did not upload, e.g. v2.0.0. Skips the version bump, the commit, and the tag.'
+        required: false
+        default: ''
+        type: string
       dry_run:
         description: 'Validate and build everything without pushing main, the tag, or the release'
         required: false
@@ -46,10 +51,12 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
+          ref: ${{ inputs.republish_tag || github.ref }}
 
       # Version, changelog, and tag problems are settled before the expensive
       # build so a mistyped release fails in seconds rather than minutes.
       - name: Resolve version and stamp the changelog
+        if: ${{ inputs.republish_tag == '' }}
         id: prepare
         env:
           RELEASE_VERSION: ${{ inputs.version }}
@@ -62,13 +69,35 @@ jobs:
           } >> "${GITHUB_OUTPUT}"
 
       - name: Confirm the release tag is unused
+        if: ${{ inputs.republish_tag == '' }}
         env:
-          TAG: ${{ steps.prepare.outputs.tag }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
           if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
             echo "Tag ${TAG} already exists; published tags are never moved or reused." >&2
             exit 1
           fi
+
+      # Republishing reuses the tag that is already published rather than moving
+      # it, so the assets stay the ones built from that exact commit.
+      - name: Resolve the tag being released
+        id: release
+        env:
+          PREPARED_TAG: ${{ steps.prepare.outputs.tag }}
+          REPUBLISH_TAG: ${{ inputs.republish_tag }}
+        run: |
+          tag="${REPUBLISH_TAG:-${PREPARED_TAG}}"
+          if [ -z "${tag}" ]; then
+            echo "No tag was resolved for this release." >&2
+            exit 1
+          fi
+          if [ -n "${REPUBLISH_TAG}" ]; then
+            if ! git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+              echo "Cannot republish ${tag}: it does not exist." >&2
+              exit 1
+            fi
+          fi
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
 
       - name: Install .NET 10 SDK
         uses: actions/setup-dotnet@v6.0.0
@@ -90,13 +119,13 @@ jobs:
 
       - name: Prepare release executables
         env:
-          TAG: ${{ steps.prepare.outputs.tag }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: ./scripts/prepare-release-assets.sh "${TAG}" release
 
       - name: Commit and push the release preparation
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && inputs.republish_tag == '' }}
         env:
-          TAG: ${{ steps.prepare.outputs.tag }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -105,9 +134,9 @@ jobs:
           git push origin HEAD:main
 
       - name: Create and push the annotated tag
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && inputs.republish_tag == '' }}
         env:
-          TAG: ${{ steps.prepare.outputs.tag }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
           git tag --annotate "${TAG}" \
             --message "Suikoden I & II HD Remaster Save Editor ${TAG}"
@@ -116,25 +145,56 @@ jobs:
       # A tag pushed with the workflow token does not start another workflow
       # run, so this job creates the release from the executables it just built
       # and validated instead of waiting for the tag workflow in ci.yml.
+      #
+      # The release is created empty and as a draft, then each asset is uploaded
+      # separately and the draft is published last. Creating it with the assets
+      # attached deletes the whole release when one upload fails, which strands a
+      # tag that can never be released again because the version is already
+      # stamped. Uploading separately means a failed upload leaves a draft this
+      # step can resume, and an incomplete release is never visible to anyone.
       - name: Create the GitHub release
         if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.prepare.outputs.tag }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
-          gh release create "${TAG}" \
-            --verify-tag \
-            --title "Suikoden I & II HD Remaster Save Editor ${TAG}" \
-            --generate-notes \
-            "release/SuikodenHdSaveEditor-${TAG}-linux-x64" \
-            "release/SuikodenHdSaveEditor-${TAG}-windows-x64.exe"
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "Release ${TAG} already exists; uploading whatever is missing."
+          else
+            gh release create "${TAG}"               --draft               --verify-tag               --title "Suikoden I & II HD Remaster Save Editor ${TAG}"               --generate-notes
+          fi
+
+          for asset in             "release/SuikodenHdSaveEditor-${TAG}-linux-x64"             "release/SuikodenHdSaveEditor-${TAG}-windows-x64.exe"; do
+            name="$(basename "${asset}")"
+            if gh release view "${TAG}" --json assets --jq '.assets[].name' | grep -Fxq "${name}"; then
+              echo "Release asset ${name} is already uploaded; preserving it."
+              continue
+            fi
+
+            uploaded=false
+            for attempt in 1 2 3; do
+              if gh release upload "${TAG}" "${asset}"; then
+                uploaded=true
+                break
+              fi
+              echo "Uploading ${name} failed on attempt ${attempt}." >&2
+              sleep $((attempt * 20))
+            done
+
+            if [ "${uploaded}" != true ]; then
+              echo "Could not upload ${name}. The draft release is kept so this can be re-run." >&2
+              exit 1
+            fi
+          done
+
+          gh release edit "${TAG}" --draft=false --prerelease=false
 
       - name: Summarize the run
         if: always()
         env:
           DRY_RUN: ${{ inputs.dry_run }}
           REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
-          TAG: ${{ steps.prepare.outputs.tag }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
           {
             if [ -z "${TAG}" ]; then
