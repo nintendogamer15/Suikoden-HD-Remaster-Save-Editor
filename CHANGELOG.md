@@ -4,6 +4,8 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 2.0.1 - 2026-08-27
+
 ### Fixed
 
 - Apply did nothing visible. Field readers captured the value the section was built with, and
