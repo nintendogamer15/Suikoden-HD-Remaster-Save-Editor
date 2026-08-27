@@ -11,7 +11,10 @@ All notable changes will be documented here. The project follows [Keep a Changel
   landed in the document but the field stayed pending, its Apply button never settled, and the
   exit guard believed a saved file still had unapplied work. Readers now query the adapter.
 - The Characters section was empty, because it is built for one character and nothing chose
-  one. It now has a character picker.
+  one. It has its picker back, along with the All / Recruited / Unrecruited / Current party
+  filter and the name-or-id search that went missing in the migration.
+- Both recruitment sections could refuse an edit as a no-op by comparing it against a value
+  read before the section was built rather than the current one.
 - Advanced Data was empty. It shows the decrypted document again, read-only and scrollable.
 
 ### Removed
