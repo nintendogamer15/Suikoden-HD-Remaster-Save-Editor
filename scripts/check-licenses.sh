@@ -14,10 +14,12 @@ done
 
 required_licenses=(
     "Avalonia-MIT.txt"
+    "CommunityToolkit.Mvvm-MIT.txt"
     "ANGLE-BSD-3-Clause.txt"
     "HarfBuzzSharp-MIT.txt"
     "Inter-OFL-1.1.txt"
     "MicroCom-MIT.txt"
+    "SaveEditor.Ui-0BSD.txt"
     "SkiaSharp-MIT.txt"
     "Suikoden-Fix-MIT.txt"
     "SuikodenSaveDecrypter-MIT.txt"

@@ -1,39 +1,14 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:theming="clr-namespace:SaveEditor.Ui.Theming;assembly=SaveEditor.Ui"
              x:Class="SuikodenHdSaveEditor.App.App"
-             RequestedThemeVariant="Default">
+             RequestedThemeVariant="Dark">
     <Application.Styles>
+        <!-- A base Avalonia theme first, then the framework's, which redefines the control
+             themes in terms of semantic tokens. The editor no longer carries its own control
+             styling: the hardcoded hex values it used to set were not theme-aware, which is
+             why the error banner was unreadable in dark mode. -->
         <FluentTheme />
-        <Style Selector="Button">
-            <Setter Property="MinHeight" Value="34" />
-            <Setter Property="Padding" Value="14,7" />
-            <Setter Property="CornerRadius" Value="6" />
-        </Style>
-        <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#3559A6" />
-            <Setter Property="Foreground" Value="White" />
-        </Style>
-        <Style Selector="Button.danger">
-            <Setter Property="Background" Value="#8C3D44" />
-            <Setter Property="Foreground" Value="White" />
-        </Style>
-        <Style Selector="TextBox">
-            <Setter Property="MinHeight" Value="34" />
-            <Setter Property="CornerRadius" Value="6" />
-        </Style>
-        <Style Selector="ComboBox">
-            <Setter Property="MinHeight" Value="34" />
-            <Setter Property="CornerRadius" Value="6" />
-        </Style>
-        <Style Selector="AutoCompleteBox">
-            <Setter Property="MinHeight" Value="34" />
-        </Style>
-        <Style Selector="Border.card">
-            <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="9" />
-            <Setter Property="Padding" Value="14" />
-        </Style>
+        <theming:SaveEditorTheme />
     </Application.Styles>
 </Application>

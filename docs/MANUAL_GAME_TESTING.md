@@ -8,7 +8,7 @@ Automated tests prove encryption and structural intent, not game acceptance. Nev
 - [ ] Back up the entire account save folder outside the live save directory.
 - [ ] Record which game, slot, and editor build/commit are under test.
 - [ ] Open the encrypted file directly and confirm detected game, slot, path, and visible metadata.
-- [ ] Use Save As first. Confirm the original hash is unchanged.
+- [ ] Use Save As first. Confirm the original hash is unchanged, and that Save As onto an existing file is refused rather than replacing it.
 
 ## Common acceptance
 
@@ -21,7 +21,8 @@ Automated tests prove encryption and structural intent, not game acceptance. Nev
 - [ ] The editor can reopen the game-written result.
 - [ ] On a copied save, run **Max stats + best party gear** and confirm all six active battle characters show level 99, full 9,999 HP, maximum MP/base stats, and weapon level 16 where applicable.
 - [ ] Confirm the recommended helmet/body/shield/accessory loadout is accepted for each current party member, known fixed equipment remains fixed, monsters retain empty equipment, and combat completes without stat overflow or display corruption.
-- [ ] Use Undo immediately after the bulk action and confirm every affected stat and equipment slot returns to its prior value.
+- [ ] Use Undo immediately after the bulk action and confirm every affected stat and equipment slot returns to its prior value in a single step.
+- [ ] Check both themes: switch between dark and light and confirm no text, warning, or error banner is unreadable.
 
 ## Suikoden I
 
@@ -43,9 +44,10 @@ Automated tests prove encryption and structural intent, not game acceptance. Nev
 
 ## Overwrite and recovery
 
-- [ ] Explicit overwrite creates a timestamped backup and shows its exact path.
+- [ ] Explicit overwrite creates a backup beside the save and shows its exact path. The naming is now the framework's, not the old `SuikodenSaveEditor Backups/<timestamp>_<name>` layout.
 - [ ] The backup decrypts to the pre-edit document.
-- [ ] Restoring the backup recovers the original game behavior.
+- [ ] The header's **Restore from backup** action puts that backup back, and the restored save recovers the original game behavior.
+- [ ] A save reported as completed without verification is treated as suspect: keep the backup until the save has loaded in-game.
 - [ ] Steam Cloud is re-enabled only after deciding which version should win synchronization.
 
 Record pass/fail evidence without committing saves, screenshots containing personal names, Steam IDs, or decrypted private JSON.
