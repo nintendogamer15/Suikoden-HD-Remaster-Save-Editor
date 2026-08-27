@@ -4,6 +4,33 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+### Changed
+
+- The editor is rebuilt on `SaveEditor.Ui`, a shared save-editor GUI framework consumed as a
+  git submodule under `external/`. It supplies the window shell, Catppuccin theming with a
+  light/dark toggle, dialogs, recent paths, settings, and the file read/write workflow. The
+  save format, validation, and every reviewed field mapping are unchanged.
+- Fields are now typed rather than parsed from text on apply, so numbers carry the bounds the
+  adapters already enforced and choice lists filter as you type.
+- Control styling is no longer hardcoded, which fixes the error banner being unreadable in
+  dark mode.
+- Backups are created and verified by the framework and no longer use the
+  `SuikodenSaveEditor Backups/<timestamp>_<name>` layout. A successful save now reports whether
+  its round trip was verified, and anything less is surfaced rather than reported as clean.
+
+### Added
+
+- **Restore from backup**, which puts a verified backup back over the open save. Recovery used
+  to happen implicitly inside the writer and otherwise meant copying files by hand.
+
+### Removed
+
+- The read-only "Catalogue · <name>" rows that the Inventory sections appended while searching.
+  The item choice control now filters the full catalogue directly, which is what those rows
+  were standing in for.
+
+## Unreleased
+
 ## 1.0.7 - 2026-08-25
 
 ### Fixed
