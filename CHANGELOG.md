@@ -4,6 +4,8 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 2.0.0 - 2026-08-27
+
 ### Changed
 
 - The editor is rebuilt on `SaveEditor.Ui`, a shared save-editor GUI framework consumed as a
