@@ -4,6 +4,8 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 2.1.3 - 2026-08-28
+
 ### Fixed
 
 - The menu bar no longer carries an empty menu after Help. Mousing just past Help lit up a
