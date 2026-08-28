@@ -4,6 +4,19 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+### Fixed
+
+- File → Recent now fills in as saves are opened, keeps the newest first, and survives a
+  restart. Opening a save never recorded it, so the submenu stayed empty however many were
+  opened.
+- Save As shows its destination chooser again, and starts in the folder of the save being
+  copied. The framework raised the chooser and the overwrite confirmation from a background
+  thread, where building them fails; the failure was caught and reported as a failed save, so
+  nothing appeared and nothing said why.
+- Save As no longer stays greyed out once the operation has finished.
+- The section toolbar uses the same card surface and rounded corners as the fields below it,
+  instead of a lighter square strip.
+
 ## 2.1.0 - 2026-08-27
 
 ### Fixed
