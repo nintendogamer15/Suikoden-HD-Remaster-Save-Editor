@@ -4,6 +4,8 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 2.1.1 - 2026-08-28
+
 ### Fixed
 
 - File → Recent now fills in as saves are opened, keeps the newest first, and survives a
