@@ -1,6 +1,6 @@
 SaveEditor.Ui (save-editor-gui-framework)
 https://github.com/nintendogamer15/save-editor-gui-framework
-Vendored as a git submodule at commit a50464b0091f047b8c027d847371fcd40b3bd4bb.
+Vendored as a git submodule at commit 6ee70c4f02cdbd9790c9a64738cac97bba8e734e.
 
 Copyright (C) 2026 by nintendogamer15
 

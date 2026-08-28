@@ -4,6 +4,15 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+### Fixed
+
+- The menu bar no longer carries an empty menu after Help. Mousing just past Help lit up a
+  blank entry that opened nothing. 2.1.0 reported this removed, but only the placeholder
+  inside the entry was hidden: a menu bar wraps any item that is not already a menu in a
+  container of its own, and that container kept its size and its hover highlight however the
+  placeholder was styled. The framework now puts an editor's extra menus into the bar itself,
+  so there is no placeholder left to wrap.
+
 ## 2.1.2 - 2026-08-28
 
 ### Fixed
