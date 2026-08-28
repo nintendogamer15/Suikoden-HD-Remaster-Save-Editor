@@ -21,6 +21,21 @@ grep -Fq "pkgname=$PACKAGE_NAME" "$REPOSITORY_ROOT/packaging/arch/PKGBUILD"
 grep -Eq '^Name:[[:space:]]+suikoden-hd-remaster-save-editor$' \
     "$REPOSITORY_ROOT/packaging/rpm/suikoden-hd-remaster-save-editor.spec"
 
+publisher="$SCRIPT_DIRECTORY/gitea-publish-package.sh"
+grep -Fq 'upload_url="$server/api/packages/$owner/rpm/upload?sign=true"' "$publisher"
+grep -Fq 'upload_url="$server/api/packages/$owner/arch/$registry"' "$publisher"
+if grep -Fq 'arch/$registry?sign=true' "$publisher"; then
+    echo "Arch package uploads must remain byte-for-byte and must not request server signing." >&2
+    exit 1
+fi
+grep -Fq ': "${GITEA_SERVER_URL:?GITEA_SERVER_URL is required for RPM signature verification}"' "$publisher"
+grep -Fq '"$public_server/api/v1/version"' "$publisher"
+grep -Fq '"$public_server/api/packages/$owner/rpm/repository.key"' "$publisher"
+grep -Fq '"$public_server/api/packages/$owner/rpm/package/$package_name/$registry_version/$rpm_arch/$filename"' "$publisher"
+grep -Fq '%|SIGPGP?{SIGPGP}:{missing}|:%|RSAHEADER?{RSAHEADER}:{missing}|' "$publisher"
+grep -Fq 'rpm --dbpath "$rpm_database" --checksig "$stored_rpm"' "$publisher"
+grep -Fq 'rpm_content_identity "$stored_rpm"' "$publisher"
+
 mapfile -t shell_scripts < <(find "$SCRIPT_DIRECTORY" -maxdepth 1 -type f -name '*.sh' -print | sort)
 bash -n "${shell_scripts[@]}" "$REPOSITORY_ROOT/packaging/arch/PKGBUILD"
 if command -v shellcheck >/dev/null 2>&1; then

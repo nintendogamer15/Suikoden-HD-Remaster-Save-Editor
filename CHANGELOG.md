@@ -4,6 +4,12 @@ All notable changes will be documented here. The project follows [Keep a Changel
 
 ## Unreleased
 
+## 2.1.2 - 2026-08-28
+
+### Fixed
+
+- Gitea RPM uploads now request server signing so normal DNF GPG verification works.
+
 ## 2.1.1 - 2026-08-28
 
 ### Fixed

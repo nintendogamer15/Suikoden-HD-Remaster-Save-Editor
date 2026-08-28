@@ -29,7 +29,7 @@ The self-contained .NET publish also carries the optional diagnostics-only `libc
 - `check-linux-native-dependencies.sh` reports unresolved dependencies declared directly by the single-file apphost; the Xvfb launch validates embedded native functionality.
 - `validate-installed-package.sh` checks the installed command target, executable, licenses, notices, desktop file, icon, architecture, ELF resolution, and forbidden content. Each assertion is named, so a failing job reports every broken expectation instead of exiting on the first one. The Arch job clears the container image's `NoExtract` rules before installing, because they would otherwise silently discard everything the package installs under `/usr/share/doc`.
 - `gitea-release-assets.sh` creates a native Gitea release and treats existing release assets as immutable.
-- `gitea-publish-package.sh` authenticates package operations as `Robert`, safely skips byte-identical existing packages, rejects different bytes for an existing version, and treats optional repository linking failures as warnings.
+- `gitea-publish-package.sh` authenticates package operations as `Robert`, safely skips byte-identical existing Arch packages, rejects different content for an existing version, and treats optional repository linking failures as warnings. RPM registry uploads request Gitea server signing; the helper downloads the stored RPM and public repository key over HTTPS, requires the Gitea signature, verifies it with an isolated RPM database, and compares signature-independent header/payload identity with the local build.
 
 `PACKAGE_PUBLISH_TOKEN` is used only for registry API and upload operations. The built-in `GITEA_TOKEN` is used for source checkout, release API operations, and release assets. The package upload base is supplied separately through `GITEA_PACKAGE_SERVER_URL`; it is intentionally not an end-user URL.
 
@@ -52,6 +52,8 @@ The public pull mirror at `Robert/Suikoden-HD-Remaster-Save-Editor` was verified
 - Allow the built-in workflow token repository content write access so it can create native releases and attach assets.
 - Keep the user-level Actions secret named `PACKAGE_PUBLISH_TOKEN`; its `Robert` token needs package read/write permission. Repository-link permission is optional.
 - Do not create another Arch or RPM repository. Publication targets the existing `robert` Arch repository and the owner's existing RPM registry.
+
+Gitea stores a server-signed copy of each registry RPM so normal DNF `gpgcheck=1` verification succeeds. The RPM attached to the release page remains the locally built, unsigned bytes, so its whole-file SHA-256 is intentionally different from the signed registry copy that DNF consumes. If a fresh registry upload cannot be verified, publication stops without deleting anything; the package owner may need to delete that immutable package version externally before a corrected rerun.
 
 ## Safe release procedure
 
